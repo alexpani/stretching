@@ -698,6 +698,12 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+  /* 100dvh tiene conto della barra Safari dinamica su iOS */
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
 }
 .session-overlay.hidden { display: none !important; }
 
@@ -708,7 +714,8 @@ body {
   display: flex;
   flex-direction: column;
   padding: var(--space-4);
-  padding-bottom: calc(var(--space-4) + env(safe-area-inset-bottom));
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .session-topbar {
@@ -748,7 +755,7 @@ body {
 .session-image {
   width: 100%;
   aspect-ratio: 1;
-  max-height: 42vh;
+  max-height: 32vh;
   background: var(--color-primary-light);
   border-radius: var(--radius-lg);
   overflow: hidden;
@@ -792,10 +799,11 @@ body {
 }
 
 .countdown {
-  width: 180px;
-  height: 180px;
+  width: 160px;
+  height: 160px;
   margin: var(--space-2) auto;
   position: relative;
+  flex-shrink: 0;
 }
 .countdown svg { width: 100%; height: 100%; transform: rotate(-90deg); }
 .countdown .ring-bg { stroke: var(--color-border-soft); fill: none; }
@@ -829,7 +837,9 @@ body {
   justify-content: center;
   gap: var(--space-4);
   padding-top: var(--space-4);
+  padding-bottom: var(--space-2);
   margin-top: auto;
+  flex-shrink: 0;
 }
 .ctrl-btn {
   width: 64px; height: 64px;
