@@ -894,6 +894,13 @@ body {
   font-weight: 600;
 }
 
+/* ── Chart wrapper (Chart.js va vincolato per evitare resize loop) */
+.chart-wrap {
+  position: relative;
+  width: 100%;
+  height: 180px;
+}
+
 /* ── Heatmap (calendario mensile) ──────── */
 .heatmap-header {
   display: flex;
