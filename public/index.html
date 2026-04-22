@@ -5,76 +5,61 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>Stretching</title>
   <meta name="theme-color" content="#2DB6A8" />
-  <style>
-    :root {
-      --primary: #2DB6A8;
-      --bg: #F5F5F5;
-      --card: #ffffff;
-      --text: #212121;
-      --muted: #616161;
-    }
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-    }
-    .app {
-      width: 100%;
-      max-width: 430px;
-      padding: 24px 16px;
-    }
-    h1 { margin: 0 0 8px; color: var(--primary); font-size: 28px; }
-    p  { margin: 4px 0; color: var(--muted); }
-    .card {
-      background: var(--card);
-      border-radius: 12px;
-      padding: 16px;
-      margin-top: 16px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
-    }
-    code {
-      background: #eee; padding: 2px 6px; border-radius: 4px;
-      font-family: ui-monospace, Menlo, Consolas, monospace;
-      font-size: 13px;
-    }
-    .ok { color: #2E7D32; font-weight: 600; }
-    .err { color: #D32F2F; font-weight: 600; }
-  </style>
+  <link rel="stylesheet" href="/css/style.css" />
 </head>
 <body>
-  <div class="app">
-    <h1>Stretching</h1>
-    <p>Scaffold M1 attivo.</p>
 
-    <div class="card">
-      <p>Health check: <span id="status">…</span></p>
-      <p>Versione: <span id="version">—</span></p>
-    </div>
+  <!-- ── Login screen ──────────────────── -->
+  <div id="login-screen" class="login-screen hidden">
+    <div class="login-card">
+      <h1>Stretching</h1>
+      <p class="login-subtitle">Accedi per continuare</p>
 
-    <div class="card">
-      <p><strong>Prossime milestone</strong></p>
-      <p>M2 — auth + layout 430px + dark mode</p>
-      <p>M3 — libreria esercizi + upload immagini</p>
-      <p>M4 — routine + drag-and-drop</p>
-      <p>M5 — sessione guidata (core)</p>
+      <form id="login-form">
+        <div class="form-field">
+          <label for="login-user">Utente</label>
+          <input type="text" id="login-user" autocomplete="username" required />
+        </div>
+        <div class="form-field">
+          <label for="login-pass">Password</label>
+          <input type="password" id="login-pass" autocomplete="current-password" required />
+        </div>
+        <button type="submit" class="btn btn-primary btn-block">Accedi</button>
+        <div id="login-error" class="msg hidden"></div>
+      </form>
     </div>
   </div>
 
-  <script>
-    fetch('/api/health')
-      .then(r => r.json())
-      .then(d => {
-        document.getElementById('status').innerHTML = '<span class="ok">OK</span>';
-        document.getElementById('version').textContent = d.version || '—';
-      })
-      .catch(() => {
-        document.getElementById('status').innerHTML = '<span class="err">errore</span>';
-      });
-  </script>
+  <!-- ── App shell ─────────────────────── -->
+  <div id="app" class="app hidden">
+    <header class="header">
+      <h1>Stretching</h1>
+      <div class="header-actions">
+        <button id="theme-toggle" class="icon-btn" aria-label="Cambia tema">☾</button>
+        <button id="logout-btn" class="icon-btn" aria-label="Esci">⎋</button>
+      </div>
+    </header>
+
+    <main class="content">
+      <div class="card">
+        <h2>Benvenuto <span id="user-name"></span></h2>
+        <p>Milestone 2 attiva: auth + layout 430px + dark mode.</p>
+      </div>
+
+      <div class="card">
+        <h2>Prossime milestone</h2>
+        <p><strong>M3</strong> — libreria esercizi + upload immagini</p>
+        <p><strong>M4</strong> — routine + drag-and-drop</p>
+        <p><strong>M5</strong> — sessione guidata (countdown, Wake Lock, audio)</p>
+        <p><strong>M6</strong> — storico + heatmap + statistiche</p>
+      </div>
+    </main>
+
+    <div class="disclaimer">
+      Le indicazioni fornite non sono consigli medici.
+    </div>
+  </div>
+
+  <script src="/js/app.js"></script>
 </body>
 </html>

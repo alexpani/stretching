@@ -32,12 +32,15 @@ app.get('/api/health', (req, res) => {
   res.json({ ok: true, app: 'stretching', version: require('./package.json').version });
 });
 
+// Auth: espone /login, /logout, /api/me (montato su '/' come nel diario)
+const authRoutes = require('./routes/auth');
+app.use('/', authRoutes);
+
 // I router di dominio arriveranno nelle milestone successive:
-//   M2  → ./routes/auth
 //   M3  → ./routes/exercises
 //   M4  → ./routes/routines
 //   M5b → ./routes/sessions
-//   M2/M6 → ./routes/settings
+//   M6  → ./routes/settings
 //   M7  → ./routes/external
 
 // SPA fallback: tutto ciò che non è /api/* → index.html
