@@ -36,8 +36,10 @@ app.get('/api/health', (req, res) => {
 const authRoutes = require('./routes/auth');
 app.use('/', authRoutes);
 
-// I router di dominio arriveranno nelle milestone successive:
-//   M3  → ./routes/exercises
+// Dominio
+app.use('/api/exercises', require('./routes/exercises'));
+
+// I router di dominio in arrivo:
 //   M4  → ./routes/routines
 //   M5b → ./routes/sessions
 //   M6  → ./routes/settings

@@ -162,5 +162,21 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('logout-btn').addEventListener('click', doLogout);
   document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
 
+  // Tab switching
+  document.querySelectorAll('.tab-item').forEach(btn => {
+    btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+  });
+
   checkAuth();
 });
+
+function switchTab(name) {
+  document.querySelectorAll('.tab-item').forEach(b => {
+    b.classList.toggle('active', b.dataset.tab === name);
+  });
+  document.querySelectorAll('.tab-panel').forEach(p => {
+    p.classList.toggle('hidden', p.id !== `tab-${name}`);
+  });
+  window.App.currentTab = name;
+  document.dispatchEvent(new CustomEvent('tabchange', { detail: { tab: name } }));
+}

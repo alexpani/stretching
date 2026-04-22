@@ -14,7 +14,6 @@
     <div class="login-card">
       <h1>Stretching</h1>
       <p class="login-subtitle">Accedi per continuare</p>
-
       <form id="login-form">
         <div class="form-field">
           <label for="login-user">Utente</label>
@@ -40,26 +39,142 @@
       </div>
     </header>
 
-    <main class="content">
-      <div class="card">
-        <h2>Benvenuto <span id="user-name"></span></h2>
-        <p>Milestone 2 attiva: auth + layout 430px + dark mode.</p>
+    <!-- Libreria -->
+    <main id="tab-library" class="content tab-panel">
+      <div class="filters">
+        <div class="chip-row" id="filter-muscle">
+          <button class="chip active" data-muscle="">Tutti</button>
+          <button class="chip" data-muscle="collo">Collo</button>
+          <button class="chip" data-muscle="spalle">Spalle</button>
+          <button class="chip" data-muscle="schiena">Schiena</button>
+          <button class="chip" data-muscle="core">Core</button>
+          <button class="chip" data-muscle="gambe">Gambe</button>
+          <button class="chip" data-muscle="anche">Anche</button>
+          <button class="chip" data-muscle="polpacci">Polpacci</button>
+          <button class="chip" data-muscle="braccia">Braccia</button>
+        </div>
+        <div class="chip-row" id="filter-level">
+          <button class="chip active" data-level="">Tutti i livelli</button>
+          <button class="chip" data-level="easy">Facile</button>
+          <button class="chip" data-level="medium">Medio</button>
+          <button class="chip" data-level="hard">Difficile</button>
+        </div>
       </div>
+      <div id="exercises-grid" class="exercises-grid"></div>
+      <div id="exercises-empty" class="empty-state hidden">Nessun esercizio trovato.</div>
+      <button class="fab" id="fab-add-exercise" aria-label="Aggiungi esercizio">+</button>
+    </main>
 
-      <div class="card">
-        <h2>Prossime milestone</h2>
-        <p><strong>M3</strong> — libreria esercizi + upload immagini</p>
-        <p><strong>M4</strong> — routine + drag-and-drop</p>
-        <p><strong>M5</strong> — sessione guidata (countdown, Wake Lock, audio)</p>
-        <p><strong>M6</strong> — storico + heatmap + statistiche</p>
+    <!-- Routine (M4) -->
+    <main id="tab-routines" class="content tab-panel hidden">
+      <div class="empty-state">
+        <p>Disponibile dalla Milestone 4.</p>
       </div>
     </main>
 
-    <div class="disclaimer">
-      Le indicazioni fornite non sono consigli medici.
+    <!-- Storico (M6) -->
+    <main id="tab-history" class="content tab-panel hidden">
+      <div class="empty-state">
+        <p>Disponibile dalla Milestone 6.</p>
+      </div>
+    </main>
+
+    <div class="disclaimer">Le indicazioni fornite non sono consigli medici.</div>
+
+    <nav class="tab-bar">
+      <button class="tab-item active" data-tab="library"><span class="icon">🧘</span>Libreria</button>
+      <button class="tab-item" data-tab="routines"><span class="icon">📋</span>Routine</button>
+      <button class="tab-item" data-tab="history"><span class="icon">📊</span>Storico</button>
+    </nav>
+  </div>
+
+  <!-- ── Modal esercizio (condiviso new/edit) ─ -->
+  <div id="modal-exercise" class="modal hidden">
+    <div class="modal-backdrop" data-close="1"></div>
+    <div class="modal-dialog">
+      <h2 id="modal-ex-title">Nuovo esercizio</h2>
+      <form id="form-exercise" enctype="multipart/form-data">
+        <input type="hidden" id="ex-id" />
+        <div class="img-preview" id="ex-img-preview">
+          <img id="ex-img" alt="" />
+        </div>
+
+        <div class="form-field">
+          <label>Immagine (opzionale)</label>
+          <input type="file" id="ex-file" accept="image/*" />
+          <label style="display:flex; align-items:center; gap:8px; font-size:var(--text-sm);">
+            <input type="checkbox" id="ex-remove-image" /> Rimuovi immagine
+          </label>
+        </div>
+
+        <div class="form-field">
+          <label for="ex-name">Nome</label>
+          <input type="text" id="ex-name" required maxlength="100" />
+        </div>
+
+        <div class="form-row">
+          <div class="form-field">
+            <label for="ex-muscle">Gruppo</label>
+            <select id="ex-muscle" required>
+              <option value="collo">Collo</option>
+              <option value="spalle">Spalle</option>
+              <option value="schiena">Schiena</option>
+              <option value="core">Core</option>
+              <option value="gambe">Gambe</option>
+              <option value="anche">Anche</option>
+              <option value="polpacci">Polpacci</option>
+              <option value="braccia">Braccia</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label for="ex-side">Lato</label>
+            <select id="ex-side">
+              <option value="both">Entrambi</option>
+              <option value="dx">Destro</option>
+              <option value="sx">Sinistro</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-field">
+            <label for="ex-level">Livello</label>
+            <select id="ex-level" required>
+              <option value="easy">Facile</option>
+              <option value="medium">Medio</option>
+              <option value="hard">Difficile</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label for="ex-duration">Durata (s)</label>
+            <input type="number" id="ex-duration" min="5" max="600" value="30" required />
+          </div>
+        </div>
+
+        <div class="form-field">
+          <label for="ex-description">Descrizione</label>
+          <textarea id="ex-description" maxlength="500"></textarea>
+        </div>
+
+        <div class="form-field">
+          <label for="ex-notes">Note</label>
+          <textarea id="ex-notes" maxlength="500"></textarea>
+        </div>
+
+        <div id="ex-error" class="msg hidden"></div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" data-close="1">Annulla</button>
+          <button type="submit" class="btn btn-primary">Salva</button>
+        </div>
+        <div class="modal-actions" id="ex-delete-row" style="display:none;">
+          <button type="button" class="btn btn-danger btn-block" id="ex-delete-btn">Elimina esercizio</button>
+        </div>
+      </form>
     </div>
   </div>
 
   <script src="/js/app.js"></script>
+  <script src="/js/library.js"></script>
 </body>
 </html>
