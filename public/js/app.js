@@ -168,7 +168,51 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   checkAuth();
+  registerServiceWorker();
 });
+
+// ── Service Worker registration + update banner ─
+function registerServiceWorker() {
+  if (!('serviceWorker' in navigator)) return;
+  window.addEventListener('load', async () => {
+    try {
+      const reg = await navigator.serviceWorker.register('/sw.js');
+
+      // Se un nuovo SW è già in waiting al caricamento della pagina, mostra il banner
+      if (reg.waiting) showUpdateBanner(reg.waiting);
+
+      reg.addEventListener('updatefound', () => {
+        const nw = reg.installing;
+        if (!nw) return;
+        nw.addEventListener('statechange', () => {
+          if (nw.state === 'installed' && navigator.serviceWorker.controller) {
+            // Installato ma non attivo: c'è già un SW che controlla la pagina → aggiornamento pronto
+            showUpdateBanner(nw);
+          }
+        });
+      });
+
+      let reloading = false;
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (reloading) return;
+        reloading = true;
+        window.location.reload();
+      });
+    } catch (err) {
+      console.warn('SW registration failed:', err);
+    }
+  });
+}
+
+function showUpdateBanner(worker) {
+  const banner = document.getElementById('update-banner');
+  if (!banner) return;
+  banner.classList.remove('hidden');
+  document.getElementById('update-reload').onclick = () => {
+    worker.postMessage({ type: 'SKIP_WAITING' });
+    // Il reload avverrà via controllerchange quando il nuovo SW prende il controllo
+  };
+}
 
 function switchTab(name) {
   document.querySelectorAll('.tab-item').forEach(b => {
