@@ -97,10 +97,54 @@
       </div>
     </main>
 
-    <!-- Storico (M6) -->
+    <!-- Storico -->
     <main id="tab-history" class="content tab-panel hidden">
-      <div class="empty-state">
-        <p>Disponibile dalla Milestone 6.</p>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-label">Streak</div>
+          <div class="stat-value" id="stat-streak">0</div>
+          <div class="stat-unit">giorni</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Streak max</div>
+          <div class="stat-value" id="stat-streak-max">0</div>
+          <div class="stat-unit">giorni</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Sessioni 30gg</div>
+          <div class="stat-value" id="stat-30d-count">0</div>
+          <div class="stat-unit">&nbsp;</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Tempo 30gg</div>
+          <div class="stat-value" id="stat-30d-time">0</div>
+          <div class="stat-unit">min</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Ultimi 7 giorni</h3>
+        <canvas id="chart-weekly" height="160"></canvas>
+      </div>
+
+      <div class="card">
+        <div class="heatmap-header">
+          <button class="icon-btn" id="hm-prev" aria-label="Mese precedente">‹</button>
+          <h3 id="hm-month">—</h3>
+          <button class="icon-btn" id="hm-next" aria-label="Mese successivo">›</button>
+        </div>
+        <div class="heatmap-days">
+          <span>L</span><span>M</span><span>M</span><span>G</span><span>V</span><span>S</span><span>D</span>
+        </div>
+        <div class="heatmap" id="heatmap"></div>
+      </div>
+
+      <div class="card">
+        <h3>Cronologia</h3>
+        <div id="history-list" class="history-list"></div>
+        <div id="history-empty" class="empty-state hidden" style="padding:var(--space-6)">
+          Nessuna sessione ancora.
+        </div>
       </div>
     </main>
 
@@ -325,9 +369,11 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.3/Sortable.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <script src="/js/app.js"></script>
   <script src="/js/library.js"></script>
   <script src="/js/routines.js"></script>
   <script src="/js/session.js"></script>
+  <script src="/js/history.js"></script>
 </body>
 </html>
