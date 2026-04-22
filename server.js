@@ -36,10 +36,13 @@ app.get('/api/health', (req, res) => {
 const authRoutes = require('./routes/auth');
 app.use('/', authRoutes);
 
-// Dominio
+// Dominio (richiede sessione)
 app.use('/api/exercises', require('./routes/exercises'));
 app.use('/api/routines',  require('./routes/routines'));
 app.use('/api/sessions',  require('./routes/sessions'));
+
+// API read-only per consumo da app terze in LAN (niente auth)
+app.use('/api/external',  require('./routes/external'));
 
 // I router di dominio in arrivo:
 //   M5b → ./routes/sessions
