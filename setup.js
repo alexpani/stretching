@@ -56,6 +56,96 @@ async function seedIfEmpty(db) {
   console.log(`✓ Inseriti ${seed.length} esercizi`);
 }
 
+async function findExId(db, name, side) {
+  const row = await db.get(
+    `SELECT id FROM exercises WHERE name = ? AND side = ? AND deleted_at IS NULL LIMIT 1`,
+    name, side
+  );
+  return row ? row.id : null;
+}
+
+async function seedRoutinesIfEmpty(db) {
+  const count = (await db.get('SELECT COUNT(*) AS n FROM routines WHERE deleted_at IS NULL')).n;
+  if (count > 0) {
+    console.log(`Seed routine saltato: ${count} routine già presenti.`);
+    return;
+  }
+  console.log('Seed routine iniziali...');
+
+  const routines = [
+    {
+      name: 'Risveglio 5 min',
+      description: 'Sveglia il corpo in modo dolce: collo, spalle, schiena, anche.',
+      items: [
+        ['Rotazione lenta del collo', 'both'],
+        ['Circonduzione spalle',      'both'],
+        ['Cross-body stretch',        'dx'],
+        ['Cross-body stretch',        'sx'],
+        ['Cat-cow',                   'both'],
+        ['Child\'s pose',             'both'],
+        ['Butterfly',                 'both'],
+        ['Cobra stretch',             'both']
+      ]
+    },
+    {
+      name: 'Schiena scrivania 10 min',
+      description: 'Decompressione per chi sta seduto tutto il giorno.',
+      items: [
+        ['Rotazione lenta del collo',    'both'],
+        ['Flessione laterale collo',     'dx'],
+        ['Flessione laterale collo',     'sx'],
+        ['Circonduzione spalle',         'both'],
+        ['Cross-body stretch',           'dx'],
+        ['Cross-body stretch',           'sx'],
+        ['Cat-cow',                      'both'],
+        ['Child\'s pose',                'both'],
+        ['Rotazione lombare supina',     'dx'],
+        ['Rotazione lombare supina',     'sx'],
+        ['Cobra stretch',                'both'],
+        ['Hip flexor lunge',             'dx'],
+        ['Hip flexor lunge',             'sx']
+      ]
+    },
+    {
+      name: 'Gambe post-workout 8 min',
+      description: 'Allungamento completo dopo una corsa o sessione gambe.',
+      items: [
+        ['Quadricipite in piedi',   'dx'],
+        ['Quadricipite in piedi',   'sx'],
+        ['Ischiocrurali seduto',    'both'],
+        ['Butterfly',               'both'],
+        ['Pigeon pose',             'dx'],
+        ['Pigeon pose',             'sx'],
+        ['Hip flexor lunge',        'dx'],
+        ['Hip flexor lunge',        'sx'],
+        ['Polpaccio al muro',       'dx'],
+        ['Polpaccio al muro',       'sx']
+      ]
+    }
+  ];
+
+  for (const r of routines) {
+    const routineId = crypto.randomUUID();
+    await db.run(
+      `INSERT INTO routines (id, name, description) VALUES (?, ?, ?)`,
+      routineId, r.name, r.description
+    );
+    let pos = 0;
+    let skipped = 0;
+    for (const [exName, exSide] of r.items) {
+      const exId = await findExId(db, exName, exSide);
+      if (!exId) { skipped++; continue; }
+      await db.run(
+        `INSERT INTO routine_items
+          (id, routine_id, exercise_id, position, rest_after_sec)
+         VALUES (?, ?, ?, ?, 10)`,
+        crypto.randomUUID(), routineId, exId, pos++
+      );
+    }
+    console.log(`✓ "${r.name}" (${pos} esercizi${skipped ? `, ${skipped} saltati` : ''})`);
+  }
+}
+
 async function main() {
   const dbDir = path.join(__dirname, 'database');
   if (!fs.existsSync(dbDir)) fs.mkdirSync(dbDir, { recursive: true });
@@ -73,6 +163,7 @@ async function main() {
   `);
 
   await seedIfEmpty(db);
+  await seedRoutinesIfEmpty(db);
 
   console.log('\n✅ Setup completato.');
   console.log('  Copia .env.example in .env e avvia con: node server.js');
