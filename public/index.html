@@ -313,11 +313,12 @@
         <div class="stat"><strong id="sm-done">0</strong> esercizi eseguiti</div>
         <div class="stat"><span id="sm-skipped">0</span> saltati</div>
         <div class="stat">Durata: <strong id="sm-duration">0s</strong></div>
-        <div style="margin-top: var(--space-5); width: 100%;">
-          <button class="btn btn-primary btn-block" id="sm-close-btn">Chiudi</button>
-          <p style="color:var(--color-text-secondary); font-size:var(--text-xs); margin-top:var(--space-3)">
-            Il salvataggio della sessione arriva alla Milestone 5b.
-          </p>
+        <div id="sm-saved-msg" class="msg success hidden" style="margin-top:var(--space-3)">
+          Sessione salvata nello storico.
+        </div>
+        <div style="margin-top: var(--space-5); width: 100%; display: flex; flex-direction: column; gap: var(--space-2);">
+          <button class="btn btn-primary btn-block" id="sm-save-btn">Salva</button>
+          <button class="btn btn-secondary btn-block" id="sm-close-btn">Chiudi</button>
         </div>
       </div>
     </div>

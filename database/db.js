@@ -62,7 +62,23 @@ async function getDb() {
   `);
   await _db.exec(`CREATE INDEX IF NOT EXISTS idx_routine_items_routine ON routine_items(routine_id, position)`);
 
-  // M5b → sessions                    (in arrivo)
+  // M5b — sessioni completate
+  await _db.exec(`
+    CREATE TABLE IF NOT EXISTS sessions (
+      id            TEXT PRIMARY KEY,
+      routine_id    TEXT REFERENCES routines(id),
+      routine_name  TEXT,
+      started_at    TEXT NOT NULL,
+      ended_at      TEXT NOT NULL,
+      duration_sec  INTEGER NOT NULL,
+      items_total   INTEGER NOT NULL,
+      items_skipped INTEGER NOT NULL DEFAULT 0,
+      notes         TEXT,
+      created_at    TEXT DEFAULT (datetime('now')),
+      updated_at    TEXT DEFAULT (datetime('now'))
+    )
+  `);
+  await _db.exec(`CREATE INDEX IF NOT EXISTS idx_sessions_started ON sessions(started_at)`);
 
   return _db;
 }

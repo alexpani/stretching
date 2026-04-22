@@ -39,6 +39,7 @@ app.use('/', authRoutes);
 // Dominio
 app.use('/api/exercises', require('./routes/exercises'));
 app.use('/api/routines',  require('./routes/routines'));
+app.use('/api/sessions',  require('./routes/sessions'));
 
 // I router di dominio in arrivo:
 //   M5b → ./routes/sessions
