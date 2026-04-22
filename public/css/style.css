@@ -103,6 +103,11 @@ html, body {
   background: var(--color-bg);
   -webkit-tap-highlight-color: transparent;
   -webkit-font-smoothing: antialiased;
+  /* iOS in PWA standalone può scalare il testo automaticamente: blocchiamolo */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  /* Impedisce overflow orizzontale che farebbe clippare l'header */
+  overflow-x: hidden;
 }
 
 button {
