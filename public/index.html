@@ -267,9 +267,66 @@
     </div>
   </div>
 
+  <!-- ── Sessione guidata (overlay full-screen) ─ -->
+  <div id="session-overlay" class="session-overlay hidden">
+    <div class="session-inner">
+      <!-- Fase "in esecuzione" -->
+      <div id="session-running">
+        <div class="session-topbar">
+          <div class="pos" id="ss-position">—</div>
+          <div class="sp"></div>
+          <button class="session-stop" id="ss-close-btn" aria-label="Termina">✕</button>
+        </div>
+        <div class="progress-bar"><div class="progress-bar-fill" id="ss-progress"></div></div>
+
+        <div class="session-image">
+          <img id="ss-img" alt="" />
+        </div>
+
+        <div class="session-meta">
+          <div class="phase-label" id="ss-phase">Esercizio</div>
+          <div class="name" id="ss-name">—</div>
+          <div class="muscle" id="ss-muscle">—</div>
+        </div>
+
+        <div class="countdown" id="ss-countdown">
+          <svg viewBox="0 0 120 120">
+            <circle class="ring-bg" cx="60" cy="60" r="54" stroke-width="8"></circle>
+            <circle class="ring-fg" cx="60" cy="60" r="54" stroke-width="8"
+                    stroke-dasharray="339.292" stroke-dashoffset="0"></circle>
+          </svg>
+          <div class="num" id="ss-num">0</div>
+        </div>
+
+        <div class="session-next" id="ss-next">&nbsp;</div>
+
+        <div class="session-controls">
+          <button class="ctrl-btn" id="ss-skip-btn" aria-label="Salta">⏭</button>
+          <button class="ctrl-btn primary" id="ss-pause-btn" aria-label="Pausa/Riprendi">⏸</button>
+          <button class="ctrl-btn" id="ss-stop-btn" aria-label="Termina">■</button>
+        </div>
+      </div>
+
+      <!-- Fase riepilogo fine -->
+      <div id="session-summary" class="session-summary hidden">
+        <h2>Sessione completata 🎉</h2>
+        <div class="stat"><strong id="sm-done">0</strong> esercizi eseguiti</div>
+        <div class="stat"><span id="sm-skipped">0</span> saltati</div>
+        <div class="stat">Durata: <strong id="sm-duration">0s</strong></div>
+        <div style="margin-top: var(--space-5); width: 100%;">
+          <button class="btn btn-primary btn-block" id="sm-close-btn">Chiudi</button>
+          <p style="color:var(--color-text-secondary); font-size:var(--text-xs); margin-top:var(--space-3)">
+            Il salvataggio della sessione arriva alla Milestone 5b.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.3/Sortable.min.js"></script>
   <script src="/js/app.js"></script>
   <script src="/js/library.js"></script>
   <script src="/js/routines.js"></script>
+  <script src="/js/session.js"></script>
 </body>
 </html>

@@ -235,7 +235,8 @@ document.getElementById('rd-del-btn').addEventListener('click', async () => {
 });
 
 document.getElementById('rd-play-btn').addEventListener('click', () => {
-  alert('La sessione guidata arriverà alla Milestone 5.');
+  if (!Routines.current) return;
+  if (typeof window.startSession === 'function') window.startSession(Routines.current);
 });
 
 // ── Picker esercizi ─────────────────────
