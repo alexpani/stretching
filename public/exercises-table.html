@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Esercizi — Foglio di lavoro</title>
+  <meta name="theme-color" content="#2DB6A8" />
+  <link rel="stylesheet" href="/css/style.css" />
+  <link rel="stylesheet" href="/css/exercises-table.css" />
+</head>
+<body class="table-body">
+  <header class="table-header">
+    <a href="/" class="back-btn-lg" aria-label="Torna all'app">‹</a>
+    <h1>Esercizi — foglio di lavoro</h1>
+    <div class="table-header-right">
+      <button id="tbl-add-btn" class="btn btn-primary">+ Nuovo</button>
+      <button id="tbl-theme" class="icon-btn" aria-label="Tema">☾</button>
+    </div>
+  </header>
+
+  <section class="table-filters">
+    <input type="search" id="tbl-search" placeholder="Cerca per nome o descrizione…" />
+    <select id="tbl-filter-muscle">
+      <option value="">Tutti i gruppi</option>
+      <option value="collo e spalle">Collo e spalle</option>
+      <option value="schiena">Schiena</option>
+      <option value="addominali">Addominali</option>
+      <option value="glutei e gambe">Glutei e gambe</option>
+      <option value="braccia e torace">Braccia e torace</option>
+    </select>
+    <select id="tbl-filter-side">
+      <option value="">Tutti i lati</option>
+      <option value="both">Entrambi</option>
+      <option value="dx">Destro</option>
+      <option value="sx">Sinistro</option>
+    </select>
+    <span id="tbl-count" class="tbl-count">—</span>
+  </section>
+
+  <main class="table-wrap">
+    <table class="sheet">
+      <thead>
+        <tr>
+          <th class="col-thumb">Foto</th>
+          <th class="col-name">Nome</th>
+          <th class="col-desc">Descrizione</th>
+          <th class="col-muscle">Gruppo</th>
+          <th class="col-side">Lato</th>
+          <th class="col-dur">Durata</th>
+          <th class="col-actions"></th>
+        </tr>
+      </thead>
+      <tbody id="tbl-body"></tbody>
+    </table>
+    <div id="tbl-empty" class="empty-state hidden" style="padding:48px">Nessun esercizio corrisponde ai filtri.</div>
+  </main>
+
+  <input type="file" id="tbl-file-input" accept="image/*" class="hidden" />
+
+  <script>
+    // Applica il tema subito (prima del render) per evitare flash di light mode.
+    (function(){
+      const saved = localStorage.getItem('st-theme');
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const theme = (saved === 'light' || saved === 'dark') ? saved : (prefersDark ? 'dark' : 'light');
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+    function toggleTheme() {
+      const cur = document.documentElement.getAttribute('data-theme') || 'light';
+      const next = cur === 'dark' ? 'light' : 'dark';
+      localStorage.setItem('st-theme', next);
+      document.documentElement.setAttribute('data-theme', next);
+    }
+  </script>
+  <script src="/js/exercises-table.js"></script>
+</body>
+</html>

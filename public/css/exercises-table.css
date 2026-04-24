@@ -1,0 +1,186 @@
+/* ============================================================
+   exercises-table.css — Foglio di lavoro esercizi (M18)
+   Full-width, desktop-first, stile spreadsheet.
+   ============================================================ */
+
+.table-body {
+  display: block !important;
+  justify-content: unset !important;
+  max-width: none !important;
+}
+
+.table-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-card);
+  border-bottom: 1px solid var(--color-border-soft);
+}
+.table-header h1 {
+  flex: 1;
+  margin: 0;
+  font-size: var(--text-xl);
+  color: var(--color-primary);
+}
+.table-header-right { display: flex; gap: var(--space-2); align-items: center; }
+.back-btn-lg {
+  font-size: 24px;
+  color: var(--color-text);
+  text-decoration: none;
+  padding: 4px 10px;
+}
+
+.table-filters {
+  display: flex;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-bg);
+  border-bottom: 1px solid var(--color-border-soft);
+  flex-wrap: wrap;
+  align-items: center;
+}
+.table-filters input[type=search],
+.table-filters select {
+  height: 36px;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--color-border-soft);
+  border-radius: var(--radius-sm);
+  background: var(--color-input);
+  color: var(--color-text);
+  font-size: var(--text-sm);
+  font-family: inherit;
+}
+.table-filters input[type=search] { flex: 1; min-width: 200px; max-width: 400px; }
+.tbl-count {
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  margin-left: auto;
+}
+
+.table-wrap {
+  padding: var(--space-4);
+  overflow-x: auto;
+}
+
+.sheet {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--color-card);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  font-size: var(--text-sm);
+}
+.sheet thead th {
+  text-align: left;
+  padding: var(--space-3) var(--space-3);
+  background: var(--color-bg);
+  color: var(--color-text-secondary);
+  font-weight: 600;
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border-bottom: 1px solid var(--color-border-soft);
+  white-space: nowrap;
+}
+.sheet tbody td {
+  padding: var(--space-2) var(--space-3);
+  border-bottom: 1px solid var(--color-border-soft);
+  vertical-align: middle;
+}
+.sheet tbody tr:last-child td { border-bottom: none; }
+.sheet tbody tr.dirty {
+  background: rgba(45, 182, 168, 0.06);
+}
+.sheet tbody tr.deleted {
+  opacity: 0.4;
+  text-decoration: line-through;
+}
+
+.col-thumb  { width: 64px; }
+.col-name   { min-width: 180px; }
+.col-desc   { min-width: 280px; }
+.col-muscle { width: 180px; }
+.col-side   { width: 120px; }
+.col-dur    { width: 90px; }
+.col-actions{ width: 110px; text-align: right; }
+
+.sheet input[type=text],
+.sheet input[type=number],
+.sheet select,
+.sheet textarea {
+  width: 100%;
+  min-height: 32px;
+  padding: 6px 8px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-xs);
+  background: transparent;
+  color: var(--color-text);
+  font-size: var(--text-sm);
+  font-family: inherit;
+  resize: vertical;
+}
+.sheet input[type=number] { min-height: 32px; }
+.sheet textarea { min-height: 34px; }
+.sheet input:focus,
+.sheet select:focus,
+.sheet textarea:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  background: var(--color-input);
+  box-shadow: 0 0 0 2px rgba(45,182,168,0.15);
+}
+
+.tbl-thumb {
+  width: 48px; height: 48px;
+  border-radius: var(--radius-xs);
+  overflow: hidden;
+  background: var(--color-primary-light);
+  cursor: pointer;
+  position: relative;
+  border: 0;
+  padding: 0;
+}
+.tbl-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.tbl-thumb:hover::after {
+  content: '📷';
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(0,0,0,0.45);
+  color: white; font-size: 18px;
+}
+
+.row-actions {
+  display: flex; gap: 4px; justify-content: flex-end;
+}
+.row-actions button {
+  width: 30px; height: 30px;
+  border-radius: var(--radius-xs);
+  background: var(--color-bg);
+  color: var(--color-text-secondary);
+  font-size: 14px;
+  cursor: pointer;
+}
+.row-actions button.save-btn { color: var(--color-primary); font-weight: 700; }
+.row-actions button.del-btn  { color: var(--color-danger); }
+.row-actions button:disabled { opacity: 0.35; cursor: default; }
+
+@media (max-width: 720px) {
+  .sheet thead { display: none; }
+  .sheet tbody tr {
+    display: grid;
+    grid-template-columns: 64px 1fr;
+    gap: 4px 8px;
+    padding: var(--space-3);
+    border-bottom: 1px solid var(--color-border-soft);
+  }
+  .sheet tbody td {
+    border: none;
+    padding: 2px 0;
+  }
+  .col-thumb { grid-row: span 6; align-self: start; }
+}
