@@ -93,11 +93,13 @@ router.post('/', async (req, res) => {
     if (!name) return res.status(400).json({ error: 'Nome richiesto' });
     const description = req.body.description ? String(req.body.description).trim() : null;
     const restStd = parseRestStandard(req.body.rest_standard_sec);
+    const voiceGuide = req.body.voice_guide ? 1 : 0;
     const db = await getDb();
     const id = crypto.randomUUID();
     await db.run(
-      `INSERT INTO routines (id, name, description, rest_standard_sec) VALUES (?, ?, ?, ?)`,
-      id, name, description, restStd
+      `INSERT INTO routines (id, name, description, rest_standard_sec, voice_guide)
+       VALUES (?, ?, ?, ?, ?)`,
+      id, name, description, restStd, voiceGuide
     );
     const row = await db.get('SELECT * FROM routines WHERE id = ?', id);
     res.status(201).json({ ...row, items_total: 0, duration_sec: 0, items: [] });
@@ -119,11 +121,12 @@ router.put('/:id', async (req, res) => {
     if (!name) return res.status(400).json({ error: 'Nome richiesto' });
     const description = req.body.description ? String(req.body.description).trim() : null;
     const restStd = parseRestStandard(req.body.rest_standard_sec);
+    const voiceGuide = req.body.voice_guide ? 1 : 0;
     await db.run(
       `UPDATE routines
-         SET name = ?, description = ?, rest_standard_sec = ?, updated_at = datetime('now')
+         SET name = ?, description = ?, rest_standard_sec = ?, voice_guide = ?, updated_at = datetime('now')
        WHERE id = ?`,
-      name, description, restStd, current.id
+      name, description, restStd, voiceGuide, current.id
     );
     const row = await db.get('SELECT * FROM routines WHERE id = ?', current.id);
     res.json(row);
@@ -160,8 +163,9 @@ router.post('/:id/duplicate', async (req, res) => {
     const items = await loadItems(db, src.id);
     const newId = crypto.randomUUID();
     await db.run(
-      `INSERT INTO routines (id, name, description, rest_standard_sec) VALUES (?, ?, ?, ?)`,
-      newId, `${src.name} (copia)`, src.description, src.rest_standard_sec
+      `INSERT INTO routines (id, name, description, rest_standard_sec, voice_guide)
+       VALUES (?, ?, ?, ?, ?)`,
+      newId, `${src.name} (copia)`, src.description, src.rest_standard_sec, src.voice_guide || 0
     );
     for (const it of items) {
       await db.run(

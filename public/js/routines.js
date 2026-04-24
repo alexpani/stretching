@@ -208,6 +208,7 @@ function openRoutineModal(r) {
   document.getElementById('rt-name').value        = r ? r.name : '';
   document.getElementById('rt-description').value = r ? (r.description || '') : '';
   document.getElementById('rt-rest-std').value    = (r && r.rest_standard_sec != null) ? r.rest_standard_sec : '';
+  document.getElementById('rt-voice-guide').checked = !!(r && r.voice_guide);
   document.getElementById('rt-error').classList.add('hidden');
   document.getElementById('modal-routine').classList.remove('hidden');
 }
@@ -236,7 +237,8 @@ document.getElementById('form-routine').addEventListener('submit', async (e) => 
   const payload = {
     name: document.getElementById('rt-name').value.trim(),
     description: document.getElementById('rt-description').value.trim(),
-    rest_standard_sec: restStdVal === '' ? null : parseInt(restStdVal, 10)
+    rest_standard_sec: restStdVal === '' ? null : parseInt(restStdVal, 10),
+    voice_guide: document.getElementById('rt-voice-guide').checked
   };
   const res = id
     ? await apiPut(`/api/routines/${id}`, payload)
@@ -250,6 +252,7 @@ document.getElementById('form-routine').addEventListener('submit', async (e) => 
     Routines.current.name = res.name;
     Routines.current.description = res.description;
     Routines.current.rest_standard_sec = res.rest_standard_sec;
+    Routines.current.voice_guide = res.voice_guide;
     document.getElementById('routine-detail-name').textContent = res.name;
     // Ricalcola la durata in view
     refreshStatsOnly();

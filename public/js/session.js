@@ -32,6 +32,11 @@ const Session = {
   // Web Audio
   audioCtx: null,
 
+  // Speech synthesis (M17)
+  voice: null,
+  voiceEnabled: false,
+  voiceLastSpokenSec: null,
+
   saved: false
 };
 
@@ -131,13 +136,49 @@ const beepFinish    = () => {
   setTimeout(() => playBeep(1568, 320), 320);
 };
 
+// ── Guida vocale (SpeechSynthesis) ──────
+// Su Safari iOS getVoices() è asincrono: ascoltiamo onvoiceschanged.
+function initVoice() {
+  if (!('speechSynthesis' in window)) return;
+  const pickItalian = () => {
+    const vs = speechSynthesis.getVoices();
+    Session.voice = vs.find(v => v.lang && v.lang.toLowerCase().startsWith('it')) || null;
+  };
+  pickItalian();
+  if (!Session.voice) {
+    speechSynthesis.addEventListener('voiceschanged', pickItalian, { once: true });
+    setTimeout(pickItalian, 500);
+  }
+}
+
+function speak(text) {
+  if (!Session.voiceEnabled || !('speechSynthesis' in window)) return;
+  try {
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = 'it-IT';
+    if (Session.voice) u.voice = Session.voice;
+    u.rate = 1.0;
+    u.pitch = 1.0;
+    u.volume = 1.0;
+    speechSynthesis.speak(u);
+  } catch (_) {}
+}
+
+function stopSpeak() {
+  if ('speechSynthesis' in window) {
+    try { speechSynthesis.cancel(); } catch (_) {}
+  }
+}
+
 // ── Avvio ────────────────────────────────
 function startSession(routine) {
   if (!routine || !Array.isArray(routine.items) || routine.items.length === 0) {
-    alert('Aggiungi almeno un esercizio alla routine.');
+    alert('Aggiungi almeno un esercizio al piano.');
     return;
   }
   ensureAudio();
+  Session.voiceEnabled = !!routine.voice_guide;
+  if (Session.voiceEnabled) initVoice();
 
   Session.routine = routine;
   Session.phases = [];
@@ -174,6 +215,8 @@ function startSession(routine) {
   document.getElementById('session-overlay').classList.remove('hidden');
 
   requestWakeLock();
+  // Annuncio di apertura (prima della voce del primo esercizio)
+  if (Session.voiceEnabled) speak('Inizio allenamento');
   enterPhase(0);
 }
 
@@ -181,6 +224,7 @@ function closeOverlay() {
   Session.running = false;
   if (Session.rafId) { cancelAnimationFrame(Session.rafId); Session.rafId = null; }
   releaseWakeLock();
+  stopSpeak();
   document.getElementById('session-overlay').classList.add('hidden');
 }
 
@@ -192,6 +236,7 @@ function enterPhase(idx) {
   Session.pausedAccumMs = 0;
   Session.paused = false;
   Session.lastCountdownSec = null;
+  Session.voiceLastSpokenSec = null;
   document.getElementById('ss-pause-btn').textContent = '⏸';
 
   const ph = Session.phases[idx];
@@ -215,6 +260,11 @@ function enterPhase(idx) {
     next.innerHTML = following
       ? `Prossimo: <strong>${escapeHtmlS(following.item.name)}${SIDE_TXT[following.item.side] ? ' (' + SIDE_TXT[following.item.side] + ')' : ''}</strong>`
       : 'Ultimo esercizio';
+    // Voce: annuncia il nome dell'esercizio (+ eventuale lato)
+    if (Session.voiceEnabled) {
+      const lateral = it.side === 'dx' ? ' lato destro' : it.side === 'sx' ? ' lato sinistro' : '';
+      speak(`${it.name || 'Esercizio'}${lateral}`);
+    }
   } else {
     cd.classList.add('rest');
     phaseLbl.textContent = 'Riposo';
@@ -223,6 +273,12 @@ function enterPhase(idx) {
     muscle.textContent = '';
     img.src = itemImgPath(ph.nextItem);
     next.innerHTML = `Prossimo: <strong>${escapeHtmlS(ph.nextItem.name)}${SIDE_TXT[ph.nextItem.side] ? ' (' + SIDE_TXT[ph.nextItem.side] + ')' : ''}</strong>`;
+    // Voce: annuncia il prossimo esercizio durante il riposo
+    if (Session.voiceEnabled && ph.nextItem) {
+      const lateral = ph.nextItem.side === 'dx' ? ' lato destro'
+                    : ph.nextItem.side === 'sx' ? ' lato sinistro' : '';
+      speak(`Pausa. Prossimo: ${ph.nextItem.name}${lateral}`);
+    }
   }
 
   updatePositionLabel();
@@ -263,6 +319,7 @@ function finishSession() {
   if (Session.rafId) { cancelAnimationFrame(Session.rafId); Session.rafId = null; }
   releaseWakeLock();
   beepFinish();
+  if (Session.voiceEnabled) speak('Allenamento completato');
 
   const totalSec = Math.round((performance.now() - Session.sessionStartMs) / 1000);
   Session._endedAtIso = new Date().toISOString();
@@ -300,6 +357,14 @@ function tick() {
     if (secDisplay === 3 || secDisplay === 2 || secDisplay === 1) beepCountdown();
     Session.lastCountdownSec = secDisplay;
   }
+  // Guida vocale 5-4-3-2-1 (solo in fase esercizio, solo se abilitata)
+  if (Session.voiceEnabled && ph.type === 'exercise'
+      && Session.voiceLastSpokenSec !== secDisplay
+      && secDisplay >= 1 && secDisplay <= 5) {
+    const words = { 5: 'cinque', 4: 'quattro', 3: 'tre', 2: 'due', 1: 'uno' };
+    speak(words[secDisplay]);
+    Session.voiceLastSpokenSec = secDisplay;
+  }
 
   const progress = Math.min(1, elapsedMs / totalMs);
   const ring = document.querySelector('#ss-countdown .ring-fg');
@@ -329,6 +394,7 @@ function togglePause() {
   if (!Session.paused) {
     Session.paused = true;
     Session.pauseStartMs = performance.now();
+    stopSpeak();
     document.getElementById('ss-pause-btn').textContent = '▶';
     releaseWakeLock();
   } else {
@@ -345,6 +411,7 @@ function stopEarly() {
   Session.running = false;
   if (Session.rafId) { cancelAnimationFrame(Session.rafId); Session.rafId = null; }
   releaseWakeLock();
+  stopSpeak();
   Session._endedAtIso = new Date().toISOString();
   Session._durationSec = Math.round((performance.now() - Session.sessionStartMs) / 1000);
 

@@ -80,10 +80,13 @@ async function getDb() {
   `);
   await _db.exec(`CREATE INDEX IF NOT EXISTS idx_sessions_started ON sessions(started_at)`);
 
-  // Round 2 — M16: pausa standard per routine (nullable).
+  // Round 2 — M16/M17: campi aggiuntivi su routine (idempotente).
   const rcols = (await _db.all("PRAGMA table_info(routines)")).map(c => c.name);
   if (!rcols.includes('rest_standard_sec')) {
     await _db.run(`ALTER TABLE routines ADD COLUMN rest_standard_sec INTEGER`);
+  }
+  if (!rcols.includes('voice_guide')) {
+    await _db.run(`ALTER TABLE routines ADD COLUMN voice_guide INTEGER NOT NULL DEFAULT 0`);
   }
 
   // Round 2 — M12: migrazione categorie muscolari (8 vecchie → 5 nuove).
