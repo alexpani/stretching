@@ -3,7 +3,7 @@ const crypto = require('crypto');
 const router = express.Router();
 const { getDb } = require('../database/db');
 const { isAuth } = require('./auth');
-const { upload, resizeAndStore, removeImage } = require('../services/images');
+const { upload, resizeAndStore, removeImage, copyImage } = require('../services/images');
 
 const MUSCLE_GROUPS = [
   'collo e spalle',
@@ -101,6 +101,22 @@ router.post('/', isAuth, upload.single('file'), async (req, res) => {
       id, data.name, data.description, data.muscle_group, data.side,
       LEVEL_DUMMY, data.duration_sec, imagePath, data.notes
     );
+
+    // M15 — clone bilaterale: se l'originale è dx/sx, crea automaticamente
+    // il gemello con lato opposto e foto copiata (file distinto).
+    if (data.side === 'dx' || data.side === 'sx') {
+      const twinSide = data.side === 'dx' ? 'sx' : 'dx';
+      const twinId = crypto.randomUUID();
+      const twinImagePath = imagePath ? copyImage(imagePath, twinId) : null;
+      await db.run(
+        `INSERT INTO exercises
+          (id, name, description, muscle_group, side, level, duration_sec, image_path, notes)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        twinId, data.name, data.description, data.muscle_group, twinSide,
+        LEVEL_DUMMY, data.duration_sec, twinImagePath, data.notes
+      );
+    }
+
     const row = await db.get('SELECT * FROM exercises WHERE id = ?', id);
     res.status(201).json(row);
   } catch (err) {

@@ -46,4 +46,16 @@ function removeImage(imagePath) {
   try { fs.unlinkSync(full); } catch (_) {}
 }
 
-module.exports = { upload, resizeAndStore, removeImage };
+// Copia un file esistente (stretch-<srcId>.jpg) in stretch-<newId>.jpg e
+// ritorna il nuovo image_path. Usato per il clone bilaterale degli esercizi.
+function copyImage(srcImagePath, newId) {
+  if (!srcImagePath) return null;
+  const srcFull = path.join(uploadsDir, path.basename(srcImagePath));
+  if (!fs.existsSync(srcFull)) return null;
+  const outName = `stretch-${newId}.jpg`;
+  const outFull = path.join(uploadsDir, outName);
+  fs.copyFileSync(srcFull, outFull);
+  return `/uploads/${outName}`;
+}
+
+module.exports = { upload, resizeAndStore, removeImage, copyImage };
