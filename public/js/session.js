@@ -141,6 +141,8 @@ function startSession(routine) {
 
   Session.routine = routine;
   Session.phases = [];
+  // M16: se la routine ha rest_standard_sec valorizzato, sovrascrive le pause per-item.
+  const restOverride = (routine.rest_standard_sec != null) ? routine.rest_standard_sec : null;
   for (let i = 0; i < routine.items.length; i++) {
     const it = routine.items[i];
     Session.phases.push({
@@ -148,10 +150,11 @@ function startSession(routine) {
       duration: it.duration_override_sec || it.exercise_duration_sec || 30,
       item: it
     });
-    if (i < routine.items.length - 1 && (it.rest_after_sec || 0) > 0) {
+    const restSec = (restOverride != null) ? restOverride : (it.rest_after_sec || 0);
+    if (i < routine.items.length - 1 && restSec > 0) {
       Session.phases.push({
         type: 'rest',
-        duration: it.rest_after_sec,
+        duration: restSec,
         item: null,
         nextItem: routine.items[i + 1]
       });

@@ -20,14 +20,31 @@ async function loadItems(db, routineId) {
   `, routineId);
 }
 
-function computeStats(items) {
+// Parse del campo rest_standard_sec:
+//   null | '' | undefined → null (= nessun override, usa item-per-item)
+//   0..600 → intero
+//   altri → null (difensivo)
+function parseRestStandard(v) {
+  if (v === null || v === undefined || v === '' || v === 'null') return null;
+  const n = parseInt(v, 10);
+  if (!Number.isFinite(n) || n < 0 || n > 600) return null;
+  return n;
+}
+
+function computeStats(items, restStandard) {
   let total = 0;
+  const hasOverride = restStandard != null;
   for (const it of items) {
     total += (it.duration_override_sec || it.exercise_duration_sec || 0);
-    total += (it.rest_after_sec || 0);
+    const r = hasOverride ? restStandard : (it.rest_after_sec || 0);
+    total += r;
   }
   // L'ultimo riposo va tolto (niente riposo dopo l'ultimo esercizio)
-  if (items.length) total -= (items[items.length - 1].rest_after_sec || 0);
+  if (items.length) {
+    const last = items[items.length - 1];
+    const lastRest = hasOverride ? restStandard : (last.rest_after_sec || 0);
+    total -= lastRest;
+  }
   return { items_total: items.length, duration_sec: Math.max(0, total) };
 }
 
@@ -41,7 +58,7 @@ router.get('/', async (req, res) => {
     const result = [];
     for (const r of routines) {
       const items = await loadItems(db, r.id);
-      const stats = computeStats(items);
+      const stats = computeStats(items, r.rest_standard_sec);
       result.push({ ...r, ...stats });
     }
     res.json(result);
@@ -61,7 +78,7 @@ router.get('/:id', async (req, res) => {
     );
     if (!routine) return res.status(404).json({ error: 'Non trovata' });
     const items = await loadItems(db, routine.id);
-    const stats = computeStats(items);
+    const stats = computeStats(items, routine.rest_standard_sec);
     res.json({ ...routine, ...stats, items });
   } catch (err) {
     console.error(err);
@@ -75,11 +92,12 @@ router.post('/', async (req, res) => {
     const name = String(req.body.name || '').trim();
     if (!name) return res.status(400).json({ error: 'Nome richiesto' });
     const description = req.body.description ? String(req.body.description).trim() : null;
+    const restStd = parseRestStandard(req.body.rest_standard_sec);
     const db = await getDb();
     const id = crypto.randomUUID();
     await db.run(
-      `INSERT INTO routines (id, name, description) VALUES (?, ?, ?)`,
-      id, name, description
+      `INSERT INTO routines (id, name, description, rest_standard_sec) VALUES (?, ?, ?, ?)`,
+      id, name, description, restStd
     );
     const row = await db.get('SELECT * FROM routines WHERE id = ?', id);
     res.status(201).json({ ...row, items_total: 0, duration_sec: 0, items: [] });
@@ -100,9 +118,12 @@ router.put('/:id', async (req, res) => {
     const name = String(req.body.name || '').trim();
     if (!name) return res.status(400).json({ error: 'Nome richiesto' });
     const description = req.body.description ? String(req.body.description).trim() : null;
+    const restStd = parseRestStandard(req.body.rest_standard_sec);
     await db.run(
-      `UPDATE routines SET name = ?, description = ?, updated_at = datetime('now') WHERE id = ?`,
-      name, description, current.id
+      `UPDATE routines
+         SET name = ?, description = ?, rest_standard_sec = ?, updated_at = datetime('now')
+       WHERE id = ?`,
+      name, description, restStd, current.id
     );
     const row = await db.get('SELECT * FROM routines WHERE id = ?', current.id);
     res.json(row);
@@ -139,8 +160,8 @@ router.post('/:id/duplicate', async (req, res) => {
     const items = await loadItems(db, src.id);
     const newId = crypto.randomUUID();
     await db.run(
-      `INSERT INTO routines (id, name, description) VALUES (?, ?, ?)`,
-      newId, `${src.name} (copia)`, src.description
+      `INSERT INTO routines (id, name, description, rest_standard_sec) VALUES (?, ?, ?, ?)`,
+      newId, `${src.name} (copia)`, src.description, src.rest_standard_sec
     );
     for (const it of items) {
       await db.run(
@@ -153,7 +174,7 @@ router.post('/:id/duplicate', async (req, res) => {
     }
     const row = await db.get('SELECT * FROM routines WHERE id = ?', newId);
     const newItems = await loadItems(db, newId);
-    const stats = computeStats(newItems);
+    const stats = computeStats(newItems, row.rest_standard_sec);
     res.status(201).json({ ...row, ...stats, items: newItems });
   } catch (err) {
     console.error(err);

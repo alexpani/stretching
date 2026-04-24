@@ -178,14 +178,18 @@ function renderRoutineItems(items) {
 }
 
 function refreshStatsOnly() {
-  // Ricalcola durata e count dalla lista in memoria
+  // Ricalcola durata e count dalla lista in memoria (usa rest_standard_sec se valorizzato)
   const items = Routines.current.items || [];
+  const restOverride = (Routines.current.rest_standard_sec != null) ? Routines.current.rest_standard_sec : null;
   let total = 0;
   for (const it of items) {
     total += (it.duration_override_sec || it.exercise_duration_sec || 0);
-    total += (it.rest_after_sec || 0);
+    total += (restOverride != null) ? restOverride : (it.rest_after_sec || 0);
   }
-  if (items.length) total -= (items[items.length - 1].rest_after_sec || 0);
+  if (items.length) {
+    const last = items[items.length - 1];
+    total -= (restOverride != null) ? restOverride : (last.rest_after_sec || 0);
+  }
   document.getElementById('rd-items').textContent = items.length;
   document.getElementById('rd-duration').textContent = fmtDuration(Math.max(0, total));
 }
@@ -199,10 +203,11 @@ function backToList() {
 
 // ── Nuova / rinomina routine ────────────
 function openRoutineModal(r) {
-  document.getElementById('modal-routine-title').textContent = r ? 'Rinomina piano' : 'Nuovo piano';
+  document.getElementById('modal-routine-title').textContent = r ? 'Impostazioni piano' : 'Nuovo piano';
   document.getElementById('rt-id').value          = r ? r.id : '';
   document.getElementById('rt-name').value        = r ? r.name : '';
   document.getElementById('rt-description').value = r ? (r.description || '') : '';
+  document.getElementById('rt-rest-std').value    = (r && r.rest_standard_sec != null) ? r.rest_standard_sec : '';
   document.getElementById('rt-error').classList.add('hidden');
   document.getElementById('modal-routine').classList.remove('hidden');
 }
@@ -227,9 +232,11 @@ document.getElementById('form-routine').addEventListener('submit', async (e) => 
   const errEl = document.getElementById('rt-error');
   errEl.classList.add('hidden');
   const id = document.getElementById('rt-id').value;
+  const restStdVal = document.getElementById('rt-rest-std').value.trim();
   const payload = {
     name: document.getElementById('rt-name').value.trim(),
-    description: document.getElementById('rt-description').value.trim()
+    description: document.getElementById('rt-description').value.trim(),
+    rest_standard_sec: restStdVal === '' ? null : parseInt(restStdVal, 10)
   };
   const res = id
     ? await apiPut(`/api/routines/${id}`, payload)
@@ -242,7 +249,10 @@ document.getElementById('form-routine').addEventListener('submit', async (e) => 
   if (id && Routines.current && Routines.current.id === id) {
     Routines.current.name = res.name;
     Routines.current.description = res.description;
+    Routines.current.rest_standard_sec = res.rest_standard_sec;
     document.getElementById('routine-detail-name').textContent = res.name;
+    // Ricalcola la durata in view
+    refreshStatsOnly();
   } else {
     loadRoutines();
   }
