@@ -3,7 +3,8 @@
    ========================================== */
 
 window.App = {
-  user: null
+  user: null,
+  currentTab: 'routines'   // tab di default al login (ex Libreria, ora Piani)
 };
 
 // ── Fetch wrapper ──────────────────────────
@@ -101,6 +102,8 @@ function showLogin() {
 function showApp() {
   document.getElementById('login-screen').classList.add('hidden');
   document.getElementById('app').classList.remove('hidden');
+  // Notifica ai moduli tab il tab corrente così caricano i dati.
+  document.dispatchEvent(new CustomEvent('tabchange', { detail: { tab: window.App.currentTab } }));
 }
 
 async function checkAuth() {

@@ -1,5 +1,5 @@
 /* ==========================================
-   routines.js — Tab Routine (M4)
+   routines.js — Tab Piani (ex Routine)
    CRUD + drag-and-drop items via SortableJS
    ========================================== */
 
@@ -144,7 +144,7 @@ function renderRoutineItems(items) {
     btn.addEventListener('click', async (e) => {
       e.stopPropagation();
       const itemId = btn.dataset.del;
-      if (!confirm('Rimuovere questo esercizio dalla routine?')) return;
+      if (!confirm('Rimuovere questo esercizio dal piano?')) return;
       const items = await apiDelete(`/api/routines/${Routines.current.id}/items/${itemId}`);
       if (Array.isArray(items)) {
         Routines.current.items = items;
@@ -177,7 +177,7 @@ function backToList() {
 
 // ── Nuova / rinomina routine ────────────
 function openRoutineModal(r) {
-  document.getElementById('modal-routine-title').textContent = r ? 'Rinomina routine' : 'Nuova routine';
+  document.getElementById('modal-routine-title').textContent = r ? 'Rinomina piano' : 'Nuovo piano';
   document.getElementById('rt-id').value          = r ? r.id : '';
   document.getElementById('rt-name').value        = r ? r.name : '';
   document.getElementById('rt-description').value = r ? (r.description || '') : '';
@@ -236,7 +236,7 @@ document.getElementById('rd-dup-btn').addEventListener('click', async () => {
 
 document.getElementById('rd-del-btn').addEventListener('click', async () => {
   if (!Routines.current) return;
-  if (!confirm(`Eliminare la routine "${Routines.current.name}"?`)) return;
+  if (!confirm(`Eliminare il piano "${Routines.current.name}"?`)) return;
   const res = await apiDelete(`/api/routines/${Routines.current.id}`);
   if (res && res.ok) backToList();
 });
@@ -247,8 +247,14 @@ document.getElementById('rd-play-btn').addEventListener('click', () => {
 });
 
 // ── Picker esercizi ─────────────────────
-function openPicker() {
+async function openPicker() {
   document.getElementById('picker-search').value = '';
+  // Assicurati che la lista esercizi sia caricata (se l'utente apre il picker
+  // senza essere mai entrato nel tab Esercizi).
+  if (typeof Library !== 'undefined' && !(Library.items && Library.items.length) &&
+      typeof loadExercises === 'function') {
+    await loadExercises();
+  }
   renderPicker('');
   document.getElementById('modal-exercise-picker').classList.remove('hidden');
 }
@@ -269,7 +275,7 @@ function renderPicker(q) {
     !qq || (ex.name && ex.name.toLowerCase().includes(qq))
   );
   if (!items.length) {
-    list.innerHTML = '<div class="empty-state" style="padding:24px">Nessun esercizio. Aggiungi prima esercizi dalla Libreria.</div>';
+    list.innerHTML = '<div class="empty-state" style="padding:24px">Nessun esercizio. Aggiungi prima voci in Esercizi.</div>';
     return;
   }
   const frag = document.createDocumentFragment();

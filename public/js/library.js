@@ -1,5 +1,5 @@
 /* ==========================================
-   library.js — Tab Libreria esercizi (M3)
+   library.js — Tab Esercizi (ex Libreria)
    ========================================== */
 
 const Library = {
@@ -179,6 +179,5 @@ document.getElementById('ex-delete-btn').addEventListener('click', async () => {
 document.addEventListener('tabchange', (e) => {
   if (e.detail.tab === 'library') loadExercises();
 });
-// Auto-load all'ingresso
-const _libInit = () => { if (!document.getElementById('app').classList.contains('hidden')) loadExercises(); };
-setTimeout(_libInit, 50);
+// Nota: il primo load avviene via tabchange dispatchato da showApp() in app.js.
+// Il listener 'tabchange' sopra si attiva solo quando l'utente apre il tab Esercizi.

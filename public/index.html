@@ -50,8 +50,8 @@
       </div>
     </header>
 
-    <!-- Libreria -->
-    <main id="tab-library" class="content tab-panel">
+    <!-- Esercizi -->
+    <main id="tab-library" class="content tab-panel hidden">
       <div class="filters">
         <div class="chip-row" id="filter-muscle">
           <button class="chip active" data-muscle="">Tutti</button>
@@ -67,20 +67,20 @@
       <button class="fab" id="fab-add-exercise" aria-label="Aggiungi esercizio">+</button>
     </main>
 
-    <!-- Routine -->
-    <main id="tab-routines" class="content tab-panel hidden">
+    <!-- Piani -->
+    <main id="tab-routines" class="content tab-panel">
       <!-- Lista routine -->
       <div id="routines-list-view">
         <div id="routines-list" class="routine-list"></div>
-        <div id="routines-empty" class="empty-state hidden">Nessuna routine. Crea la prima col pulsante "+".</div>
-        <button class="fab" id="fab-add-routine" aria-label="Nuova routine">+</button>
+        <div id="routines-empty" class="empty-state hidden">Nessun piano. Crea il primo col pulsante "+".</div>
+        <button class="fab" id="fab-add-routine" aria-label="Nuovo piano">+</button>
       </div>
 
       <!-- Dettaglio routine -->
       <div id="routine-detail-view" class="hidden">
         <div class="subheader">
           <button class="back-btn" id="routine-back">‹</button>
-          <h2 id="routine-detail-name">Routine</h2>
+          <h2 id="routine-detail-name">Piano</h2>
           <button class="icon-btn" id="routine-edit-btn" aria-label="Modifica nome">✎</button>
         </div>
         <div class="routine-stats">
@@ -153,8 +153,8 @@
     <div class="disclaimer">Le indicazioni fornite non sono consigli medici.</div>
 
     <nav class="tab-bar">
-      <button class="tab-item active" data-tab="library"><span class="icon">🧘</span>Libreria</button>
-      <button class="tab-item" data-tab="routines"><span class="icon">📋</span>Routine</button>
+      <button class="tab-item" data-tab="library"><span class="icon">🧘</span>Esercizi</button>
+      <button class="tab-item active" data-tab="routines"><span class="icon">📋</span>Piani</button>
       <button class="tab-item" data-tab="history"><span class="icon">📊</span>Storico</button>
     </nav>
   </div>
@@ -236,7 +236,7 @@
   <div id="modal-routine" class="modal hidden">
     <div class="modal-backdrop" data-close="1"></div>
     <div class="modal-dialog">
-      <h2 id="modal-routine-title">Nuova routine</h2>
+      <h2 id="modal-routine-title">Nuovo piano</h2>
       <form id="form-routine">
         <input type="hidden" id="rt-id" />
         <div class="form-field">
