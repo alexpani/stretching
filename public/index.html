@@ -81,20 +81,21 @@
         <div class="subheader">
           <button class="back-btn" id="routine-back">‹</button>
           <h2 id="routine-detail-name">Piano</h2>
-          <button class="icon-btn" id="routine-edit-btn" aria-label="Modifica nome">✎</button>
+          <button class="icon-btn" id="rd-edit-toggle" aria-label="Modifica piano">✎</button>
         </div>
         <div class="routine-stats">
           <div><strong id="rd-items">0</strong> esercizi</div>
           <div><strong id="rd-duration">0</strong> durata</div>
         </div>
-        <div class="routine-actions">
-          <button class="btn btn-primary" id="rd-play-btn">▶ Avvia</button>
+        <button class="btn btn-primary btn-block" id="rd-play-btn">▶ Avvia</button>
+        <div class="routine-actions edit-only" style="margin-top: var(--space-3);">
+          <button class="btn btn-secondary" id="rd-rename-btn">Rinomina</button>
           <button class="btn btn-secondary" id="rd-dup-btn">Duplica</button>
           <button class="btn btn-danger" id="rd-del-btn">Elimina</button>
         </div>
-        <div id="routine-items-list" class="items-list"></div>
-        <div style="padding: var(--space-3) 0 var(--space-10); display:flex; gap:var(--space-2)">
-          <button class="btn btn-secondary btn-block" id="rd-add-item-btn">+ Aggiungi esercizio</button>
+        <div id="routine-items-list" class="items-list" style="margin-top: var(--space-4);"></div>
+        <div style="padding: var(--space-3) 0 var(--space-10);">
+          <button class="btn btn-secondary btn-block edit-only" id="rd-add-item-btn">+ Aggiungi esercizio</button>
         </div>
       </div>
     </main>

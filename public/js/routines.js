@@ -5,8 +5,9 @@
 
 const Routines = {
   list: [],
-  current: null,   // dettaglio aperto
-  sortable: null
+  current: null,      // dettaglio aperto
+  sortable: null,
+  editMode: false     // M14: view/edit mode nel dettaglio piano
 };
 
 const MUSCLE_LBL = {
@@ -82,6 +83,8 @@ async function openRoutineDetail(id) {
   const r = await apiGet(`/api/routines/${id}`);
   if (!r) return;
   Routines.current = r;
+  Routines.editMode = false;                         // sempre view-mode all'apertura
+  setEditMode(false);
 
   document.getElementById('routines-list-view').classList.add('hidden');
   document.getElementById('routine-detail-view').classList.remove('hidden');
@@ -90,6 +93,24 @@ async function openRoutineDetail(id) {
   document.getElementById('rd-duration').textContent = fmtDuration(r.duration_sec);
 
   renderRoutineItems(r.items);
+}
+
+function setEditMode(on) {
+  Routines.editMode = !!on;
+  const view = document.getElementById('routine-detail-view');
+  view.classList.toggle('edit-mode', Routines.editMode);
+  const toggleBtn = document.getElementById('rd-edit-toggle');
+  if (toggleBtn) {
+    toggleBtn.textContent = Routines.editMode ? '✓' : '✎';
+    toggleBtn.setAttribute('aria-label', Routines.editMode ? 'Fine modifica' : 'Modifica piano');
+  }
+  // In view-mode distruggi Sortable per evitare drag accidentale
+  if (!Routines.editMode && Routines.sortable) {
+    Routines.sortable.destroy();
+    Routines.sortable = null;
+  } else if (Routines.editMode && Routines.current) {
+    renderRoutineItems(Routines.current.items);     // ri-renderizza per riagganciare Sortable
+  }
 }
 
 function renderRoutineItems(items) {
@@ -113,6 +134,7 @@ function renderRoutineItems(items) {
       <button class="item-del" data-del="${it.id}" aria-label="Rimuovi">×</button>
     `;
     row.addEventListener('click', (e) => {
+      if (!Routines.editMode) return;                // read-only in view mode
       if (e.target.closest('.drag-handle') || e.target.closest('.item-del')) return;
       openItemEdit(it);
     });
@@ -120,9 +142,9 @@ function renderRoutineItems(items) {
   }
   root.appendChild(frag);
 
-  // SortableJS
-  if (Routines.sortable) Routines.sortable.destroy();
-  if (typeof Sortable !== 'undefined') {
+  // SortableJS solo in edit mode
+  if (Routines.sortable) { Routines.sortable.destroy(); Routines.sortable = null; }
+  if (Routines.editMode && typeof Sortable !== 'undefined') {
     Routines.sortable = Sortable.create(root, {
       handle: '.drag-handle',
       animation: 150,
@@ -193,7 +215,10 @@ document.getElementById('modal-routine').addEventListener('click', (e) => {
 });
 
 document.getElementById('fab-add-routine').addEventListener('click', () => openRoutineModal(null));
-document.getElementById('routine-edit-btn').addEventListener('click', () => {
+document.getElementById('rd-edit-toggle').addEventListener('click', () => {
+  setEditMode(!Routines.editMode);
+});
+document.getElementById('rd-rename-btn').addEventListener('click', () => {
   if (Routines.current) openRoutineModal(Routines.current);
 });
 
