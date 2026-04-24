@@ -55,20 +55,11 @@
       <div class="filters">
         <div class="chip-row" id="filter-muscle">
           <button class="chip active" data-muscle="">Tutti</button>
-          <button class="chip" data-muscle="collo">Collo</button>
-          <button class="chip" data-muscle="spalle">Spalle</button>
+          <button class="chip" data-muscle="collo e spalle">Collo e spalle</button>
           <button class="chip" data-muscle="schiena">Schiena</button>
-          <button class="chip" data-muscle="core">Core</button>
-          <button class="chip" data-muscle="gambe">Gambe</button>
-          <button class="chip" data-muscle="anche">Anche</button>
-          <button class="chip" data-muscle="polpacci">Polpacci</button>
-          <button class="chip" data-muscle="braccia">Braccia</button>
-        </div>
-        <div class="chip-row" id="filter-level">
-          <button class="chip active" data-level="">Tutti i livelli</button>
-          <button class="chip" data-level="easy">Facile</button>
-          <button class="chip" data-level="medium">Medio</button>
-          <button class="chip" data-level="hard">Difficile</button>
+          <button class="chip" data-muscle="addominali">Addominali</button>
+          <button class="chip" data-muscle="glutei e gambe">Glutei e gambe</button>
+          <button class="chip" data-muscle="braccia e torace">Braccia e torace</button>
         </div>
       </div>
       <div id="exercises-grid" class="exercises-grid"></div>
@@ -192,37 +183,24 @@
           <input type="text" id="ex-name" required maxlength="100" />
         </div>
 
+        <div class="form-field">
+          <label for="ex-muscle">Gruppo</label>
+          <select id="ex-muscle" required>
+            <option value="collo e spalle">Collo e spalle</option>
+            <option value="schiena">Schiena</option>
+            <option value="addominali">Addominali</option>
+            <option value="glutei e gambe">Glutei e gambe</option>
+            <option value="braccia e torace">Braccia e torace</option>
+          </select>
+        </div>
+
         <div class="form-row">
-          <div class="form-field">
-            <label for="ex-muscle">Gruppo</label>
-            <select id="ex-muscle" required>
-              <option value="collo">Collo</option>
-              <option value="spalle">Spalle</option>
-              <option value="schiena">Schiena</option>
-              <option value="core">Core</option>
-              <option value="gambe">Gambe</option>
-              <option value="anche">Anche</option>
-              <option value="polpacci">Polpacci</option>
-              <option value="braccia">Braccia</option>
-            </select>
-          </div>
           <div class="form-field">
             <label for="ex-side">Lato</label>
             <select id="ex-side">
               <option value="both">Entrambi</option>
               <option value="dx">Destro</option>
               <option value="sx">Sinistro</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="form-row">
-          <div class="form-field">
-            <label for="ex-level">Livello</label>
-            <select id="ex-level" required>
-              <option value="easy">Facile</option>
-              <option value="medium">Medio</option>
-              <option value="hard">Difficile</option>
             </select>
           </div>
           <div class="form-field">

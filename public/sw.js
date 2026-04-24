@@ -11,7 +11,7 @@
 // su conferma utente, invia postMessage({type:'SKIP_WAITING'}) che innesca
 // self.skipWaiting() qui + reload lato client.
 
-const VERSION = 'v2';
+const VERSION = 'v3';
 const SHELL_CACHE   = `st-shell-${VERSION}`;
 const RUNTIME_CACHE = `st-runtime-${VERSION}`;
 const API_CACHE     = `st-api-${VERSION}`;
@@ -31,14 +31,11 @@ const SHELL_ASSETS = [
   '/js/session.js',
   '/js/history.js',
   '/img/exercises/default.svg',
-  '/img/exercises/collo.svg',
-  '/img/exercises/spalle.svg',
+  '/img/exercises/collo-e-spalle.svg',
   '/img/exercises/schiena.svg',
-  '/img/exercises/core.svg',
-  '/img/exercises/gambe.svg',
-  '/img/exercises/anche.svg',
-  '/img/exercises/polpacci.svg',
-  '/img/exercises/braccia.svg'
+  '/img/exercises/addominali.svg',
+  '/img/exercises/glutei-e-gambe.svg',
+  '/img/exercises/braccia-e-torace.svg'
 ];
 
 const CDN_ASSETS = [

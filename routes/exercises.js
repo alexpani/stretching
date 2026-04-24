@@ -5,18 +5,25 @@ const { getDb } = require('../database/db');
 const { isAuth } = require('./auth');
 const { upload, resizeAndStore, removeImage } = require('../services/images');
 
-const MUSCLE_GROUPS = ['collo', 'spalle', 'schiena', 'core', 'gambe', 'anche', 'polpacci', 'braccia'];
-const LEVELS = ['easy', 'medium', 'hard'];
+const MUSCLE_GROUPS = [
+  'collo e spalle',
+  'schiena',
+  'addominali',
+  'glutei e gambe',
+  'braccia e torace'
+];
 const SIDES = ['both', 'dx', 'sx'];
+// Il campo 'level' nel DB resta (NOT NULL su DB esistenti) ma è deprecato:
+// la UI non lo espone più. Scriviamo sempre 'easy' come valore dummy.
+const LEVEL_DUMMY = 'easy';
 
 function parseForm(body) {
   const {
-    name, description, muscle_group, side, level, duration_sec, notes
+    name, description, muscle_group, side, duration_sec, notes
   } = body || {};
   const errors = [];
   if (!name || !String(name).trim()) errors.push('nome richiesto');
   if (!MUSCLE_GROUPS.includes(muscle_group)) errors.push('gruppo muscolare non valido');
-  if (!LEVELS.includes(level)) errors.push('livello non valido');
   const dur = parseInt(duration_sec, 10);
   if (!dur || dur < 5 || dur > 600) errors.push('durata 5-600 secondi');
   const safeSide = SIDES.includes(side) ? side : 'both';
@@ -27,14 +34,13 @@ function parseForm(body) {
       description: description ? String(description).trim() : null,
       muscle_group,
       side: safeSide,
-      level,
       duration_sec: dur,
       notes: notes ? String(notes).trim() : null
     }
   };
 }
 
-// GET /api/exercises?muscle_group=...&level=...&q=...
+// GET /api/exercises?muscle_group=...&q=...
 router.get('/', isAuth, async (req, res) => {
   try {
     const db = await getDb();
@@ -42,9 +48,6 @@ router.get('/', isAuth, async (req, res) => {
     const params = [];
     if (req.query.muscle_group && MUSCLE_GROUPS.includes(req.query.muscle_group)) {
       where.push('muscle_group = ?'); params.push(req.query.muscle_group);
-    }
-    if (req.query.level && LEVELS.includes(req.query.level)) {
-      where.push('level = ?'); params.push(req.query.level);
     }
     if (req.query.q) {
       where.push('(name LIKE ? OR description LIKE ?)');
@@ -96,7 +99,7 @@ router.post('/', isAuth, upload.single('file'), async (req, res) => {
         (id, name, description, muscle_group, side, level, duration_sec, image_path, notes)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       id, data.name, data.description, data.muscle_group, data.side,
-      data.level, data.duration_sec, imagePath, data.notes
+      LEVEL_DUMMY, data.duration_sec, imagePath, data.notes
     );
     const row = await db.get('SELECT * FROM exercises WHERE id = ?', id);
     res.status(201).json(row);
@@ -137,11 +140,11 @@ router.put('/:id', isAuth, upload.single('file'), async (req, res) => {
     await db.run(
       `UPDATE exercises
          SET name = ?, description = ?, muscle_group = ?, side = ?,
-             level = ?, duration_sec = ?, image_path = ?, notes = ?,
+             duration_sec = ?, image_path = ?, notes = ?,
              updated_at = datetime('now')
        WHERE id = ?`,
       data.name, data.description, data.muscle_group, data.side,
-      data.level, data.duration_sec, imagePath, data.notes, current.id
+      data.duration_sec, imagePath, data.notes, current.id
     );
     const row = await db.get('SELECT * FROM exercises WHERE id = ?', current.id);
     res.json(row);

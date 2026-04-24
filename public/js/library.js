@@ -3,28 +3,37 @@
    ========================================== */
 
 const Library = {
-  filter: { muscle_group: '', level: '' },
+  filter: { muscle_group: '' },
   items: [],
   modalOpen: false
 };
 
 const MUSCLE_LABELS = {
-  collo: 'Collo', spalle: 'Spalle', schiena: 'Schiena', core: 'Core',
-  gambe: 'Gambe', anche: 'Anche', polpacci: 'Polpacci', braccia: 'Braccia'
+  'collo e spalle':   'Collo e spalle',
+  'schiena':          'Schiena',
+  'addominali':       'Addominali',
+  'glutei e gambe':   'Glutei e gambe',
+  'braccia e torace': 'Braccia e torace'
 };
-const LEVEL_LABELS = { easy: 'Facile', medium: 'Medio', hard: 'Difficile' };
 const SIDE_LABELS = { dx: 'DX', sx: 'SX' };
+
+// Converte un muscle_group ("glutei e gambe") in slug file-safe ("glutei-e-gambe")
+// per il path SVG placeholder.
+function slugMuscle(s) {
+  return (s || '').replace(/\s+/g, '-');
+}
 
 function imgFor(ex) {
   if (ex && ex.image_path) return ex.image_path;
-  if (ex && ex.muscle_group) return `/img/exercises/${ex.muscle_group}.svg`;
+  if (ex && ex.muscle_group) return `/img/exercises/${slugMuscle(ex.muscle_group)}.svg`;
   return '/img/exercises/default.svg';
 }
+// Esposto globalmente: anche session.js lo userà.
+window.slugMuscle = slugMuscle;
 
 async function loadExercises() {
   const params = new URLSearchParams();
   if (Library.filter.muscle_group) params.set('muscle_group', Library.filter.muscle_group);
-  if (Library.filter.level)        params.set('level',        Library.filter.level);
   const qs = params.toString() ? `?${params}` : '';
   const list = await apiGet(`/api/exercises${qs}`);
   Library.items = Array.isArray(list) ? list : [];
@@ -52,7 +61,7 @@ function renderExercises() {
       <div class="thumb"><img src="${imgFor(ex)}" alt="" loading="lazy" /></div>
       <div class="body">
         <div class="name">${escapeHtml(ex.name)}</div>
-        <div class="meta-row">${sideBadge}<span class="meta">${MUSCLE_LABELS[ex.muscle_group] || ex.muscle_group} · ${ex.duration_sec}s · ${LEVEL_LABELS[ex.level]}</span></div>
+        <div class="meta-row">${sideBadge}<span class="meta">${MUSCLE_LABELS[ex.muscle_group] || ex.muscle_group} · ${ex.duration_sec}s</span></div>
       </div>
     `;
     card.addEventListener('click', () => openModal(ex));
@@ -77,14 +86,6 @@ document.getElementById('filter-muscle').addEventListener('click', (e) => {
   Library.filter.muscle_group = btn.dataset.muscle || '';
   loadExercises();
 });
-document.getElementById('filter-level').addEventListener('click', (e) => {
-  const btn = e.target.closest('.chip');
-  if (!btn) return;
-  document.querySelectorAll('#filter-level .chip').forEach(c => c.classList.remove('active'));
-  btn.classList.add('active');
-  Library.filter.level = btn.dataset.level || '';
-  loadExercises();
-});
 
 // ── Modal ────────────────────────────────
 function openModal(ex) {
@@ -92,9 +93,8 @@ function openModal(ex) {
   document.getElementById('modal-ex-title').textContent = ex ? 'Modifica esercizio' : 'Nuovo esercizio';
   document.getElementById('ex-id').value           = ex ? ex.id : '';
   document.getElementById('ex-name').value         = ex ? ex.name : '';
-  document.getElementById('ex-muscle').value       = ex ? ex.muscle_group : 'collo';
+  document.getElementById('ex-muscle').value       = ex ? ex.muscle_group : 'collo e spalle';
   document.getElementById('ex-side').value         = ex ? (ex.side || 'both') : 'both';
-  document.getElementById('ex-level').value        = ex ? ex.level : 'easy';
   document.getElementById('ex-duration').value     = ex ? ex.duration_sec : 30;
   document.getElementById('ex-description').value  = ex ? (ex.description || '') : '';
   document.getElementById('ex-notes').value        = ex ? (ex.notes || '') : '';
@@ -139,7 +139,6 @@ document.getElementById('form-exercise').addEventListener('submit', async (e) =>
   fd.set('name',         document.getElementById('ex-name').value.trim());
   fd.set('muscle_group', document.getElementById('ex-muscle').value);
   fd.set('side',         document.getElementById('ex-side').value);
-  fd.set('level',        document.getElementById('ex-level').value);
   fd.set('duration_sec', document.getElementById('ex-duration').value);
   fd.set('description',  document.getElementById('ex-description').value.trim());
   fd.set('notes',        document.getElementById('ex-notes').value.trim());

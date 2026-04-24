@@ -80,6 +80,14 @@ async function getDb() {
   `);
   await _db.exec(`CREATE INDEX IF NOT EXISTS idx_sessions_started ON sessions(started_at)`);
 
+  // Round 2 — M12: migrazione categorie muscolari (8 vecchie → 5 nuove).
+  // Idempotente: gli UPDATE matchano solo i valori vecchi; se non presenti, no-op.
+  await _db.run(`UPDATE exercises SET muscle_group = 'collo e spalle'  WHERE muscle_group IN ('collo', 'spalle')`);
+  await _db.run(`UPDATE exercises SET muscle_group = 'addominali'      WHERE muscle_group = 'core'`);
+  await _db.run(`UPDATE exercises SET muscle_group = 'glutei e gambe'  WHERE muscle_group IN ('gambe', 'anche', 'polpacci')`);
+  await _db.run(`UPDATE exercises SET muscle_group = 'braccia e torace' WHERE muscle_group = 'braccia'`);
+  // 'schiena' resta invariata.
+
   return _db;
 }
 

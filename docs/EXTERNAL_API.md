@@ -152,9 +152,8 @@ Catalogo esercizi attivi (non cancellati).
     "id": "e7e8f9a0-...",
     "name": "Butterfly",
     "description": "Seduto, piante dei piedi unite, avvicina i talloni...",
-    "muscle_group": "anche",
+    "muscle_group": "glutei e gambe",
     "side": "both",
-    "level": "easy",
     "duration_sec": 45,
     "image_path": "/uploads/stretch-e7e8f9a0-....jpg"
   }
@@ -168,11 +167,10 @@ Catalogo esercizi attivi (non cancellati).
 | `id` | string | UUID esercizio |
 | `name` | string | Nome |
 | `description` | string \| null | Descrizione dell'esecuzione |
-| `muscle_group` | string | Uno di: `collo`, `spalle`, `schiena`, `core`, `gambe`, `anche`, `polpacci`, `braccia` |
+| `muscle_group` | string | Uno di: `collo e spalle`, `schiena`, `addominali`, `glutei e gambe`, `braccia e torace` |
 | `side` | string | Uno di: `both`, `dx`, `sx` |
-| `level` | string | Uno di: `easy`, `medium`, `hard` |
 | `duration_sec` | integer | Durata di default in secondi |
-| `image_path` | string \| null | Path relativo dell'immagine caricata (se presente); `null` → il client usa il fallback SVG `/img/exercises/{muscle_group}.svg` |
+| `image_path` | string \| null | Path relativo dell'immagine caricata (se presente); `null` → il client usa il fallback SVG `/img/exercises/<slug>.svg` dove `<slug>` è il `muscle_group` con gli spazi sostituiti da `-`. |
 
 ---
 

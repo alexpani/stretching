@@ -38,13 +38,18 @@ const Session = {
 const CIRC = 2 * Math.PI * 54;
 const SIDE_TXT = { dx: 'DX', sx: 'SX' };
 const MUSCLE_TXT = {
-  collo: 'Collo', spalle: 'Spalle', schiena: 'Schiena', core: 'Core',
-  gambe: 'Gambe', anche: 'Anche', polpacci: 'Polpacci', braccia: 'Braccia'
+  'collo e spalle':   'Collo e spalle',
+  'schiena':          'Schiena',
+  'addominali':       'Addominali',
+  'glutei e gambe':   'Glutei e gambe',
+  'braccia e torace': 'Braccia e torace'
 };
+
+function muscleSlug(s) { return (s || '').replace(/\s+/g, '-'); }
 
 function itemImgPath(it) {
   if (it && it.image_path) return it.image_path;
-  if (it && it.muscle_group) return `/img/exercises/${it.muscle_group}.svg`;
+  if (it && it.muscle_group) return `/img/exercises/${muscleSlug(it.muscle_group)}.svg`;
   return '/img/exercises/default.svg';
 }
 

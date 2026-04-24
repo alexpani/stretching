@@ -10,10 +10,17 @@ const Routines = {
 };
 
 const MUSCLE_LBL = {
-  collo: 'Collo', spalle: 'Spalle', schiena: 'Schiena', core: 'Core',
-  gambe: 'Gambe', anche: 'Anche', polpacci: 'Polpacci', braccia: 'Braccia'
+  'collo e spalle':   'Collo e spalle',
+  'schiena':          'Schiena',
+  'addominali':       'Addominali',
+  'glutei e gambe':   'Glutei e gambe',
+  'braccia e torace': 'Braccia e torace'
 };
 const SIDE_LBL = { dx: 'DX', sx: 'SX' };
+
+function slugMuscle(s) {
+  return (s || '').replace(/\s+/g, '-');
+}
 
 function fmtDuration(sec) {
   if (!sec) return '0s';
@@ -26,7 +33,7 @@ function fmtDuration(sec) {
 
 function itemImg(it) {
   if (it.image_path) return it.image_path;
-  if (it.muscle_group) return `/img/exercises/${it.muscle_group}.svg`;
+  if (it.muscle_group) return `/img/exercises/${slugMuscle(it.muscle_group)}.svg`;
   return '/img/exercises/default.svg';
 }
 
