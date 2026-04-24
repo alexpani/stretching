@@ -412,6 +412,12 @@ body {
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
+.exercise-card .meta-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  flex-wrap: wrap;
+}
 .exercise-card .meta {
   font-size: var(--text-xs);
   color: var(--color-text-secondary);
@@ -653,7 +659,20 @@ body {
   font-weight: 500; font-size: var(--text-md); color: var(--color-text);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
-.item-row .item-meta { font-size: var(--text-xs); color: var(--color-text-secondary); }
+.item-row .item-meta-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  flex-wrap: wrap;
+  min-width: 0;
+}
+.item-row .item-meta {
+  font-size: var(--text-xs);
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 .item-row .item-del {
   color: var(--color-danger);
   font-size: 20px; padding: 4px 8px;
@@ -692,7 +711,20 @@ body {
   font-size: var(--text-sm); font-weight: 500;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
-.picker-row .picker-meta { font-size: var(--text-xs); color: var(--color-text-secondary); }
+.picker-row .picker-meta-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  flex-wrap: wrap;
+  min-width: 0;
+}
+.picker-row .picker-meta {
+  font-size: var(--text-xs);
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 
 /* ── Session overlay ────────────────────── */
 .session-overlay {

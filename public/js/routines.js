@@ -100,8 +100,8 @@ function renderRoutineItems(items) {
       <div class="drag-handle" aria-label="Trascina">≡</div>
       <div class="item-thumb"><img src="${itemImg(it)}" alt="" /></div>
       <div class="item-body">
-        <div class="item-name">${escHtml(it.name)} ${sideBadge}</div>
-        <div class="item-meta">${MUSCLE_LBL[it.muscle_group]} · ${dur}s · riposo ${it.rest_after_sec || 0}s</div>
+        <div class="item-name">${escHtml(it.name)}</div>
+        <div class="item-meta-row">${sideBadge}<span class="item-meta">${MUSCLE_LBL[it.muscle_group]} · ${dur}s · riposo ${it.rest_after_sec || 0}s</span></div>
       </div>
       <button class="item-del" data-del="${it.id}" aria-label="Rimuovi">×</button>
     `;
@@ -273,8 +273,8 @@ function renderPicker(q) {
     row.innerHTML = `
       <div class="picker-thumb"><img src="${itemImg(ex)}" alt="" /></div>
       <div class="picker-body">
-        <div class="picker-name">${escHtml(ex.name)} ${sideBadge}</div>
-        <div class="picker-meta">${MUSCLE_LBL[ex.muscle_group]} · ${ex.duration_sec}s</div>
+        <div class="picker-name">${escHtml(ex.name)}</div>
+        <div class="picker-meta-row">${sideBadge}<span class="picker-meta">${MUSCLE_LBL[ex.muscle_group]} · ${ex.duration_sec}s</span></div>
       </div>
       <button class="btn btn-primary" style="min-height:36px; padding:0 var(--space-3);">+</button>
     `;

@@ -51,8 +51,8 @@ function renderExercises() {
     card.innerHTML = `
       <div class="thumb"><img src="${imgFor(ex)}" alt="" loading="lazy" /></div>
       <div class="body">
-        <div class="name">${escapeHtml(ex.name)} ${sideBadge}</div>
-        <div class="meta">${MUSCLE_LABELS[ex.muscle_group] || ex.muscle_group} · ${ex.duration_sec}s · ${LEVEL_LABELS[ex.level]}</div>
+        <div class="name">${escapeHtml(ex.name)}</div>
+        <div class="meta-row">${sideBadge}<span class="meta">${MUSCLE_LABELS[ex.muscle_group] || ex.muscle_group} · ${ex.duration_sec}s · ${LEVEL_LABELS[ex.level]}</span></div>
       </div>
     `;
     card.addEventListener('click', () => openModal(ex));
