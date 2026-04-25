@@ -292,8 +292,8 @@ function enterPhase(idx) {
   const next = document.getElementById('ss-next');
 
   // Reset eventuale toggle descrizione → torna sempre alla foto al cambio fase
-  const ssImage = document.getElementById('ss-image');
-  if (ssImage) ssImage.classList.remove('show-desc');
+  const ssMid = document.querySelector('.session-mid');
+  if (ssMid) ssMid.classList.remove('show-desc');
   const descText = document.getElementById('ss-desc-text');
 
   if (ph.type === 'exercise') {
@@ -529,10 +529,12 @@ async function saveSession() {
 }
 
 // ── Listener ────────────────────────────
-// Toggle descrizione esercizio cliccando sulla foto durante la sessione
+// Toggle descrizione esercizio cliccando sulla foto: la foto resta visibile,
+// il pannello compare sopra meta+countdown (non sopra l'immagine).
 const _ssImageEl = document.getElementById('ss-image');
-if (_ssImageEl) {
-  const toggleDesc = () => _ssImageEl.classList.toggle('show-desc');
+const _ssMidEl = document.querySelector('.session-mid');
+if (_ssImageEl && _ssMidEl) {
+  const toggleDesc = () => _ssMidEl.classList.toggle('show-desc');
   _ssImageEl.addEventListener('click', toggleDesc);
   _ssImageEl.addEventListener('keydown', (e) => {
     if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleDesc(); }

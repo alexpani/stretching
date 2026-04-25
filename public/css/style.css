@@ -779,22 +779,31 @@ body {
   cursor: pointer;
 }
 
-/* Pannello descrizione: appare sopra la foto al click */
+/* Wrapper della metà inferiore (meta + countdown + next + desc panel) */
+.session-mid {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+/* Pannello descrizione: appare sopra meta+countdown (NON sulla foto). */
 .ss-desc {
   position: absolute;
   inset: 0;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
-  padding: var(--s-5);
-  background: color-mix(in srgb, var(--surface) 96%, transparent);
-  -webkit-backdrop-filter: blur(6px);
-  backdrop-filter: blur(6px);
+  padding: var(--s-4) var(--s-5);
+  background: var(--surface);
+  border-radius: var(--r-3);
   color: var(--ink);
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.2s ease;
+  transition: opacity 0.18s ease;
   overflow-y: auto;
+  box-shadow: var(--sh-1);
 }
 .ss-desc-inner {
   font-size: var(--t-md);
@@ -804,11 +813,10 @@ body {
   text-align: left;
   width: 100%;
 }
-.session-image.show-desc .ss-desc {
+.session-mid.show-desc .ss-desc {
   opacity: 1;
   pointer-events: auto;
 }
-.session-image.show-desc img { opacity: 0.08; }
 .session-image img {
   width: 100%; height: 100%; object-fit: cover;
   display: block;
