@@ -291,12 +291,18 @@ function enterPhase(idx) {
   const muscle = document.getElementById('ss-muscle');
   const next = document.getElementById('ss-next');
 
+  // Reset eventuale toggle descrizione → torna sempre alla foto al cambio fase
+  const ssImage = document.getElementById('ss-image');
+  if (ssImage) ssImage.classList.remove('show-desc');
+  const descText = document.getElementById('ss-desc-text');
+
   if (ph.type === 'exercise') {
     const it = ph.item;
     cd.classList.remove('rest');
     phaseLbl.textContent = 'Esercizio';
     phaseLbl.classList.remove('rest');
     img.src = itemImgPath(it);
+    if (descText) descText.textContent = it.description || 'Nessuna descrizione disponibile per questo esercizio.';
     const sideTxt = SIDE_TXT[it.side] ? ` (${SIDE_TXT[it.side]})` : '';
     name.textContent = (it.name || '') + sideTxt;
     muscle.textContent = MUSCLE_TXT[it.muscle_group] || it.muscle_group || '';
@@ -316,6 +322,7 @@ function enterPhase(idx) {
     name.textContent = ph.isInitial ? 'Iniziamo' : 'Respira';
     muscle.textContent = '';
     img.src = itemImgPath(ph.nextItem);
+    if (descText) descText.textContent = (ph.nextItem && ph.nextItem.description) || '';
     next.innerHTML = `Prossimo: <strong>${escapeHtmlS(ph.nextItem.name)}${SIDE_TXT[ph.nextItem.side] ? ' (' + SIDE_TXT[ph.nextItem.side] + ')' : ''}</strong>`;
     // Voce: annuncia il prossimo esercizio durante il riposo (o "preparati" se è la pausa iniziale)
     if (Session.voiceEnabled && ph.nextItem) {
@@ -522,6 +529,16 @@ async function saveSession() {
 }
 
 // ── Listener ────────────────────────────
+// Toggle descrizione esercizio cliccando sulla foto durante la sessione
+const _ssImageEl = document.getElementById('ss-image');
+if (_ssImageEl) {
+  const toggleDesc = () => _ssImageEl.classList.toggle('show-desc');
+  _ssImageEl.addEventListener('click', toggleDesc);
+  _ssImageEl.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleDesc(); }
+  });
+}
+
 document.getElementById('ss-pause-btn').addEventListener('click', togglePause);
 document.getElementById('ss-skip-btn').addEventListener('click', skipPhase);
 document.getElementById('ss-stop-btn').addEventListener('click', stopEarly);
