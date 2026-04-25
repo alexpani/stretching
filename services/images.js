@@ -58,4 +58,19 @@ function copyImage(srcImagePath, newId) {
   return `/uploads/${outName}`;
 }
 
-module.exports = { upload, resizeAndStore, removeImage, copyImage };
+// Variante per le cover dei piani: 16:9, fit 'cover' centrato. File chiamato
+// cover-<routineId>.jpg. Stesso pattern naming → soft-delete piani non rimuove
+// l'immagine (coerente con esercizi).
+async function resizeAndStoreCover(tmpPath, routineId) {
+  const outName = `cover-${routineId}.jpg`;
+  const outPath = path.join(uploadsDir, outName);
+  await sharp(tmpPath)
+    .rotate()
+    .resize({ width: 1280, height: 720, fit: 'cover', position: 'center' })
+    .jpeg({ quality: 85, mozjpeg: true })
+    .toFile(outPath);
+  try { fs.unlinkSync(tmpPath); } catch (_) {}
+  return `/uploads/${outName}`;
+}
+
+module.exports = { upload, resizeAndStore, removeImage, copyImage, resizeAndStoreCover };

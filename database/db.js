@@ -88,6 +88,9 @@ async function getDb() {
   if (!rcols.includes('voice_guide')) {
     await _db.run(`ALTER TABLE routines ADD COLUMN voice_guide INTEGER NOT NULL DEFAULT 0`);
   }
+  if (!rcols.includes('cover_image_path')) {
+    await _db.run(`ALTER TABLE routines ADD COLUMN cover_image_path TEXT`);
+  }
 
   // Round 2 — M12: migrazione categorie muscolari (8 vecchie → 5 nuove).
   // Idempotente: gli UPDATE matchano solo i valori vecchi; se non presenti, no-op.

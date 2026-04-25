@@ -65,7 +65,11 @@ function renderRoutines() {
   for (const r of Routines.list) {
     const card = document.createElement('div');
     card.className = 'routine-card';
+    const coverHtml = r.cover_image_path
+      ? `<div class="rc-cover"><img src="${escHtml(r.cover_image_path)}" alt="" /></div>`
+      : '';
     card.innerHTML = `
+      ${coverHtml}
       <div class="rc-body">
         <div class="rc-name">${escHtml(r.name)}</div>
         <div class="rc-meta">${r.items_total} esercizi · ${fmtDuration(r.duration_sec)}</div>
@@ -91,6 +95,16 @@ async function openRoutineDetail(id) {
   document.getElementById('routine-detail-name').textContent = r.name;
   document.getElementById('rd-items').textContent = r.items_total;
   document.getElementById('rd-duration').textContent = fmtDuration(r.duration_sec);
+  // Cover banner (M-cover)
+  const coverEl = document.getElementById('rd-cover');
+  const coverImg = document.getElementById('rd-cover-img');
+  if (r.cover_image_path) {
+    coverImg.src = r.cover_image_path;
+    coverEl.classList.remove('hidden');
+  } else {
+    coverImg.removeAttribute('src');
+    coverEl.classList.add('hidden');
+  }
 
   renderRoutineItems(r.items);
 }
@@ -209,6 +223,21 @@ function openRoutineModal(r) {
   document.getElementById('rt-description').value = r ? (r.description || '') : '';
   document.getElementById('rt-rest-std').value    = (r && r.rest_standard_sec != null) ? r.rest_standard_sec : '';
   document.getElementById('rt-voice-guide').checked = !!(r && r.voice_guide);
+
+  // Cover preview
+  const coverImg = document.getElementById('rt-cover-img');
+  const coverEmpty = document.getElementById('rt-cover-empty');
+  document.getElementById('rt-cover-file').value = '';
+  Routines._coverFile = null;
+  Routines._coverRemove = false;
+  if (r && r.cover_image_path) {
+    coverImg.src = r.cover_image_path;
+    coverEmpty.style.display = 'none';
+  } else {
+    coverImg.removeAttribute('src');
+    coverEmpty.style.display = '';
+  }
+
   document.getElementById('rt-error').classList.add('hidden');
   document.getElementById('modal-routine').classList.remove('hidden');
 }
@@ -218,6 +247,25 @@ function closeRoutineModal() {
 
 document.getElementById('modal-routine').addEventListener('click', (e) => {
   if (e.target.dataset && e.target.dataset.close) closeRoutineModal();
+});
+
+// Preview cover al cambio file
+document.getElementById('rt-cover-file').addEventListener('change', (e) => {
+  const f = e.target.files && e.target.files[0];
+  if (!f) return;
+  Routines._coverFile = f;
+  Routines._coverRemove = false;
+  const url = URL.createObjectURL(f);
+  document.getElementById('rt-cover-img').src = url;
+  document.getElementById('rt-cover-empty').style.display = 'none';
+});
+
+document.getElementById('rt-cover-remove').addEventListener('click', () => {
+  Routines._coverFile = null;
+  Routines._coverRemove = true;
+  document.getElementById('rt-cover-file').value = '';
+  document.getElementById('rt-cover-img').removeAttribute('src');
+  document.getElementById('rt-cover-empty').style.display = '';
 });
 
 document.getElementById('fab-add-routine').addEventListener('click', () => openRoutineModal(null));
@@ -240,21 +288,51 @@ document.getElementById('form-routine').addEventListener('submit', async (e) => 
     rest_standard_sec: restStdVal === '' ? null : parseInt(restStdVal, 10),
     voice_guide: document.getElementById('rt-voice-guide').checked
   };
-  const res = id
+  let res = id
     ? await apiPut(`/api/routines/${id}`, payload)
     : await apiPost('/api/routines', payload);
   if (!res || res.error) {
     showMsg(errEl, (res && res.error) || 'Errore di salvataggio', 'error');
     return;
   }
+
+  // Gestione cover (upload o remove) dopo il save dei metadata
+  const targetId = res.id;
+  if (Routines._coverFile) {
+    const fd = new FormData();
+    fd.set('file', Routines._coverFile);
+    const cr = await fetch(`/api/routines/${targetId}/cover`, {
+      method: 'PUT', body: fd, credentials: 'same-origin'
+    });
+    if (cr.ok) res = await cr.json();
+  } else if (Routines._coverRemove) {
+    const dr = await fetch(`/api/routines/${targetId}/cover`, {
+      method: 'DELETE', credentials: 'same-origin'
+    });
+    if (dr.ok) res.cover_image_path = null;
+  }
+  Routines._coverFile = null;
+  Routines._coverRemove = false;
+
   closeRoutineModal();
   if (id && Routines.current && Routines.current.id === id) {
     Routines.current.name = res.name;
     Routines.current.description = res.description;
     Routines.current.rest_standard_sec = res.rest_standard_sec;
     Routines.current.voice_guide = res.voice_guide;
+    Routines.current.cover_image_path = res.cover_image_path;
     document.getElementById('routine-detail-name').textContent = res.name;
-    // Ricalcola la durata in view
+    // Aggiorna banner cover nel detail
+    const coverEl = document.getElementById('rd-cover');
+    const coverImg = document.getElementById('rd-cover-img');
+    if (res.cover_image_path) {
+      // Aggiungo cache-buster per forzare refresh dell'immagine sostituita
+      coverImg.src = res.cover_image_path + '?t=' + Date.now();
+      coverEl.classList.remove('hidden');
+    } else {
+      coverImg.removeAttribute('src');
+      coverEl.classList.add('hidden');
+    }
     refreshStatsOnly();
   } else {
     loadRoutines();

@@ -3,6 +3,7 @@ const crypto = require('crypto');
 const router = express.Router();
 const { getDb } = require('../database/db');
 const { isAuth } = require('./auth');
+const { upload, resizeAndStoreCover, removeImage } = require('../services/images');
 
 router.use(isAuth);
 
@@ -270,6 +271,54 @@ router.delete('/:id/items/:itemId', async (req, res) => {
     await db.run(`UPDATE routines SET updated_at = datetime('now') WHERE id = ?`, req.params.id);
     const items = await loadItems(db, req.params.id);
     res.json(items);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Errore del server' });
+  }
+});
+
+// PUT /api/routines/:id/cover  — upload immagine di copertina (multipart "file")
+router.put('/:id/cover', upload.single('file'), async (req, res) => {
+  try {
+    const db = await getDb();
+    const routine = await db.get(
+      `SELECT * FROM routines WHERE id = ? AND deleted_at IS NULL`, req.params.id
+    );
+    if (!routine) {
+      if (req.file) removeImage(`/uploads/${req.file.filename}`);
+      return res.status(404).json({ error: 'Piano non trovato' });
+    }
+    if (!req.file) return res.status(400).json({ error: 'File mancante' });
+
+    if (routine.cover_image_path) removeImage(routine.cover_image_path);
+    const newPath = await resizeAndStoreCover(req.file.path, routine.id);
+    await db.run(
+      `UPDATE routines SET cover_image_path = ?, updated_at = datetime('now') WHERE id = ?`,
+      newPath, routine.id
+    );
+    const updated = await db.get('SELECT * FROM routines WHERE id = ?', routine.id);
+    res.json(updated);
+  } catch (err) {
+    console.error(err);
+    if (req.file) removeImage(`/uploads/${req.file.filename}`);
+    res.status(500).json({ error: 'Errore del server' });
+  }
+});
+
+// DELETE /api/routines/:id/cover  — rimuovi immagine di copertina
+router.delete('/:id/cover', async (req, res) => {
+  try {
+    const db = await getDb();
+    const routine = await db.get(
+      `SELECT * FROM routines WHERE id = ? AND deleted_at IS NULL`, req.params.id
+    );
+    if (!routine) return res.status(404).json({ error: 'Piano non trovato' });
+    if (routine.cover_image_path) removeImage(routine.cover_image_path);
+    await db.run(
+      `UPDATE routines SET cover_image_path = NULL, updated_at = datetime('now') WHERE id = ?`,
+      routine.id
+    );
+    res.json({ ok: true });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Errore del server' });

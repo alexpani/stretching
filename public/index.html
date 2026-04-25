@@ -86,6 +86,9 @@
           <h2 id="routine-detail-name">Piano</h2>
           <button class="icon-btn" id="rd-edit-toggle" aria-label="Modifica piano">✎</button>
         </div>
+        <div id="rd-cover" class="rd-cover hidden">
+          <img id="rd-cover-img" alt="" />
+        </div>
         <div class="routine-stats">
           <div><strong id="rd-items">0</strong> esercizi</div>
           <div><strong id="rd-duration">0</strong> durata</div>
@@ -269,6 +272,22 @@
       <h2 id="modal-routine-title">Nuovo piano</h2>
       <form id="form-routine">
         <input type="hidden" id="rt-id" />
+
+        <div class="form-field">
+          <label>Copertina (opzionale)</label>
+          <div class="cover-preview" id="rt-cover-preview">
+            <img id="rt-cover-img" alt="" />
+            <div class="cover-empty" id="rt-cover-empty">Nessuna immagine</div>
+          </div>
+          <div style="display:flex; gap:var(--space-2); margin-top:var(--space-2)">
+            <input type="file" id="rt-cover-file" accept="image/*" style="flex:1;" />
+            <button type="button" class="btn btn-secondary" id="rt-cover-remove" style="min-height:36px; padding:0 var(--space-3); font-size:var(--text-sm)">Rimuovi</button>
+          </div>
+          <small style="color:var(--color-text-secondary); font-size:var(--text-xs)">
+            Verrà ridimensionata automaticamente a 1280×720 (16:9).
+          </small>
+        </div>
+
         <div class="form-field">
           <label for="rt-name">Nome</label>
           <input type="text" id="rt-name" required maxlength="80" />
