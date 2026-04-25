@@ -48,7 +48,7 @@
   /* Session toggles ──────────────────────── */
   function getSessionOpts() {
     const raw = localStorage.getItem('st-session-opts');
-    const def = { beep: true, voice: true, wakelock: true };
+    const def = { beep: true, voice: true, wakelock: true, voiceVolume: 1.0 };
     if (!raw) return def;
     try { return Object.assign(def, JSON.parse(raw)); } catch { return def; }
   }
@@ -117,6 +117,23 @@
         setSessionOpts(next);
       });
     });
+
+    const slider = document.getElementById('opt-voice-volume');
+    const valEl = document.getElementById('opt-voice-volume-val');
+    if (slider) {
+      const init = Math.round((opts.voiceVolume ?? 1.0) * 100);
+      slider.value = String(init);
+      if (valEl) valEl.textContent = `${init}%`;
+      const onChange = () => {
+        const pct = Math.max(0, Math.min(100, parseInt(slider.value, 10) || 0));
+        if (valEl) valEl.textContent = `${pct}%`;
+        const next = getSessionOpts();
+        next.voiceVolume = pct / 100;
+        setSessionOpts(next);
+      };
+      slider.addEventListener('input', onChange);
+      slider.addEventListener('change', onChange);
+    }
   }
 
   /* Reazione a cambi sistema (auto theme) ─ */

@@ -64,17 +64,23 @@ function renderRoutines() {
   const frag = document.createDocumentFragment();
   for (const r of Routines.list) {
     const card = document.createElement('div');
-    card.className = 'routine-card';
-    const coverHtml = r.cover_image_path
-      ? `<div class="rc-cover"><img src="${escHtml(r.cover_image_path)}" alt="" /></div>`
+    const hasCover = !!r.cover_image_path;
+    card.className = 'plan-card' + (hasCover ? '' : ' no-cover');
+    const imgHtml = hasCover
+      ? `<img class="plan-cover-img" src="${escHtml(r.cover_image_path)}" alt="" />`
       : '';
     card.innerHTML = `
-      ${coverHtml}
-      <div class="rc-body">
-        <div class="rc-name">${escHtml(r.name)}</div>
-        <div class="rc-meta">${r.items_total} esercizi · ${fmtDuration(r.duration_sec)}</div>
+      <div class="plan-cover">
+        ${imgHtml}
+        ${hasCover ? '<div class="plan-cover-overlay"></div>' : ''}
+        <div class="plan-cover-meta">
+          <div class="plan-cover-meta-l">
+            <div class="plan-cover-name">${escHtml(r.name)}</div>
+            <div class="plan-cover-sub">${r.items_total} esercizi · ${fmtDuration(r.duration_sec)}</div>
+          </div>
+          <div class="plan-cover-play" aria-hidden="true">${window.Icons ? Icons.Play({ size: 18 }) : '▶'}</div>
+        </div>
       </div>
-      <div class="rc-arrow">›</div>
     `;
     card.addEventListener('click', () => openRoutineDetail(r.id));
     frag.appendChild(card);

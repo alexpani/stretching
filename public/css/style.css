@@ -1209,6 +1209,127 @@ body {
 .card { border-radius: var(--r-3); box-shadow: var(--sh-1); }
 
 /* ============================================
+   Plan card (lista piani — cover full-width)
+   ============================================ */
+#routines-list { display: flex; flex-direction: column; gap: var(--s-4); padding: 0 0 var(--s-10); }
+
+.plan-card {
+  position: relative;
+  background: var(--surface);
+  border-radius: var(--r-4);
+  overflow: hidden;
+  box-shadow: var(--sh-2);
+  cursor: pointer;
+  transition: transform .15s;
+}
+.plan-card:active { transform: scale(0.99); }
+
+.plan-cover {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  background: var(--accent-soft);
+  overflow: hidden;
+}
+.plan-cover-img {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.plan-cover-overlay {
+  position: absolute; inset: 0;
+  background: linear-gradient(180deg, transparent 45%, rgba(0,0,0,0.62) 100%);
+  pointer-events: none;
+}
+.plan-cover-meta {
+  position: absolute;
+  left: var(--s-4); right: var(--s-4); bottom: var(--s-4);
+  display: flex; align-items: flex-end; justify-content: space-between;
+  gap: var(--s-3);
+  color: #fff;
+}
+.plan-cover-meta-l { min-width: 0; flex: 1; }
+.plan-cover-name {
+  font-size: var(--t-xl);
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  line-height: 1.2;
+  margin-bottom: 2px;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.3);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.plan-cover-sub {
+  font-size: var(--t-sm);
+  font-weight: 500;
+  opacity: 0.92;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.25);
+}
+.plan-cover-play {
+  width: 44px; height: 44px;
+  border-radius: var(--r-full);
+  background: rgba(255,255,255,0.95);
+  color: var(--ink);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.18);
+}
+.plan-cover-play svg { margin-left: 2px; }
+
+/* Piani senza copertina: sfondo accent-soft, testo in ink (no overlay scuro) */
+.plan-card.no-cover .plan-cover {
+  background: linear-gradient(140deg, var(--accent-soft), var(--accent-tint));
+}
+.plan-card.no-cover .plan-cover-name,
+.plan-card.no-cover .plan-cover-sub {
+  color: var(--ink);
+  text-shadow: none;
+}
+.plan-card.no-cover .plan-cover-sub { color: var(--ink-2); opacity: 1; }
+
+/* ============================================
+   Slider (volume voce)
+   ============================================ */
+.slider-row { flex-wrap: wrap; }
+.slider-row .profile-row-body { width: 100%; }
+.slider {
+  appearance: none; -webkit-appearance: none;
+  width: 100%;
+  height: 4px;
+  border-radius: var(--r-full);
+  background: var(--bg-alt);
+  outline: none;
+  margin-top: var(--s-3);
+}
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 22px; height: 22px;
+  border-radius: var(--r-full);
+  background: var(--accent);
+  border: 2px solid var(--surface);
+  box-shadow: var(--sh-1);
+  cursor: pointer;
+}
+.slider::-moz-range-thumb {
+  width: 22px; height: 22px;
+  border-radius: var(--r-full);
+  background: var(--accent);
+  border: 2px solid var(--surface);
+  box-shadow: var(--sh-1);
+  cursor: pointer;
+}
+.slider-value {
+  font-size: var(--t-sm);
+  color: var(--ink-3);
+  margin-top: 4px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ============================================
    Sessione: pause overlay + done state
    ============================================ */
 .ss-pause-overlay {

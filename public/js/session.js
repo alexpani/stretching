@@ -164,13 +164,16 @@ function initVoice() {
 
 function speak(text) {
   if (!Session.voiceEnabled || !('speechSynthesis' in window)) return;
+  const opts = sessionOpts();
+  const vol = Math.max(0, Math.min(1, opts.voiceVolume ?? 1.0));
+  if (vol <= 0) return;
   try {
     const u = new SpeechSynthesisUtterance(text);
     u.lang = 'it-IT';
     if (Session.voice) u.voice = Session.voice;
     u.rate = 1.0;
     u.pitch = 1.0;
-    u.volume = 1.0;
+    u.volume = vol;
     speechSynthesis.speak(u);
   } catch (_) {}
 }
