@@ -184,6 +184,16 @@ function startSession(routine) {
   Session.phases = [];
   // M16: se la routine ha rest_standard_sec valorizzato, sovrascrive le pause per-item.
   const restOverride = (routine.rest_standard_sec != null) ? routine.rest_standard_sec : null;
+  // Pausa iniziale di 10s prima del primo esercizio (richiesta utente, sempre fissa)
+  if (routine.items.length > 0) {
+    Session.phases.push({
+      type: 'rest',
+      duration: 10,
+      item: null,
+      nextItem: routine.items[0],
+      isInitial: true
+    });
+  }
   for (let i = 0; i < routine.items.length; i++) {
     const it = routine.items[i];
     Session.phases.push({
@@ -237,6 +247,7 @@ function enterPhase(idx) {
   Session.paused = false;
   Session.lastCountdownSec = null;
   Session.voiceLastSpokenSec = null;
+  Session.voiceMidSpoken = false;
   document.getElementById('ss-pause-btn').textContent = '⏸';
 
   const ph = Session.phases[idx];
@@ -267,17 +278,21 @@ function enterPhase(idx) {
     }
   } else {
     cd.classList.add('rest');
-    phaseLbl.textContent = 'Riposo';
+    phaseLbl.textContent = ph.isInitial ? 'Preparati' : 'Riposo';
     phaseLbl.classList.add('rest');
-    name.textContent = 'Respira';
+    name.textContent = ph.isInitial ? 'Iniziamo' : 'Respira';
     muscle.textContent = '';
     img.src = itemImgPath(ph.nextItem);
     next.innerHTML = `Prossimo: <strong>${escapeHtmlS(ph.nextItem.name)}${SIDE_TXT[ph.nextItem.side] ? ' (' + SIDE_TXT[ph.nextItem.side] + ')' : ''}</strong>`;
-    // Voce: annuncia il prossimo esercizio durante il riposo
+    // Voce: annuncia il prossimo esercizio durante il riposo (o "preparati" se è la pausa iniziale)
     if (Session.voiceEnabled && ph.nextItem) {
       const lateral = ph.nextItem.side === 'dx' ? ' lato destro'
                     : ph.nextItem.side === 'sx' ? ' lato sinistro' : '';
-      speak(`Pausa. Prossimo: ${ph.nextItem.name}${lateral}`);
+      if (ph.isInitial) {
+        speak(`Preparati. Primo esercizio: ${ph.nextItem.name}${lateral}`);
+      } else {
+        speak(`Pausa. Prossimo: ${ph.nextItem.name}${lateral}`);
+      }
     }
   }
 
@@ -357,13 +372,20 @@ function tick() {
     if (secDisplay === 3 || secDisplay === 2 || secDisplay === 1) beepCountdown();
     Session.lastCountdownSec = secDisplay;
   }
-  // Guida vocale 5-4-3-2-1 (solo in fase esercizio, solo se abilitata)
+  // Guida vocale 3-2-1 (solo in fase esercizio, solo se abilitata)
   if (Session.voiceEnabled && ph.type === 'exercise'
       && Session.voiceLastSpokenSec !== secDisplay
-      && secDisplay >= 1 && secDisplay <= 5) {
-    const words = { 5: 'cinque', 4: 'quattro', 3: 'tre', 2: 'due', 1: 'uno' };
+      && secDisplay >= 1 && secDisplay <= 3) {
+    const words = { 3: 'tre', 2: 'due', 1: 'uno' };
     speak(words[secDisplay]);
     Session.voiceLastSpokenSec = secDisplay;
+  }
+  // Guida vocale "metà tempo" (#4): annuncia una sola volta a metà fase esercizio,
+  // solo se l'esercizio dura almeno 20 secondi (per evitare di disturbare su esercizi corti).
+  if (Session.voiceEnabled && ph.type === 'exercise' && !Session.voiceMidSpoken
+      && ph.duration >= 20 && elapsedMs >= totalMs / 2) {
+    Session.voiceMidSpoken = true;
+    speak('metà tempo');
   }
 
   const progress = Math.min(1, elapsedMs / totalMs);

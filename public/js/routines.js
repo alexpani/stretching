@@ -203,7 +203,7 @@ function backToList() {
 
 // ── Nuova / rinomina routine ────────────
 function openRoutineModal(r) {
-  document.getElementById('modal-routine-title').textContent = r ? 'Impostazioni piano' : 'Nuovo piano';
+  document.getElementById('modal-routine-title').textContent = r ? 'Impostazioni' : 'Nuovo piano';
   document.getElementById('rt-id').value          = r ? r.id : '';
   document.getElementById('rt-name').value        = r ? r.name : '';
   document.getElementById('rt-description').value = r ? (r.description || '') : '';
