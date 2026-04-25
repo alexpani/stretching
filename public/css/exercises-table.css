@@ -163,6 +163,7 @@
 }
 .sheet input[type=number] { min-height: 32px; }
 .sheet textarea { min-height: 34px; }
+.sheet td.col-desc textarea { min-height: 96px; height: 96px; }
 .sheet input:focus,
 .sheet select:focus,
 .sheet textarea:focus {
