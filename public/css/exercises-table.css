@@ -6,7 +6,8 @@
 .table-body {
   display: block !important;
   justify-content: unset !important;
-  max-width: none !important;
+  max-width: 1400px !important;
+  margin: 0 auto;
 }
 
 .table-header {
