@@ -10,8 +10,41 @@
 const Table = {
   items: [],
   filter: { q: '', muscle_group: '', side: '' },
+  sort: { key: null, dir: 'asc' },   // key: 'name' | 'muscle_group' | null
   uploadRowId: null   // id riga per cui sta arrivando la foto
 };
+
+const MUSCLE_ORDER = ['collo e spalle', 'schiena', 'addominali', 'glutei e gambe', 'braccia e torace'];
+
+function compareSort(a, b) {
+  const k = Table.sort.key;
+  if (!k) return 0;
+  const dir = Table.sort.dir === 'desc' ? -1 : 1;
+  let av, bv;
+  if (k === 'muscle_group') {
+    av = MUSCLE_ORDER.indexOf(a.muscle_group || '');
+    bv = MUSCLE_ORDER.indexOf(b.muscle_group || '');
+    if (av < 0) av = 999;
+    if (bv < 0) bv = 999;
+  } else {
+    av = (a[k] || '').toString().toLocaleLowerCase('it');
+    bv = (b[k] || '').toString().toLocaleLowerCase('it');
+  }
+  if (av < bv) return -1 * dir;
+  if (av > bv) return  1 * dir;
+  // Tie-break stabile per nome
+  const an = (a.name || '').toLocaleLowerCase('it');
+  const bn = (b.name || '').toLocaleLowerCase('it');
+  return an < bn ? -1 : an > bn ? 1 : 0;
+}
+
+function refreshSortHeaders() {
+  document.querySelectorAll('.th-sort').forEach(btn => {
+    const key = btn.dataset.sort;
+    btn.classList.remove('asc', 'desc');
+    if (Table.sort.key === key) btn.classList.add(Table.sort.dir);
+  });
+}
 
 const MUSCLE_LABELS_T = {
   'collo e spalle':   'Collo e spalle',
@@ -61,6 +94,8 @@ function renderTable() {
   const empty = document.getElementById('tbl-empty');
   body.innerHTML = '';
   const filtered = Table.items.filter(matchesFilter);
+  if (Table.sort.key) filtered.sort(compareSort);
+  refreshSortHeaders();
   document.getElementById('tbl-count').textContent =
     `${filtered.length} / ${Table.items.length}`;
   if (!filtered.length) {
@@ -268,6 +303,22 @@ document.getElementById('tbl-filter-side').addEventListener('change', (e) => {
 // ── Tema ────────────────────────────────
 document.getElementById('tbl-theme').addEventListener('click', () => {
   if (typeof toggleTheme === 'function') toggleTheme();
+});
+
+// ── Sort headers ────────────────────────
+document.querySelectorAll('.th-sort').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const key = btn.dataset.sort;
+    if (Table.sort.key === key) {
+      // toggle asc → desc → off
+      if (Table.sort.dir === 'asc') Table.sort.dir = 'desc';
+      else { Table.sort.key = null; Table.sort.dir = 'asc'; }
+    } else {
+      Table.sort.key = key;
+      Table.sort.dir = 'asc';
+    }
+    renderTable();
+  });
 });
 
 // ── Init ────────────────────────────────
