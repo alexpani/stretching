@@ -70,28 +70,9 @@ function showMsg(el, text, type = 'success') {
   setTimeout(() => el.classList.add('hidden'), 3500);
 }
 
-// ── Tema (light/dark) ─────────────────────
-function getPreferredTheme() {
-  const saved = localStorage.getItem('st-theme');
-  if (saved === 'light' || saved === 'dark') return saved;
-  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-}
-
-function applyTheme(theme) {
-  document.documentElement.setAttribute('data-theme', theme);
-  const btn = document.getElementById('theme-toggle');
-  if (btn) btn.textContent = theme === 'dark' ? '☀' : '☾';
-}
-
-function toggleTheme() {
-  const current = document.documentElement.getAttribute('data-theme') || 'light';
-  const next = current === 'dark' ? 'light' : 'dark';
-  localStorage.setItem('st-theme', next);
-  applyTheme(next);
-}
-
-// Applica subito (prima che app/login appaiano) per evitare flash
-applyTheme(getPreferredTheme());
+// ── Tema + palette ──────────────────────
+// La lettura/applicazione iniziale è gestita da settings.js (Settings.bootApply()
+// è invocato all'IIFE load del file). Questo evita il flash al primo render.
 
 // ── Auth ──────────────────────────────────
 function showLogin() {
@@ -137,8 +118,27 @@ async function doLogout() {
   showLogin();
 }
 
-// ── Login form ────────────────────────────
+// ── Header per-tab ────────────────────────
+const TAB_HEADERS = {
+  routines: { greet: 'Buongiorno', title: 'I tuoi piani' },
+  library:  { greet: 'Esplora',    title: 'Esercizi' },
+  history:  { greet: 'Il tuo percorso', title: 'Storico' },
+  profile:  { greet: 'Personalizza', title: 'Profilo' },
+};
+
+function updateAppHeader(tab) {
+  const h = TAB_HEADERS[tab] || TAB_HEADERS.routines;
+  const greetEl = document.getElementById('app-greet');
+  const titleEl = document.getElementById('app-title');
+  if (greetEl) greetEl.textContent = h.greet;
+  if (titleEl) titleEl.textContent = h.title;
+}
+
+// ── DOM ready ─────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
+  // Idrata tutte le icone con [data-icon="Name"]
+  if (window.Icons) Icons.hydrate();
+
   const form = document.getElementById('login-form');
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -163,12 +163,15 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   document.getElementById('logout-btn').addEventListener('click', doLogout);
-  document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
 
   // Tab switching
-  document.querySelectorAll('.tab-item').forEach(btn => {
+  document.querySelectorAll('.tab-btn').forEach(btn => {
     btn.addEventListener('click', () => switchTab(btn.dataset.tab));
   });
+
+  // Init pannello Profilo (palette + tema + toggle sessione)
+  if (window.Settings) Settings.initUI();
+  updateAppHeader(window.App.currentTab);
 
   checkAuth();
   registerServiceWorker();
@@ -218,12 +221,13 @@ function showUpdateBanner(worker) {
 }
 
 function switchTab(name) {
-  document.querySelectorAll('.tab-item').forEach(b => {
+  document.querySelectorAll('.tab-btn').forEach(b => {
     b.classList.toggle('active', b.dataset.tab === name);
   });
   document.querySelectorAll('.tab-panel').forEach(p => {
     p.classList.toggle('hidden', p.id !== `tab-${name}`);
   });
   window.App.currentTab = name;
+  updateAppHeader(name);
   document.dispatchEvent(new CustomEvent('tabchange', { detail: { tab: name } }));
 }

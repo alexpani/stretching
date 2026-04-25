@@ -65,6 +65,17 @@ function formatSec(s) {
   return r ? `${m}min ${r}s` : `${m}min`;
 }
 
+function formatMmss(s) {
+  s = Math.max(0, Math.round(s));
+  const m = Math.floor(s / 60);
+  const r = s - m * 60;
+  return `${m}:${String(r).padStart(2, '0')}`;
+}
+
+function sessionOpts() {
+  return (window.Settings && Settings.getSessionOpts) ? Settings.getSessionOpts() : { beep: true, voice: true, wakelock: true };
+}
+
 function escapeHtmlS(s) {
   if (s == null) return '';
   return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -91,7 +102,7 @@ async function releaseWakeLock() {
 }
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'visible' && Session.running && !Session.paused) {
-    requestWakeLock();
+    if (Session.wakelockEnabled) requestWakeLock();
   }
 });
 
@@ -191,8 +202,12 @@ function startSession(routine) {
     alert('Aggiungi almeno un esercizio al piano.');
     return;
   }
+  const opts = sessionOpts();
   ensureAudio();
-  Session.voiceEnabled = !!routine.voice_guide;
+  // Voice: il toggle del piano (routine.voice_guide) ha priorità; fallback al default globale.
+  Session.voiceEnabled = (routine.voice_guide != null) ? !!routine.voice_guide : !!opts.voice;
+  Session.beepEnabled = opts.beep !== false;
+  Session.wakelockEnabled = opts.wakelock !== false;
   if (Session.voiceEnabled) initVoice();
 
   Session.routine = routine;
@@ -239,7 +254,7 @@ function startSession(routine) {
   document.getElementById('session-summary').classList.add('hidden');
   document.getElementById('session-overlay').classList.remove('hidden');
 
-  requestWakeLock();
+  if (Session.wakelockEnabled) requestWakeLock();
   // Annuncio di apertura (prima della voce del primo esercizio)
   if (Session.voiceEnabled) speak('Inizio allenamento');
   enterPhase(0);
@@ -357,8 +372,13 @@ function finishSession() {
 
   document.getElementById('sm-done').textContent = Session.itemsDone;
   document.getElementById('sm-skipped').textContent = Session.itemsSkipped;
-  document.getElementById('sm-duration').textContent = formatSec(totalSec);
-  document.getElementById('sm-save-btn').textContent = 'Salva';
+  document.getElementById('sm-duration').textContent = formatMmss(totalSec);
+  const meta = Session.routine
+    ? `${Session.routine.name} · ${Session.itemsDone} esercizi`
+    : `${Session.itemsDone} esercizi`;
+  const metaEl = document.getElementById('sm-routine-meta');
+  if (metaEl) metaEl.textContent = meta;
+  document.getElementById('sm-save-btn').textContent = 'Fatto';
   document.getElementById('sm-save-btn').disabled = false;
   document.getElementById('sm-saved-msg').classList.add('hidden');
   document.getElementById('session-running').classList.add('hidden');
@@ -383,7 +403,7 @@ function tick() {
   document.getElementById('ss-num').textContent = secDisplay;
 
   // Beep 3-2-1 solo per la fase esercizio (non disturbare in riposo)
-  if (ph.type === 'exercise' && Session.lastCountdownSec !== secDisplay) {
+  if (Session.beepEnabled && ph.type === 'exercise' && Session.lastCountdownSec !== secDisplay) {
     if (secDisplay === 3 || secDisplay === 2 || secDisplay === 1) beepCountdown();
     Session.lastCountdownSec = secDisplay;
   }
@@ -428,17 +448,20 @@ function updateTotalProgress(currentPhaseElapsedMs) {
 // ── Controlli ───────────────────────────
 function togglePause() {
   if (!Session.running) return;
+  const sr = document.getElementById('session-running');
   if (!Session.paused) {
     Session.paused = true;
     Session.pauseStartMs = performance.now();
     stopSpeak();
     setPauseBtnIcon(true);
     releaseWakeLock();
+    if (sr) sr.classList.add('is-paused');
   } else {
     Session.pausedAccumMs += (performance.now() - Session.pauseStartMs);
     Session.paused = false;
     setPauseBtnIcon(false);
-    requestWakeLock();
+    if (Session.wakelockEnabled) requestWakeLock();
+    if (sr) sr.classList.remove('is-paused');
   }
 }
 
@@ -454,7 +477,11 @@ function stopEarly() {
 
   document.getElementById('sm-done').textContent = Session.itemsDone;
   document.getElementById('sm-skipped').textContent = Session.itemsSkipped;
-  document.getElementById('sm-duration').textContent = formatSec(Session._durationSec);
+  document.getElementById('sm-duration').textContent = formatMmss(Session._durationSec);
+  const metaEl = document.getElementById('sm-routine-meta');
+  if (metaEl) metaEl.textContent = Session.routine
+    ? `${Session.routine.name} · sessione parziale`
+    : 'Sessione parziale';
   document.getElementById('sm-save-btn').textContent = 'Salva (parziale)';
   document.getElementById('sm-save-btn').disabled = false;
   document.getElementById('sm-saved-msg').classList.add('hidden');
@@ -498,5 +525,7 @@ document.getElementById('ss-stop-btn').addEventListener('click', stopEarly);
 document.getElementById('ss-close-btn').addEventListener('click', stopEarly);
 document.getElementById('sm-save-btn').addEventListener('click', saveSession);
 document.getElementById('sm-close-btn').addEventListener('click', closeOverlay);
+const smCloseX = document.getElementById('sm-close-x');
+if (smCloseX) smCloseX.addEventListener('click', closeOverlay);
 
 window.startSession = startSession;

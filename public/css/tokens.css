@@ -1,0 +1,220 @@
+/* ============================================
+   Stretching v2 — Design tokens
+   Apple Health-meets-Calm. Light + Dark + 6 palette.
+   Imported BEFORE style.css. Contains alias verso
+   le vecchie variabili (--color-primary, --space-N,
+   --radius-*, --text-*, --shadow-*) per non rompere
+   il CSS esistente durante il refactor.
+   ============================================ */
+
+:root {
+  /* Type families */
+  --ff-sans: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, system-ui, sans-serif;
+  --ff-mono: 'Geist Mono', 'SF Mono', ui-monospace, Menlo, monospace;
+
+  /* Surfaces (light) — warm-cool neutral */
+  --bg:           #F6F5F2;
+  --bg-alt:       #ECEAE4;
+  --surface:      #FFFFFF;
+  --surface-2:    #FAFAF7;
+  --hairline:     rgba(0,0,0,0.08);
+  --hairline-2:   rgba(0,0,0,0.04);
+
+  /* Text */
+  --ink:          #15161A;
+  --ink-2:        #45464C;
+  --ink-3:        #76787F;
+  --ink-4:        #A8AAAF;
+  --on-accent:    #FFFFFF;
+
+  /* Default palette: Indaco */
+  --accent:       #5B7FA8;
+  --accent-2:     #3F5C82;
+  --accent-soft:  #DDE6F0;
+  --accent-tint:  #C7D5E5;
+
+  /* Semantic */
+  --warn:         #C58B4F;
+  --warn-soft:    #F5E9DA;
+  --danger:       #B5564B;
+  --danger-soft:  #F4DDD9;
+  --ok:           #5C8A66;
+  --ok-soft:      #DDE9DE;
+
+  /* Spacing — 4px grid */
+  --s-0: 0;
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-5: 20px;
+  --s-6: 24px;
+  --s-7: 28px;
+  --s-8: 32px;
+  --s-10: 40px;
+  --s-12: 48px;
+  --s-16: 64px;
+
+  /* Radius */
+  --r-1: 8px;
+  --r-2: 12px;
+  --r-3: 16px;
+  --r-4: 20px;
+  --r-5: 28px;
+  --r-full: 9999px;
+
+  /* Type scale */
+  --t-xs:   11px;
+  --t-sm:   13px;
+  --t-md:   15px;
+  --t-lg:   17px;
+  --t-xl:   20px;
+  --t-2xl:  24px;
+  --t-3xl:  32px;
+  --t-4xl:  44px;
+  --t-display: 64px;
+
+  /* Shadows (light) */
+  --sh-1: 0 1px 2px rgba(20,22,28,0.04), 0 1px 1px rgba(20,22,28,0.03);
+  --sh-2: 0 4px 14px rgba(20,22,28,0.05), 0 1px 2px rgba(20,22,28,0.03);
+  --sh-3: 0 12px 32px rgba(20,22,28,0.08), 0 2px 6px rgba(20,22,28,0.04);
+  --sh-4: 0 24px 60px rgba(20,22,28,0.12), 0 4px 12px rgba(20,22,28,0.06);
+
+  /* Layout */
+  --app-max-width: 430px;
+  --header-height: 52px;
+  --tabbar-height: 64px;
+
+  /* ── Legacy aliases (retrocompat con style.css esistente) ── */
+  --color-primary:         var(--accent);
+  --color-primary-dark:    var(--accent-2);
+  --color-primary-light:   var(--accent-soft);
+  --color-text:            var(--ink);
+  --color-text-secondary:  var(--ink-3);
+  --color-text-on-primary: var(--on-accent);
+  --color-bg:              var(--bg);
+  --color-card:            var(--surface);
+  --color-input:           var(--surface);
+  --color-border:          var(--ink-4);
+  --color-border-soft:     var(--hairline);
+  --color-danger:          var(--danger);
+  --color-warning:         var(--warn);
+  --color-success:         var(--ok);
+  --color-success-bg:      var(--ok-soft);
+  --color-danger-bg:       var(--danger-soft);
+
+  --space-1:  var(--s-1);
+  --space-2:  var(--s-2);
+  --space-3:  var(--s-3);
+  --space-4:  var(--s-4);
+  --space-5:  var(--s-5);
+  --space-6:  var(--s-6);
+  --space-8:  var(--s-8);
+  --space-10: var(--s-10);
+
+  --radius-xs:   var(--r-1);
+  --radius-sm:   var(--r-1);
+  --radius:      var(--r-2);
+  --radius-lg:   var(--r-3);
+  --radius-xl:   var(--r-4);
+  --radius-full: var(--r-full);
+
+  --font-sans: var(--ff-sans);
+  --text-xs:   var(--t-xs);
+  --text-sm:   var(--t-sm);
+  --text-md:   var(--t-md);
+  --text-lg:   var(--t-lg);
+  --text-xl:   var(--t-xl);
+  --text-2xl:  var(--t-2xl);
+  --text-3xl:  var(--t-3xl);
+
+  --shadow-sm: var(--sh-1);
+  --shadow:    var(--sh-2);
+  --shadow-lg: var(--sh-3);
+}
+
+/* ============================================
+   Palette accents (light mode)
+   Selettore [data-palette="..."] su <html>.
+   Default Indaco è già su :root sopra.
+   ============================================ */
+[data-palette="indaco"] {
+  --accent: #5B7FA8; --accent-2: #3F5C82;
+  --accent-soft: #DDE6F0; --accent-tint: #C7D5E5;
+}
+[data-palette="salvia"] {
+  --accent: #5B8E84; --accent-2: #3F6F66;
+  --accent-soft: #E2EBE7; --accent-tint: #D6E4DF;
+}
+[data-palette="terracotta"] {
+  --accent: #C58B4F; --accent-2: #9B6A38;
+  --accent-soft: #F5E9DA; --accent-tint: #EFD9BF;
+}
+[data-palette="carbone"] {
+  --accent: #15161A; --accent-2: #45464C;
+  --accent-soft: #ECEAE4; --accent-tint: #DEDCD5;
+}
+[data-palette="rosa"] {
+  --accent: #B5697A; --accent-2: #8B4A5B;
+  --accent-soft: #F0DDE2; --accent-tint: #E5C5CD;
+}
+[data-palette="oliva"] {
+  --accent: #7B8A4F; --accent-2: #5C6936;
+  --accent-soft: #E5E8D5; --accent-tint: #D5D9BD;
+}
+
+/* ============================================
+   Dark mode — surfaces
+   ============================================ */
+[data-theme="dark"] {
+  --bg:         #0E0F11;
+  --bg-alt:     #16181B;
+  --surface:    #1A1C20;
+  --surface-2:  #232529;
+  --hairline:   rgba(255,255,255,0.08);
+  --hairline-2: rgba(255,255,255,0.04);
+
+  --ink:    #F4F4F2;
+  --ink-2:  #C5C6C8;
+  --ink-3:  #898B90;
+  --ink-4:  #5A5C61;
+  --on-accent: #0E0F11;
+
+  --warn-soft:   #3A2C1A;
+  --danger-soft: #3A1F1A;
+  --ok-soft:     #1F2E22;
+
+  --sh-1: 0 1px 2px rgba(0,0,0,0.3);
+  --sh-2: 0 4px 14px rgba(0,0,0,0.35);
+  --sh-3: 0 12px 32px rgba(0,0,0,0.45);
+  --sh-4: 0 24px 60px rgba(0,0,0,0.6);
+}
+
+/* Dark accent overrides per palette
+   Lightened ~+20% verso le surface scure.
+   Carbone speciale: in dark si "inverte" (accent diventa chiaro). */
+[data-theme="dark"][data-palette="indaco"],
+[data-theme="dark"]:not([data-palette]) {
+  --accent: #A0BBD8; --accent-2: #7FA0C2;
+  --accent-soft: #1F2A36; --accent-tint: #2A3A4C;
+}
+[data-theme="dark"][data-palette="salvia"] {
+  --accent: #7FB3A6; --accent-2: #5B8E84;
+  --accent-soft: #243630; --accent-tint: #2E443C;
+}
+[data-theme="dark"][data-palette="terracotta"] {
+  --accent: #E0B186; --accent-2: #C58B4F;
+  --accent-soft: #3A2C1A; --accent-tint: #4A3924;
+}
+[data-theme="dark"][data-palette="carbone"] {
+  --accent: #E2E0D9; --accent-2: #B6B5AE;
+  --accent-soft: #2A2C30; --accent-tint: #3A3C40;
+}
+[data-theme="dark"][data-palette="rosa"] {
+  --accent: #D894A4; --accent-2: #B5697A;
+  --accent-soft: #36242A; --accent-tint: #4A2F38;
+}
+[data-theme="dark"][data-palette="oliva"] {
+  --accent: #A8B380; --accent-2: #7B8A4F;
+  --accent-soft: #2C2E20; --accent-tint: #3C402C;
+}

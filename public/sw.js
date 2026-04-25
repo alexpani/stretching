@@ -11,7 +11,7 @@
 // su conferma utente, invia postMessage({type:'SKIP_WAITING'}) che innesca
 // self.skipWaiting() qui + reload lato client.
 
-const VERSION = 'v10';
+const VERSION = 'v11';
 const SHELL_CACHE   = `st-shell-${VERSION}`;
 const RUNTIME_CACHE = `st-runtime-${VERSION}`;
 const API_CACHE     = `st-api-${VERSION}`;
@@ -26,13 +26,17 @@ const SHELL_ASSETS = [
   '/icons/icon-192.png',
   '/icons/icon-512.png',
   '/css/style.css',
+  '/css/tokens.css',
   '/css/exercises-table.css',
   '/js/app.js',
+  '/js/icons.js',
+  '/js/settings.js',
   '/js/library.js',
   '/js/routines.js',
   '/js/session.js',
   '/js/history.js',
   '/js/exercises-table.js',
+  '/img/brand/logo-d.svg',
   '/img/exercises/default.svg',
   '/img/exercises/collo-e-spalle.svg',
   '/img/exercises/schiena.svg',
@@ -43,7 +47,8 @@ const SHELL_ASSETS = [
 
 const CDN_ASSETS = [
   'https://cdn.jsdelivr.net/npm/sortablejs@1.15.3/Sortable.min.js',
-  'https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js'
+  'https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js',
+  'https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap'
 ];
 
 function isCacheableApi(url) {

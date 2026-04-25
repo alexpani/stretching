@@ -4,34 +4,35 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover" />
   <title>Stretching</title>
-  <meta name="theme-color" content="#2DB6A8" />
+  <meta name="theme-color" content="#5B7FA8" media="(prefers-color-scheme: light)" />
+  <meta name="theme-color" content="#0E0F11" media="(prefers-color-scheme: dark)" />
   <link rel="manifest" href="/manifest.json" />
   <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="Stretching" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap" />
+  <link rel="stylesheet" href="/css/tokens.css" />
   <link rel="stylesheet" href="/css/style.css" />
 </head>
 <body>
 
   <!-- ── Login screen ──────────────────── -->
   <div id="login-screen" class="login-screen hidden">
-    <div class="login-card">
-      <h1>Stretching</h1>
-      <p class="login-subtitle">Accedi per continuare</p>
-      <form id="login-form">
-        <div class="form-field">
-          <label for="login-user">Utente</label>
-          <input type="text" id="login-user" autocomplete="username" required />
-        </div>
-        <div class="form-field">
-          <label for="login-pass">Password</label>
-          <input type="password" id="login-pass" autocomplete="current-password" required />
-        </div>
-        <button type="submit" class="btn btn-primary btn-block">Accedi</button>
-        <div id="login-error" class="msg hidden"></div>
-      </form>
+    <div class="login-brand">
+      <span class="login-brand-mark" data-icon="LogoD" data-icon-size="56" aria-hidden="true"></span>
+      <span class="login-brand-name">stretching</span>
+      <span class="login-brand-tag">Sessioni guidate, calme.</span>
     </div>
+    <form id="login-form" class="login-form">
+      <input type="text" id="login-user" class="input" placeholder="Utente" autocomplete="username" required />
+      <input type="password" id="login-pass" class="input" placeholder="Password" autocomplete="current-password" required />
+      <button type="submit" class="btn btn-primary btn-block">Accedi</button>
+      <div id="login-error" class="msg hidden"></div>
+    </form>
+    <div class="login-foot">Le indicazioni fornite non sono consigli medici.</div>
   </div>
 
   <!-- Banner nuova versione (SW update) -->
@@ -42,11 +43,10 @@
 
   <!-- ── App shell ─────────────────────── -->
   <div id="app" class="app hidden">
-    <header class="header">
-      <h1>Stretching</h1>
-      <div class="header-actions">
-        <button id="theme-toggle" class="icon-btn" aria-label="Cambia tema">☾</button>
-        <button id="logout-btn" class="icon-btn" aria-label="Esci">⎋</button>
+    <header class="app-hd">
+      <div class="app-hd-text">
+        <div class="app-hd-greet" id="app-greet">Benvenuto</div>
+        <div class="app-hd-title" id="app-title">I tuoi piani</div>
       </div>
     </header>
 
@@ -157,37 +157,91 @@
       </div>
     </main>
 
+    <!-- Profilo / Aspetto -->
+    <main id="tab-profile" class="content tab-panel hidden">
+      <section class="profile-section">
+        <div class="profile-section-h">Aspetto</div>
+        <div class="palette-grid" id="palette-grid"></div>
+      </section>
+
+      <section class="profile-section">
+        <div class="profile-section-h">Tema</div>
+        <div class="profile-card" id="theme-list">
+          <button type="button" class="profile-row" data-theme-choice="auto">
+            <div class="profile-row-body">
+              <div class="profile-row-name">Auto</div>
+              <div class="profile-row-sub">Segue il sistema</div>
+            </div>
+            <span class="radio" aria-hidden="true"></span>
+          </button>
+          <button type="button" class="profile-row" data-theme-choice="light">
+            <div class="profile-row-body">
+              <div class="profile-row-name">Chiaro</div>
+            </div>
+            <span class="radio" aria-hidden="true"></span>
+          </button>
+          <button type="button" class="profile-row" data-theme-choice="dark">
+            <div class="profile-row-body">
+              <div class="profile-row-name">Scuro</div>
+            </div>
+            <span class="radio" aria-hidden="true"></span>
+          </button>
+        </div>
+      </section>
+
+      <section class="profile-section">
+        <div class="profile-section-h">Sessione</div>
+        <div class="profile-card">
+          <label class="profile-row toggle-row">
+            <div class="profile-row-body">
+              <div class="profile-row-name">Beep al cambio esercizio</div>
+              <div class="profile-row-sub">Suono breve quando cambia l'esercizio</div>
+            </div>
+            <input type="checkbox" id="opt-beep" class="toggle" />
+          </label>
+          <label class="profile-row toggle-row">
+            <div class="profile-row-body">
+              <div class="profile-row-name">Guida vocale</div>
+              <div class="profile-row-sub">"Tre, due, uno" e annuncio del prossimo esercizio</div>
+            </div>
+            <input type="checkbox" id="opt-voice" class="toggle" />
+          </label>
+          <label class="profile-row toggle-row">
+            <div class="profile-row-body">
+              <div class="profile-row-name">Wake Lock schermo</div>
+              <div class="profile-row-sub">Mantiene lo schermo acceso durante una sessione</div>
+            </div>
+            <input type="checkbox" id="opt-wakelock" class="toggle" checked />
+          </label>
+        </div>
+      </section>
+
+      <section class="profile-section">
+        <button class="btn btn-secondary btn-block" id="logout-btn">
+          <span data-icon="LogOut" data-icon-size="16" aria-hidden="true"></span>
+          Esci
+        </button>
+      </section>
+    </main>
+
     <div class="disclaimer">Le indicazioni fornite non sono consigli medici.</div>
 
-    <nav class="tab-bar">
-      <button class="tab-item active" data-tab="routines">
-        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <line x1="9" y1="6" x2="20" y2="6"/>
-          <line x1="9" y1="12" x2="20" y2="12"/>
-          <line x1="9" y1="18" x2="20" y2="18"/>
-          <circle cx="4.5" cy="6" r="1.5" fill="currentColor"/>
-          <circle cx="4.5" cy="12" r="1.5" fill="currentColor"/>
-          <circle cx="4.5" cy="18" r="1.5" fill="currentColor"/>
-        </svg>
-        Piani
+    <nav class="tabbar" role="tablist">
+      <button class="tab-btn active" data-tab="routines" role="tab">
+        <span data-icon="Plans" aria-hidden="true"></span>
+        <span>Piani</span>
       </button>
-      <button class="tab-item" data-tab="library">
-        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <rect x="2" y="9" width="3" height="6" rx="1"/>
-          <rect x="19" y="9" width="3" height="6" rx="1"/>
-          <line x1="5" y1="12" x2="19" y2="12"/>
-          <line x1="6.5" y1="9" x2="6.5" y2="15"/>
-          <line x1="17.5" y1="9" x2="17.5" y2="15"/>
-        </svg>
-        Esercizi
+      <button class="tab-btn" data-tab="library" role="tab">
+        <span data-icon="Library" aria-hidden="true"></span>
+        <span>Esercizi</span>
       </button>
-      <button class="tab-item" data-tab="history">
-        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <rect x="3" y="13" width="4" height="8" rx="0.5"/>
-          <rect x="10" y="8" width="4" height="13" rx="0.5"/>
-          <rect x="17" y="3" width="4" height="18" rx="0.5"/>
-        </svg>
-        Storico
+      <button class="tab-btn" data-tab="history" role="tab">
+        <span data-icon="History" aria-hidden="true"></span>
+        <span>Storico</span>
+      </button>
+      <button class="tab-btn" data-tab="profile" role="tab">
+        <span data-icon="User" aria-hidden="true"></span>
+        <span>Profilo</span>
       </button>
     </nav>
   </div>
@@ -421,18 +475,50 @@
         </div>
       </div>
 
-      <!-- Fase riepilogo fine -->
-      <div id="session-summary" class="session-summary hidden">
-        <h2>Sessione completata 🎉</h2>
-        <div class="stat"><strong id="sm-done">0</strong> esercizi eseguiti</div>
-        <div class="stat"><span id="sm-skipped">0</span> saltati</div>
-        <div class="stat">Durata: <strong id="sm-duration">0s</strong></div>
-        <div id="sm-saved-msg" class="msg success hidden" style="margin-top:var(--space-3)">
-          Sessione salvata nello storico.
+      <!-- Pause overlay (sopra l'immagine, mostrato solo in stato paused) -->
+      <div class="ss-pause-overlay" id="ss-pause-overlay" aria-hidden="true">
+        <div class="ss-pause-icon">
+          <svg viewBox="0 0 24 24" fill="currentColor" width="42" height="42" aria-hidden="true">
+            <rect x="6" y="5" width="4" height="14" rx="1"/>
+            <rect x="14" y="5" width="4" height="14" rx="1"/>
+          </svg>
         </div>
-        <div style="margin-top: var(--space-5); width: 100%; display: flex; flex-direction: column; gap: var(--space-2);">
-          <button class="btn btn-primary btn-block" id="sm-save-btn">Salva</button>
-          <button class="btn btn-secondary btn-block" id="sm-close-btn">Chiudi</button>
+        <div class="ss-pause-label">IN PAUSA</div>
+      </div>
+
+      <!-- Fase riepilogo (done) -->
+      <div id="session-summary" class="session-done hidden">
+        <button class="sess-x" id="sm-close-x" aria-label="Chiudi">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+            <line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/>
+          </svg>
+        </button>
+        <div class="done-medal">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" width="44" height="44" aria-hidden="true">
+            <polyline points="5 12 10 17 19 7"/>
+          </svg>
+        </div>
+        <div class="done-eyebrow">SESSIONE COMPLETATA</div>
+        <h1 class="done-title">Bel lavoro.</h1>
+        <div class="done-sub" id="sm-routine-meta">—</div>
+        <div class="done-stats">
+          <div class="done-stat">
+            <div class="done-stat-v mono" id="sm-duration">0:00</div>
+            <div class="done-stat-k">DURATA</div>
+          </div>
+          <div class="done-stat">
+            <div class="done-stat-v mono" id="sm-done">0</div>
+            <div class="done-stat-k">ESERCIZI</div>
+          </div>
+          <div class="done-stat">
+            <div class="done-stat-v mono" id="sm-skipped">0</div>
+            <div class="done-stat-k">SALTATI</div>
+          </div>
+        </div>
+        <div id="sm-saved-msg" class="msg success hidden">Sessione salvata nello storico.</div>
+        <div class="done-actions">
+          <button class="btn btn-primary btn-block" id="sm-save-btn">Fatto</button>
+          <button class="btn btn-ghost btn-block" id="sm-close-btn">Chiudi senza salvare</button>
         </div>
       </div>
     </div>
@@ -440,6 +526,8 @@
 
   <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.3/Sortable.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="/js/icons.js"></script>
+  <script src="/js/settings.js"></script>
   <script src="/js/app.js"></script>
   <script src="/js/library.js"></script>
   <script src="/js/routines.js"></script>
