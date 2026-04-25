@@ -366,23 +366,26 @@ body {
 /* ── FAB (floating action button) ──────── */
 .fab {
   position: fixed;
-  bottom: calc(var(--tabbar-height) + 12px);
+  bottom: calc(var(--tabbar-height) + 12px + env(safe-area-inset-bottom));
   left: 50%;
   transform: translateX(calc(var(--app-max-width) / 2 - 36px - 16px));
   width: 56px;
   height: 56px;
-  border-radius: var(--radius-full);
-  background: var(--color-primary);
-  color: var(--color-text-on-primary);
-  font-size: 28px;
-  box-shadow: var(--shadow-lg);
+  border-radius: var(--r-full);
+  background: var(--ink);
+  color: var(--bg);
+  box-shadow: var(--sh-3);
   z-index: 20;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
+  transition: transform 0.12s;
 }
+.fab:active { transform: translateX(calc(var(--app-max-width) / 2 - 36px - 16px)) scale(0.94); }
+.fab svg { width: 22px; height: 22px; stroke-width: 1.8; }
 @media (max-width: 462px) {
   .fab { left: auto; right: 16px; transform: none; }
+  .fab:active { transform: scale(0.94); }
 }
 
 /* ── Modal ─────────────────────────────── */

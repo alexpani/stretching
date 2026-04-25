@@ -11,9 +11,9 @@ async function loadItems(db, routineId) {
   return db.all(`
     SELECT ri.id, ri.routine_id, ri.exercise_id, ri.position,
            ri.duration_override_sec, ri.rest_after_sec,
-           e.name, e.muscle_group, e.side, e.level,
+           e.name, e.description, e.muscle_group, e.side, e.level,
            e.duration_sec AS exercise_duration_sec,
-           e.image_path
+           e.image_path, e.notes
     FROM routine_items ri
     JOIN exercises e ON e.id = ri.exercise_id
     WHERE ri.routine_id = ?
