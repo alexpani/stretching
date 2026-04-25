@@ -164,6 +164,21 @@ function speak(text) {
   } catch (_) {}
 }
 
+// SVG pause/play per il bottone primary
+const PAUSE_SVG = `<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+  <rect x="6" y="5" width="4" height="14" rx="1"/>
+  <rect x="14" y="5" width="4" height="14" rx="1"/>
+</svg>`;
+const PLAY_SVG = `<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+  <polygon points="6,4 20,12 6,20"/>
+</svg>`;
+function setPauseBtnIcon(showPlay) {
+  const btn = document.getElementById('ss-pause-btn');
+  if (!btn) return;
+  btn.innerHTML = showPlay ? PLAY_SVG : PAUSE_SVG;
+  btn.setAttribute('aria-label', showPlay ? 'Riprendi' : 'Pausa');
+}
+
 function stopSpeak() {
   if ('speechSynthesis' in window) {
     try { speechSynthesis.cancel(); } catch (_) {}
@@ -248,7 +263,7 @@ function enterPhase(idx) {
   Session.lastCountdownSec = null;
   Session.voiceLastSpokenSec = null;
   Session.voiceMidSpoken = false;
-  document.getElementById('ss-pause-btn').textContent = '⏸';
+  setPauseBtnIcon(false);
 
   const ph = Session.phases[idx];
   const cd = document.getElementById('ss-countdown');
@@ -417,12 +432,12 @@ function togglePause() {
     Session.paused = true;
     Session.pauseStartMs = performance.now();
     stopSpeak();
-    document.getElementById('ss-pause-btn').textContent = '▶';
+    setPauseBtnIcon(true);
     releaseWakeLock();
   } else {
     Session.pausedAccumMs += (performance.now() - Session.pauseStartMs);
     Session.paused = false;
-    document.getElementById('ss-pause-btn').textContent = '⏸';
+    setPauseBtnIcon(false);
     requestWakeLock();
   }
 }

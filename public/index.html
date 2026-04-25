@@ -157,9 +157,35 @@
     <div class="disclaimer">Le indicazioni fornite non sono consigli medici.</div>
 
     <nav class="tab-bar">
-      <button class="tab-item" data-tab="library"><span class="icon">🧘</span>Esercizi</button>
-      <button class="tab-item active" data-tab="routines"><span class="icon">📋</span>Piani</button>
-      <button class="tab-item" data-tab="history"><span class="icon">📊</span>Storico</button>
+      <button class="tab-item active" data-tab="routines">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <line x1="9" y1="6" x2="20" y2="6"/>
+          <line x1="9" y1="12" x2="20" y2="12"/>
+          <line x1="9" y1="18" x2="20" y2="18"/>
+          <circle cx="4.5" cy="6" r="1.5" fill="currentColor"/>
+          <circle cx="4.5" cy="12" r="1.5" fill="currentColor"/>
+          <circle cx="4.5" cy="18" r="1.5" fill="currentColor"/>
+        </svg>
+        Piani
+      </button>
+      <button class="tab-item" data-tab="library">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <rect x="2" y="9" width="3" height="6" rx="1"/>
+          <rect x="19" y="9" width="3" height="6" rx="1"/>
+          <line x1="5" y1="12" x2="19" y2="12"/>
+          <line x1="6.5" y1="9" x2="6.5" y2="15"/>
+          <line x1="17.5" y1="9" x2="17.5" y2="15"/>
+        </svg>
+        Esercizi
+      </button>
+      <button class="tab-item" data-tab="history">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <rect x="3" y="13" width="4" height="8" rx="0.5"/>
+          <rect x="10" y="8" width="4" height="13" rx="0.5"/>
+          <rect x="17" y="3" width="4" height="18" rx="0.5"/>
+        </svg>
+        Storico
+      </button>
     </nav>
   </div>
 
@@ -325,7 +351,12 @@
         <div class="session-topbar">
           <div class="pos" id="ss-position">—</div>
           <div class="sp"></div>
-          <button class="session-stop" id="ss-close-btn" aria-label="Termina">✕</button>
+          <button class="session-stop" id="ss-close-btn" aria-label="Termina">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true">
+              <line x1="6" y1="6" x2="18" y2="18"/>
+              <line x1="18" y1="6" x2="6" y2="18"/>
+            </svg>
+          </button>
         </div>
         <div class="progress-bar"><div class="progress-bar-fill" id="ss-progress"></div></div>
 
@@ -351,9 +382,23 @@
         <div class="session-next" id="ss-next">&nbsp;</div>
 
         <div class="session-controls">
-          <button class="ctrl-btn" id="ss-skip-btn" aria-label="Salta">⏭</button>
-          <button class="ctrl-btn primary" id="ss-pause-btn" aria-label="Pausa/Riprendi">⏸</button>
-          <button class="ctrl-btn" id="ss-stop-btn" aria-label="Termina">■</button>
+          <button class="ctrl-btn" id="ss-skip-btn" aria-label="Salta">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <polygon points="5,5 14,12 5,19"/>
+              <rect x="16" y="5" width="3" height="14" rx="0.5"/>
+            </svg>
+          </button>
+          <button class="ctrl-btn primary" id="ss-pause-btn" aria-label="Pausa">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <rect x="6" y="5" width="4" height="14" rx="1"/>
+              <rect x="14" y="5" width="4" height="14" rx="1"/>
+            </svg>
+          </button>
+          <button class="ctrl-btn" id="ss-stop-btn" aria-label="Termina">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <rect x="6" y="6" width="12" height="12" rx="1.5"/>
+            </svg>
+          </button>
         </div>
       </div>
 
