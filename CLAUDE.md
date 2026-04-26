@@ -112,7 +112,7 @@ Schema (tutte le migrazioni idempotenti in `database/db.js`, applicate a ogni `g
 - Container app `max-width: 430px` centrato.
 - Tutto in CSS vars (`--color-*`, `--space-*`, `--radius-*`, `--text-*`); dark mode tramite `[data-theme="dark"]` su `<html>`. Il tema segue il sistema di default, persistito in `localStorage.st-theme`.
 - Touch target minimo 44px per input/button, 56-76px per i control di sessione.
-- Il disclaimer "Le indicazioni fornite non sono consigli medici" è visibile in fondo alla shell sempre.
+- Disclaimer medico **rimosso** dalla shell e dal login (Apr 2026, scelta utente). Non reintrodurlo senza una nuova decisione esplicita.
 
 ### Gotcha UI
 
@@ -177,7 +177,7 @@ Tutte le milestone chiuse (M0–M10). L'app è in produzione stabile. Le modific
 2. Preservare il pattern "SQLite idempotent migrations".
 3. Non introdurre framework client (continuare vanilla JS).
 4. Non aggiungere dipendenze senza motivo dichiarato.
-5. Mantenere il disclaimer medico visibile.
+5. ~~Mantenere il disclaimer medico visibile~~ — rimosso ad Apr 2026 (scelta utente).
 
 ## Troubleshooting rapido
 
