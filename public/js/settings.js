@@ -7,12 +7,18 @@
    ========================================== */
 (function () {
   const PALETTES = [
-    { id: 'indaco',     name: 'Indaco',     accent: '#5B7FA8', accent2: '#3F5C82', soft: '#DDE6F0' },
-    { id: 'salvia',     name: 'Salvia',     accent: '#5B8E84', accent2: '#3F6F66', soft: '#E2EBE7' },
-    { id: 'terracotta', name: 'Terracotta', accent: '#C58B4F', accent2: '#9B6A38', soft: '#F5E9DA' },
-    { id: 'carbone',    name: 'Carbone',    accent: '#15161A', accent2: '#45464C', soft: '#ECEAE4' },
+    { id: 'indaco',     name: 'Indaco',      accent: '#5B7FA8', accent2: '#3F5C82', soft: '#DDE6F0' },
+    { id: 'salvia',     name: 'Salvia',      accent: '#5B8E84', accent2: '#3F6F66', soft: '#E2EBE7' },
+    { id: 'terracotta', name: 'Terracotta',  accent: '#C58B4F', accent2: '#9B6A38', soft: '#F5E9DA' },
+    { id: 'carbone',    name: 'Carbone',     accent: '#15161A', accent2: '#45464C', soft: '#ECEAE4' },
     { id: 'rosa',       name: 'Rosa antico', accent: '#B5697A', accent2: '#8B4A5B', soft: '#F0DDE2' },
-    { id: 'oliva',      name: 'Oliva',      accent: '#7B8A4F', accent2: '#5C6936', soft: '#E5E8D5' },
+    { id: 'oliva',      name: 'Oliva',       accent: '#7B8A4F', accent2: '#5C6936', soft: '#E5E8D5' },
+    { id: 'oceano',     name: 'Oceano',      accent: '#3E7B8A', accent2: '#285C68', soft: '#D8E5E9' },
+    { id: 'lavanda',    name: 'Lavanda',     accent: '#8A7AA8', accent2: '#665680', soft: '#E5DEEC' },
+    { id: 'ambra',      name: 'Ambra',       accent: '#B88A2F', accent2: '#8E6A1E', soft: '#F0E4C8' },
+    { id: 'muschio',    name: 'Muschio',     accent: '#4F7355', accent2: '#365239', soft: '#DDE6DC' },
+    { id: 'corallo',    name: 'Corallo',     accent: '#D27865', accent2: '#A8553F', soft: '#F4DED4' },
+    { id: 'notte',      name: 'Notte',       accent: '#3A4A6B', accent2: '#26334D', soft: '#D8DDE7' },
   ];
   const PALETTE_IDS = PALETTES.map(p => p.id);
   const DEFAULT_PALETTE = 'indaco';

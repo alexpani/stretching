@@ -162,6 +162,30 @@
   --accent: #7B8A4F; --accent-2: #5C6936;
   --accent-soft: #E5E8D5; --accent-tint: #D5D9BD;
 }
+[data-palette="oceano"] {
+  --accent: #3E7B8A; --accent-2: #285C68;
+  --accent-soft: #D8E5E9; --accent-tint: #BFD2D9;
+}
+[data-palette="lavanda"] {
+  --accent: #8A7AA8; --accent-2: #665680;
+  --accent-soft: #E5DEEC; --accent-tint: #D2C7DD;
+}
+[data-palette="ambra"] {
+  --accent: #B88A2F; --accent-2: #8E6A1E;
+  --accent-soft: #F0E4C8; --accent-tint: #E5D2A8;
+}
+[data-palette="muschio"] {
+  --accent: #4F7355; --accent-2: #365239;
+  --accent-soft: #DDE6DC; --accent-tint: #C5D3C5;
+}
+[data-palette="corallo"] {
+  --accent: #D27865; --accent-2: #A8553F;
+  --accent-soft: #F4DED4; --accent-tint: #EBC4B5;
+}
+[data-palette="notte"] {
+  --accent: #3A4A6B; --accent-2: #26334D;
+  --accent-soft: #D8DDE7; --accent-tint: #BCC5D5;
+}
 
 /* ============================================
    Dark mode — surfaces
@@ -217,4 +241,28 @@
 [data-theme="dark"][data-palette="oliva"] {
   --accent: #A8B380; --accent-2: #7B8A4F;
   --accent-soft: #2C2E20; --accent-tint: #3C402C;
+}
+[data-theme="dark"][data-palette="oceano"] {
+  --accent: #7BA8B7; --accent-2: #5B8E9B;
+  --accent-soft: #1F3239; --accent-tint: #2B4550;
+}
+[data-theme="dark"][data-palette="lavanda"] {
+  --accent: #B5A6CE; --accent-2: #9285B0;
+  --accent-soft: #2E2738; --accent-tint: #3D344B;
+}
+[data-theme="dark"][data-palette="ambra"] {
+  --accent: #DCB264; --accent-2: #B88A2F;
+  --accent-soft: #3A2E14; --accent-tint: #4D3D1A;
+}
+[data-theme="dark"][data-palette="muschio"] {
+  --accent: #85AC8A; --accent-2: #67916D;
+  --accent-soft: #1F2D22; --accent-tint: #2A3D2D;
+}
+[data-theme="dark"][data-palette="corallo"] {
+  --accent: #E8A192; --accent-2: #D27865;
+  --accent-soft: #3D241D; --accent-tint: #532F26;
+}
+[data-theme="dark"][data-palette="notte"] {
+  --accent: #7989AC; --accent-2: #5C6E92;
+  --accent-soft: #1B2230; --accent-tint: #28304A;
 }
