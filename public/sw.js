@@ -11,7 +11,7 @@
 // su conferma utente, invia postMessage({type:'SKIP_WAITING'}) che innesca
 // self.skipWaiting() qui + reload lato client.
 
-const VERSION = 'v23';
+const VERSION = 'v24';
 const SHELL_CACHE   = `st-shell-${VERSION}`;
 const RUNTIME_CACHE = `st-runtime-${VERSION}`;
 const API_CACHE     = `st-api-${VERSION}`;
@@ -25,6 +25,13 @@ const SHELL_ASSETS = [
   '/apple-touch-icon.png',
   '/icons/icon-192.png',
   '/icons/icon-512.png',
+  '/icons/icon-maskable-512.png',
+  '/icons/favicon-16.png',
+  '/icons/favicon-32.png',
+  '/img/brand/logo.svg',
+  '/img/brand/logo-mono.svg',
+  '/img/brand/app-icon-512.svg',
+  '/img/brand/app-icon-maskable.svg',
   '/css/style.css',
   '/css/tokens.css',
   '/css/exercises-table.css',
@@ -36,7 +43,6 @@ const SHELL_ASSETS = [
   '/js/session.js',
   '/js/history.js',
   '/js/exercises-table.js',
-  '/img/brand/logo-d.svg',
   '/img/exercises/default.svg',
   '/img/exercises/collo-e-spalle.svg',
   '/img/exercises/schiena.svg',

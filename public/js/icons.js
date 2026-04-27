@@ -74,13 +74,15 @@
       `<polygon points="4 9 8 9 13 5 13 19 8 15 4 15"/><path d="M16 8c1.5 1 2.5 2.5 2.5 4s-1 3-2.5 4"/>`),
     Trash: ({ size = 18 } = {}) => wrap(size,
       `<polyline points="4 7 20 7"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/><path d="M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12"/>`),
-    /* Logo "Direction D — Two anchors". 32x32. */
+    /* Logo "L10b — Pinch con ancore" (4 ancore + 2 archi che si incrociano). 32x32. */
     LogoD: ({ size = 28 } = {}) =>
       `<svg width="${size}" height="${size}" viewBox="0 0 32 32" fill="none" aria-hidden="true">
-        <circle cx="6" cy="16" r="3" fill="currentColor"/>
-        <circle cx="26" cy="16" r="3" fill="currentColor"/>
-        <path d="M9 16 L23 16" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
-        <path d="M11 11 L11 21 M21 11 L21 21" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity="0.5"/>
+        <path d="M4 9 Q12 9 16 16 Q20 23 28 23" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" fill="none"/>
+        <path d="M4 23 Q12 23 16 16 Q20 9 28 9" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" fill="none"/>
+        <circle cx="4" cy="9" r="2" fill="currentColor"/>
+        <circle cx="28" cy="9" r="2" fill="currentColor"/>
+        <circle cx="4" cy="23" r="2" fill="currentColor"/>
+        <circle cx="28" cy="23" r="2" fill="currentColor"/>
       </svg>`,
   };
 
