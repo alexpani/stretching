@@ -8,13 +8,14 @@ Parte di un ecosistema self-hosted salute: espone in LAN `/api/external/*` read-
 
 ## Funzionalità
 
-- **Libreria esercizi** — CRUD con immagini (resize server-side 1024 px), filtro per gruppo muscolare e livello, seed iniziale di 23 esercizi, 8 SVG placeholder per gruppo muscolare.
-- **Routine componibili** — CRUD, drag-and-drop dei singoli item (SortableJS), durata-override per esercizio, riposi configurabili, duplicazione, seed di 3 routine d'esempio.
-- **Sessione guidata** — overlay full-screen con immagine, countdown circolare SVG animato, label "Esercizio / Riposo", anteprima del prossimo. Pausa / Salta / Stop. Screen Wake Lock con re-acquire su `visibilitychange`. Beep Web Audio a 3-2-1 e al cambio esercizio. Salvataggio sessione completata o parziale.
+- **Libreria esercizi** — CRUD con immagini (resize server-side 1024 px), filtro per gruppo muscolare e livello, seed iniziale di 23 esercizi, 8 SVG placeholder per gruppo muscolare. Foglio di lavoro desktop dedicato (`/exercises-table.html`, max-width 1680).
+- **Piani componibili** — CRUD, drag-and-drop dei singoli item (SortableJS), durata-override per esercizio, riposi configurabili, duplicazione, copertina full-width come sfondo del riquadro, seed di 3 piani d'esempio.
+- **Sessione guidata** — overlay full-screen con foto, countdown circolare SVG animato, label "Esercizio / Riposo", anteprima del prossimo. Tap sulla foto → descrizione in overlay con backdrop blur. Pausa (overlay "IN PAUSA" con blur) / Salta / Stop. Screen Wake Lock con re-acquire su `visibilitychange`. Beep Web Audio + guida vocale italiana a 3-2-1 (volume regolabile). Schermata "done" con medaglia + stat trio.
 - **Storico** — streak corrente, streak max, tempo totale 30 gg, heatmap mensile, grafico 7 giorni Chart.js, lista cronologica con delete.
+- **Profilo / Aspetto** — picker **12 palette accent** (Indaco · Salvia · Terracotta · Carbone · Rosa antico · Oliva · Oceano · Lavanda · Ambra · Muschio · Corallo · Notte) applicate runtime via CSS custom properties, theme picker `auto` / `light` / `dark`, toggle Beep / Voce / Wake Lock + slider volume voce. Persistito in `localStorage`.
 - **API esterne read-only in LAN** — `GET /api/external/sessions|routines|exercises` senza auth, JSON pronto per costruire `HKWorkout`. Vedi [docs/EXTERNAL_API.md](docs/EXTERNAL_API.md).
-- **PWA** — manifest, service worker scritto a mano con 4 bucket versionati, installabile su iPhone con icona e splash, funziona offline per shell + dati in cache.
-- **Dark mode** coerente col resto dell'ecosistema.
+- **PWA** — manifest, service worker scritto a mano con 4 bucket versionati, installabile su iPhone con icona e splash (logo "Two anchors" su sfondo `#15161A`), funziona offline per shell + dati in cache.
+- **Design system v2 (Apr 2026)** — Apple Health-meets-Calm, Geist + Geist Mono, token in `public/css/tokens.css`, dark mode coerente.
 
 ## Stack
 
@@ -66,11 +67,16 @@ database/db.js            # Singleton + migrazioni idempotenti
 routes/{auth,exercises,routines,sessions,external}.js
 services/images.js        # multer + sharp
 public/
-├── index.html            # Shell SPA unica
-├── manifest.json, sw.js  # PWA
-├── css/style.css         # Tema via CSS vars + dark mode
-├── img/exercises/*.svg   # Placeholder fallback per gruppo muscolare
-└── js/{app,library,routines,session,history}.js
+├── index.html, exercises-table.html
+├── manifest.json, sw.js  # PWA (4 bucket versionati)
+├── css/
+│   ├── tokens.css        # Design system v2: 12 palette + dark + alias legacy
+│   ├── style.css         # Reset + componenti
+│   └── exercises-table.css
+├── img/
+│   ├── exercises/*.svg   # Placeholder per gruppo muscolare
+│   └── brand/            # logo-d.svg + app-icon-source.svg
+└── js/{icons,settings,app,library,routines,session,history}.js
 docs/
 ├── REFERENCE_NOTES.md
 ├── EXTERNAL_API.md
@@ -104,6 +110,10 @@ Non direttamente: le sessioni vengono esposte via `/api/external/sessions` in LA
 
 Release 1.0 — in produzione su `https://stretching.activeproxy.it`. Tutte le milestone (M0–M10) chiuse. Single-user, non multi-tenant. Nessun build step: `node server.js` serve file e API dallo stesso processo.
 
-## Disclaimer
+## Foto degli esercizi
 
-Le indicazioni e gli esercizi mostrati dall'app **non sono consigli medici**. Questa è un'app personale; se hai patologie o dubbi sulla tua mobilità, consulta un professionista prima di eseguire gli esercizi.
+Le foto degli esercizi sono generate con un modello di immagine. Il prompt usato (mantenuto identico per coerenza visiva tra esercizi) è:
+
+> Genera immagine umana. Immagine con sfondo bianco, si vede solo un tappetino nero e una ragazza che fa l'esercizio. La ragazza ha pantaloni aderenti neri, scalza, top giallo smanicato, castana, capelli medi, coda di cavallo.
+
+Si specifica poi l'esercizio (nome + breve descrizione della posa). L'immagine generata viene caricata via il modal di modifica esercizio o dal foglio di lavoro (`/exercises-table.html`); il server la ridimensiona a lato lungo 1024 px (JPEG 85%) tramite `sharp`.
