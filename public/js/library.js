@@ -15,7 +15,7 @@ const MUSCLE_LABELS = {
   'glutei e gambe':   'Glutei e gambe',
   'braccia e torace': 'Braccia e torace'
 };
-const SIDE_LABELS = { dx: 'DX', sx: 'SX' };
+const SIDE_LABELS = { dx: 'DX', sx: 'SX', bilaterale: 'BL' };
 
 // Converte un muscle_group ("glutei e gambe") in slug file-safe ("glutei-e-gambe")
 // per il path SVG placeholder.
@@ -54,7 +54,7 @@ function renderExercises() {
   for (const ex of Library.items) {
     const card = document.createElement('div');
     card.className = 'exercise-card';
-    const sideBadge = (ex.side === 'dx' || ex.side === 'sx')
+    const sideBadge = SIDE_LABELS[ex.side]
       ? `<span class="badge side-${ex.side}">${SIDE_LABELS[ex.side]}</span>`
       : '';
     card.innerHTML = `

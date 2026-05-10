@@ -135,7 +135,7 @@ function buildRow(ex) {
   tr.appendChild(buildSelectCell('muscle_group', ex.muscle_group, MUSCLE_LABELS_T, 'col-muscle'));
   // Lato
   tr.appendChild(buildSelectCell('side', ex.side || 'both',
-    { 'both': 'Entrambi', 'dx': 'Destro', 'sx': 'Sinistro' }, 'col-side'));
+    { 'both': 'Entrambi', 'dx': 'Destro', 'sx': 'Sinistro', 'bilaterale': 'Bilaterale' }, 'col-side'));
   // Durata
   tr.appendChild(buildInputCell('number', 'duration_sec', ex.duration_sec || 30, 'col-dur'));
 

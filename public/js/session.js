@@ -41,7 +41,7 @@ const Session = {
 };
 
 const CIRC = 2 * Math.PI * 54;
-const SIDE_TXT = { dx: 'DX', sx: 'SX' };
+const SIDE_TXT = { dx: 'DX', sx: 'SX', bilaterale: 'BL' };
 const MUSCLE_TXT = {
   'collo e spalle':   'Collo e spalle',
   'schiena':          'Schiena',
@@ -424,12 +424,16 @@ function tick() {
     speak(words[secDisplay]);
     Session.voiceLastSpokenSec = secDisplay;
   }
-  // Guida vocale "metà tempo" (#4): annuncia una sola volta a metà fase esercizio,
-  // solo se l'esercizio dura almeno 20 secondi (per evitare di disturbare su esercizi corti).
+  // Guida vocale a metà fase esercizio: una sola volta.
+  // - Se bilaterale → "cambia lato" (annuncio sempre, è un'istruzione operativa)
+  // - Altrimenti → "metà tempo" solo se esercizio ≥ 20s (per non disturbare i corti)
   if (Session.voiceEnabled && ph.type === 'exercise' && !Session.voiceMidSpoken
-      && ph.duration >= 20 && elapsedMs >= totalMs / 2) {
-    Session.voiceMidSpoken = true;
-    speak('metà tempo');
+      && elapsedMs >= totalMs / 2) {
+    const isBilateral = ph.item && ph.item.side === 'bilaterale';
+    if (isBilateral || ph.duration >= 20) {
+      Session.voiceMidSpoken = true;
+      speak(isBilateral ? 'cambia lato' : 'metà tempo');
+    }
   }
 
   const progress = Math.min(1, elapsedMs / totalMs);

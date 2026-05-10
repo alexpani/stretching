@@ -12,7 +12,7 @@ const MUSCLE_GROUPS = [
   'glutei e gambe',
   'braccia e torace'
 ];
-const SIDES = ['both', 'dx', 'sx'];
+const SIDES = ['both', 'dx', 'sx', 'bilaterale'];
 // Il campo 'level' nel DB resta (NOT NULL su DB esistenti) ma è deprecato:
 // la UI non lo espone più. Scriviamo sempre 'easy' come valore dummy.
 const LEVEL_DUMMY = 'easy';

@@ -360,8 +360,10 @@ body {
 }
 .badge.side-dx { background: #FFF3E0; color: #E65100; }
 .badge.side-sx { background: #E3F2FD; color: #1565C0; }
+.badge.side-bilaterale { background: #E8F5E9; color: #2E7D32; }
 [data-theme="dark"] .badge.side-dx { background: #4a2a0d; color: #FFB74D; }
 [data-theme="dark"] .badge.side-sx { background: #0d2a4a; color: #64B5F6; }
+[data-theme="dark"] .badge.side-bilaterale { background: #1b3a1d; color: #81C784; }
 
 /* ── FAB (floating action button) ──────── */
 .fab {

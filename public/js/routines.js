@@ -17,7 +17,7 @@ const MUSCLE_LBL = {
   'glutei e gambe':   'Glutei e gambe',
   'braccia e torace': 'Braccia e torace'
 };
-const SIDE_LBL = { dx: 'DX', sx: 'SX' };
+const SIDE_LBL = { dx: 'DX', sx: 'SX', bilaterale: 'BL' };
 
 function slugMuscle(s) {
   return (s || '').replace(/\s+/g, '-');
