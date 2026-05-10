@@ -282,6 +282,7 @@ function enterPhase(idx) {
   Session.lastCountdownSec = null;
   Session.voiceLastSpokenSec = null;
   Session.voiceMidSpoken = false;
+  Session.voiceCommentSpoken = false;
   setPauseBtnIcon(false);
 
   const ph = Session.phases[idx];
@@ -423,6 +424,13 @@ function tick() {
     const words = { 3: 'tre', 2: 'due', 1: 'uno' };
     speak(words[secDisplay]);
     Session.voiceLastSpokenSec = secDisplay;
+  }
+  // Commento esercizio: letto una volta dopo ~3s dall'avvio della fase
+  // (così non si sovrappone all'annuncio del nome). Solo se notes valorizzato.
+  if (Session.voiceEnabled && ph.type === 'exercise' && !Session.voiceCommentSpoken
+      && elapsedMs >= 3000 && ph.item && ph.item.notes) {
+    Session.voiceCommentSpoken = true;
+    speak(ph.item.notes);
   }
   // Guida vocale a metà fase esercizio: una sola volta.
   // - Se bilaterale → "cambia lato" (annuncio sempre, è un'istruzione operativa)
