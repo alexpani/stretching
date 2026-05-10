@@ -769,14 +769,13 @@ body {
 
 .session-image {
   width: 100%;
-  aspect-ratio: 1;
   max-height: 42vh;
-  background: var(--color-primary-light);
   border-radius: var(--radius-lg);
-  overflow: hidden;
   margin-bottom: var(--space-3);
   position: relative;
   cursor: pointer;
+  display: flex;
+  justify-content: center;
 }
 
 /* Pannello descrizione: appare sopra la foto al click.
@@ -813,8 +812,12 @@ body {
   pointer-events: auto;
 }
 .session-image img {
-  width: 100%; height: 100%; object-fit: contain;
   display: block;
+  max-width: 100%;
+  max-height: 42vh;
+  width: auto;
+  height: auto;
+  border-radius: var(--radius-lg);
 }
 
 .session-meta {
