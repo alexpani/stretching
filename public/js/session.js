@@ -141,6 +141,7 @@ function playBeep(freq, durMs, peak = 0.18) {
 }
 const beepCountdown = () => playBeep(880, 120);
 const beepEndPhase  = () => playBeep(1320, 220);
+const beepStartExercise = () => playBeep(1100, 220);
 const beepFinish    = () => {
   playBeep(880, 140);
   setTimeout(() => playBeep(1175, 140), 160);
@@ -298,6 +299,7 @@ function enterPhase(idx) {
 
   if (ph.type === 'exercise') {
     const it = ph.item;
+    if (Session.beepEnabled) beepStartExercise();
     cd.classList.remove('rest');
     phaseLbl.textContent = 'Esercizio';
     phaseLbl.classList.remove('rest');
