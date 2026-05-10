@@ -770,7 +770,7 @@ body {
 .session-image {
   width: 100%;
   aspect-ratio: 1;
-  max-height: 32vh;
+  max-height: 42vh;
   background: var(--color-primary-light);
   border-radius: var(--radius-lg);
   overflow: hidden;
@@ -849,8 +849,8 @@ body {
 }
 
 .countdown {
-  width: 160px;
-  height: 160px;
+  width: 132px;
+  height: 132px;
   margin: var(--space-2) auto;
   position: relative;
   flex-shrink: 0;
@@ -868,7 +868,7 @@ body {
   position: absolute; inset: 0;
   display: flex; align-items: center; justify-content: center;
   font-variant-numeric: tabular-nums;
-  font-size: 44px;
+  font-size: 36px;
   font-weight: 700;
   color: var(--color-text);
 }
