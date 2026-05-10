@@ -289,7 +289,6 @@ function enterPhase(idx) {
   const phaseLbl = document.getElementById('ss-phase');
   const img = document.getElementById('ss-img');
   const name = document.getElementById('ss-name');
-  const muscle = document.getElementById('ss-muscle');
   const next = document.getElementById('ss-next');
 
   // Reset eventuale toggle descrizione → torna sempre alla foto al cambio fase
@@ -307,7 +306,6 @@ function enterPhase(idx) {
     if (descText) descText.textContent = it.description || 'Nessuna descrizione disponibile per questo esercizio.';
     const sideTxt = SIDE_TXT[it.side] ? ` (${SIDE_TXT[it.side]})` : '';
     name.textContent = (it.name || '') + sideTxt;
-    muscle.textContent = MUSCLE_TXT[it.muscle_group] || it.muscle_group || '';
     const following = Session.phases.slice(idx + 1).find(p => p.type === 'exercise');
     next.innerHTML = following
       ? `Prossimo: <strong>${escapeHtmlS(following.item.name)}${SIDE_TXT[following.item.side] ? ' (' + SIDE_TXT[following.item.side] + ')' : ''}</strong>`
@@ -322,7 +320,6 @@ function enterPhase(idx) {
     phaseLbl.textContent = ph.isInitial ? 'Preparati' : 'Riposo';
     phaseLbl.classList.add('rest');
     name.textContent = ph.isInitial ? 'Iniziamo' : 'Respira';
-    muscle.textContent = '';
     img.src = itemImgPath(ph.nextItem);
     if (descText) descText.textContent = (ph.nextItem && ph.nextItem.description) || '';
     next.innerHTML = `Prossimo: <strong>${escapeHtmlS(ph.nextItem.name)}${SIDE_TXT[ph.nextItem.side] ? ' (' + SIDE_TXT[ph.nextItem.side] + ')' : ''}</strong>`;

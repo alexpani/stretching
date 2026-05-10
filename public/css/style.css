@@ -852,8 +852,8 @@ body {
 }
 
 .countdown {
-  width: 132px;
-  height: 132px;
+  width: 104px;
+  height: 104px;
   margin: var(--space-2) auto;
   position: relative;
   flex-shrink: 0;
@@ -871,7 +871,7 @@ body {
   position: absolute; inset: 0;
   display: flex; align-items: center; justify-content: center;
   font-variant-numeric: tabular-nums;
-  font-size: 36px;
+  font-size: 28px;
   font-weight: 700;
   color: var(--color-text);
 }
