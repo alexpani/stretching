@@ -825,7 +825,7 @@ body {
   margin-bottom: var(--space-3);
 }
 .session-meta .name {
-  font-size: var(--text-2xl);
+  font-size: var(--text-lg);
   font-weight: 600;
   color: var(--color-text);
   margin: 0 0 4px;
@@ -906,11 +906,9 @@ body {
 }
 .ctrl-btn svg { width: 26px; height: 26px; display: block; }
 .ctrl-btn.primary {
-  width: 76px; height: 76px;
   background: var(--color-primary);
   color: var(--color-text-on-primary);
 }
-.ctrl-btn.primary svg { width: 30px; height: 30px; }
 
 /* ── Schermata riepilogo ──────────────── */
 .session-summary {
