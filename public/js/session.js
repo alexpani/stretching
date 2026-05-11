@@ -150,11 +150,29 @@ const beepFinish    = () => {
 
 // ── Guida vocale (SpeechSynthesis) ──────
 // Su Safari iOS getVoices() è asincrono: ascoltiamo onvoiceschanged.
+// Su Apple le voci "naturali" (Siri / Neural / Premium / Enhanced) suonano
+// nettamente meglio delle compatte di default: le preferiamo via scoring.
+function scoreVoice(v) {
+  const uri  = (v.voiceURI || '').toLowerCase();
+  const name = (v.name     || '').toLowerCase();
+  const hay  = uri + ' ' + name;
+  let s = 0;
+  if (/siri|neural/.test(hay))               s += 100;
+  if (/premium/.test(hay))                   s += 60;
+  if (/enhanced|eloquence|eloquenza/.test(hay)) s += 40;
+  if (/\bcompact\b/.test(hay))               s -= 30;
+  if (v.localService)                        s += 5;
+  return s;
+}
+
 function initVoice() {
   if (!('speechSynthesis' in window)) return;
   const pickItalian = () => {
-    const vs = speechSynthesis.getVoices();
-    Session.voice = vs.find(v => v.lang && v.lang.toLowerCase().startsWith('it')) || null;
+    const its = speechSynthesis.getVoices()
+      .filter(v => v.lang && v.lang.toLowerCase().startsWith('it'));
+    if (!its.length) return;
+    its.sort((a, b) => scoreVoice(b) - scoreVoice(a));
+    Session.voice = its[0];
   };
   pickItalian();
   if (!Session.voice) {
