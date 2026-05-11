@@ -391,6 +391,10 @@ function nextPhase() {
 }
 
 function skipPhase() {
+  // Interrompi subito qualsiasi annuncio in corso (es. nome esercizio appena saltato)
+  if ('speechSynthesis' in window) {
+    try { speechSynthesis.cancel(); } catch (_) {}
+  }
   const ph = Session.phases[Session.phaseIndex];
   if (ph && ph.type === 'exercise') Session.itemsSkipped++;
   let target = Session.phaseIndex + 1;
