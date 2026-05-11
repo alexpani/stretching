@@ -275,7 +275,7 @@
 
         <div class="form-field">
           <label>Immagine (opzionale)</label>
-          <input type="file" id="ex-file" accept="image/*" />
+          <input type="file" id="ex-file" accept="image/*,video/*" />
           <label style="display:flex; align-items:center; gap:8px; font-size:var(--text-sm);">
             <input type="checkbox" id="ex-remove-image" /> Rimuovi immagine
           </label>
@@ -452,6 +452,7 @@
 
         <div class="session-image" id="ss-image" role="button" tabindex="0" aria-label="Mostra descrizione">
           <img id="ss-img" alt="" />
+          <video id="ss-video" class="hidden" muted loop autoplay playsinline preload="metadata"></video>
           <div class="ss-desc" id="ss-desc" aria-hidden="true">
             <div class="ss-desc-inner" id="ss-desc-text"></div>
           </div>

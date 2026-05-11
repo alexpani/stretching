@@ -27,7 +27,7 @@ Lavora direttamente su **`main`**. Niente feature branch. Commit piccoli, freque
 | DB | SQLite via `sqlite` + `sqlite3` (async wrapper) | **non** `better-sqlite3` |
 | Session | `express-session` memory store, cookie `httpOnly`, 30 gg | |
 | Auth | plaintext in `.env`, no bcrypt, no tabella users | coerente col diario |
-| Upload | `multer` + `sharp` (resize lato lungo 1024px, JPEG 85%) | |
+| Upload | `multer` + `sharp` per immagini (lato lungo 1024px, JPEG 85%). Video accettati senza transcoding (limite 50 MB, estensione preservata: mp4/webm/mov/m4v/ogv) | |
 | Client | vanilla JS + HTML + CSS, mobile-first max-width 430px | |
 | Drag-drop | SortableJS via CDN | |
 | Grafici | Chart.js 4.4.0 via CDN | |

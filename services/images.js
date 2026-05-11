@@ -17,12 +17,35 @@ const storage = multer.diskStorage({
 
 const upload = multer({
   storage,
-  limits: { fileSize: 5 * 1024 * 1024 }, // 5 MB
+  limits: { fileSize: 50 * 1024 * 1024 }, // 50 MB (immagini o video brevi)
   fileFilter: (req, file, cb) => {
-    if (file.mimetype.startsWith('image/')) cb(null, true);
-    else cb(new Error('Solo immagini sono accettate'));
+    if (file.mimetype.startsWith('image/') || file.mimetype.startsWith('video/')) cb(null, true);
+    else cb(new Error('Sono accettati solo immagini o video'));
   }
 });
+
+const VIDEO_EXT_BY_MIME = {
+  'video/mp4': '.mp4',
+  'video/webm': '.webm',
+  'video/quicktime': '.mov',
+  'video/x-m4v': '.m4v',
+  'video/ogg': '.ogv'
+};
+
+function isVideoFile(file) {
+  return !!(file && file.mimetype && file.mimetype.startsWith('video/'));
+}
+
+// Sposta il video temp in stretch-<id>.<ext> mantenendo il formato originale
+// (no transcoding: serve ffmpeg, lo evitiamo finché non necessario).
+function storeVideo(tmpPath, id, file) {
+  const ext = VIDEO_EXT_BY_MIME[file.mimetype]
+    || (path.extname(file.originalname) || '.mp4').toLowerCase();
+  const outName = `stretch-${id}${ext}`;
+  const outPath = path.join(uploadsDir, outName);
+  fs.renameSync(tmpPath, outPath);
+  return `/uploads/${outName}`;
+}
 
 // Ridimensiona il file temp a lato lungo 1024 (JPEG 85%), cancella il temp,
 // ritorna il path pubblico da salvare in DB.
@@ -52,7 +75,9 @@ function copyImage(srcImagePath, newId) {
   if (!srcImagePath) return null;
   const srcFull = path.join(uploadsDir, path.basename(srcImagePath));
   if (!fs.existsSync(srcFull)) return null;
-  const outName = `stretch-${newId}.jpg`;
+  // Preserva l'estensione originale (jpg per foto, mp4/webm/... per video).
+  const ext = (path.extname(srcImagePath) || '.jpg').toLowerCase();
+  const outName = `stretch-${newId}${ext}`;
   const outFull = path.join(uploadsDir, outName);
   fs.copyFileSync(srcFull, outFull);
   return `/uploads/${outName}`;
@@ -73,4 +98,4 @@ async function resizeAndStoreCover(tmpPath, routineId) {
   return `/uploads/${outName}`;
 }
 
-module.exports = { upload, resizeAndStore, removeImage, copyImage, resizeAndStoreCover };
+module.exports = { upload, resizeAndStore, removeImage, copyImage, resizeAndStoreCover, storeVideo, isVideoFile };

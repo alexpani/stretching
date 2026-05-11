@@ -33,9 +33,23 @@ function fmtDuration(sec) {
 }
 
 function itemImg(it) {
-  if (it.image_path) return it.image_path;
+  if (it.image_path) {
+    const v = it.updated_at || it.created_at || '';
+    return it.image_path + (v ? `?v=${encodeURIComponent(v)}` : '');
+  }
   if (it.muscle_group) return `/img/exercises/${slugMuscle(it.muscle_group)}.svg`;
   return '/img/exercises/default.svg';
+}
+
+function isVideoMediaR(p) {
+  return typeof p === 'string' && /\.(mp4|webm|mov|m4v|ogv)(\?|$)/i.test(p);
+}
+
+function itemMediaTag(it) {
+  const src = itemImg(it);
+  return isVideoMediaR(src)
+    ? `<video src="${src}" muted loop autoplay playsinline preload="metadata"></video>`
+    : `<img src="${src}" alt="" />`;
 }
 
 function escHtml(s) {
@@ -146,7 +160,7 @@ function renderRoutineItems(items) {
     const sideBadge = SIDE_LBL[it.side] ? `<span class="badge side-${it.side}">${SIDE_LBL[it.side]}</span>` : '';
     row.innerHTML = `
       <div class="drag-handle" aria-label="Trascina">≡</div>
-      <div class="item-thumb"><img src="${itemImg(it)}" alt="" /></div>
+      <div class="item-thumb">${itemMediaTag(it)}</div>
       <div class="item-body">
         <div class="item-name">${escHtml(it.name)}</div>
         <div class="item-meta-row">${sideBadge}<span class="item-meta">${MUSCLE_LBL[it.muscle_group]} · ${dur}s · riposo ${it.rest_after_sec || 0}s</span></div>

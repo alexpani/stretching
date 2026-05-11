@@ -58,13 +58,24 @@ function slugMuscleT(s) { return (s || '').replace(/\s+/g, '-'); }
 
 function imgForT(ex) {
   if (ex && ex.image_path) {
-    // Il file è sempre stretch-<id>.jpg: bust cache browser/SW al cambio.
+    // Il file è sempre stretch-<id>.<ext>: bust cache browser/SW al cambio.
     const v = ex.updated_at || ex.created_at || '';
     const q = v ? `?v=${encodeURIComponent(v)}` : '';
     return ex.image_path + q;
   }
   if (ex && ex.muscle_group) return `/img/exercises/${slugMuscleT(ex.muscle_group)}.svg`;
   return '/img/exercises/default.svg';
+}
+
+function isVideoMediaT(p) {
+  return typeof p === 'string' && /\.(mp4|webm|mov|m4v|ogv)(\?|$)/i.test(p);
+}
+
+function mediaTagT(ex) {
+  const src = imgForT(ex);
+  return isVideoMediaT(src)
+    ? `<video src="${src}" muted loop autoplay playsinline preload="metadata"></video>`
+    : `<img src="${src}" alt="" />`;
 }
 
 function escT(s) {
@@ -122,8 +133,8 @@ function buildRow(ex) {
   const tdThumb = document.createElement('td');
   tdThumb.className = 'col-thumb';
   tdThumb.innerHTML = `
-    <button type="button" class="tbl-thumb" title="Clicca per cambiare foto">
-      <img src="${imgForT(ex)}" alt="" />
+    <button type="button" class="tbl-thumb" title="Clicca per cambiare foto o video">
+      ${mediaTagT(ex)}
     </button>
   `;
   tdThumb.querySelector('.tbl-thumb').addEventListener('click', () => {

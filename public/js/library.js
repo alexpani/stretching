@@ -31,6 +31,18 @@ function imgFor(ex) {
   if (ex && ex.muscle_group) return `/img/exercises/${slugMuscle(ex.muscle_group)}.svg`;
   return '/img/exercises/default.svg';
 }
+
+function isVideoMedia(p) {
+  return typeof p === 'string' && /\.(mp4|webm|mov|m4v|ogv)(\?|$)/i.test(p);
+}
+
+function mediaTagFor(ex) {
+  const src = imgFor(ex);
+  if (isVideoMedia(src)) {
+    return `<video src="${src}" muted loop autoplay playsinline preload="metadata"></video>`;
+  }
+  return `<img src="${src}" alt="" loading="lazy" />`;
+}
 // Esposto globalmente: anche session.js lo userà.
 window.slugMuscle = slugMuscle;
 
@@ -61,7 +73,7 @@ function renderExercises() {
       ? `<span class="badge side-${ex.side}">${SIDE_LABELS[ex.side]}</span>`
       : '';
     card.innerHTML = `
-      <div class="thumb"><img src="${imgFor(ex)}" alt="" loading="lazy" /></div>
+      <div class="thumb">${mediaTagFor(ex)}</div>
       <div class="body">
         <div class="name">${escapeHtml(ex.name)}</div>
         <div class="meta-row">${sideBadge}<span class="meta">${MUSCLE_LABELS[ex.muscle_group] || ex.muscle_group} · ${ex.duration_sec}s</span></div>

@@ -3,7 +3,7 @@ const crypto = require('crypto');
 const router = express.Router();
 const { getDb } = require('../database/db');
 const { isAuth } = require('./auth');
-const { upload, resizeAndStore, removeImage, copyImage } = require('../services/images');
+const { upload, resizeAndStore, removeImage, copyImage, storeVideo, isVideoFile } = require('../services/images');
 
 const MUSCLE_GROUPS = [
   'collo e spalle',
@@ -92,7 +92,11 @@ router.post('/', isAuth, upload.single('file'), async (req, res) => {
     const db = await getDb();
     const id = crypto.randomUUID();
     let imagePath = null;
-    if (req.file) imagePath = await resizeAndStore(req.file.path, id);
+    if (req.file) {
+      imagePath = isVideoFile(req.file)
+        ? storeVideo(req.file.path, id, req.file)
+        : await resizeAndStore(req.file.path, id);
+    }
 
     await db.run(
       `INSERT INTO exercises
@@ -147,7 +151,9 @@ router.put('/:id', isAuth, upload.single('file'), async (req, res) => {
     let imagePath = current.image_path;
     if (req.file) {
       if (current.image_path) removeImage(current.image_path);
-      imagePath = await resizeAndStore(req.file.path, current.id);
+      imagePath = isVideoFile(req.file)
+        ? storeVideo(req.file.path, current.id, req.file)
+        : await resizeAndStore(req.file.path, current.id);
     } else if (req.body.remove_image === '1') {
       if (current.image_path) removeImage(current.image_path);
       imagePath = null;

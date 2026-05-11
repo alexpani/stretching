@@ -61,6 +61,31 @@ function itemImgPath(it) {
   return '/img/exercises/default.svg';
 }
 
+function isVideoMedia(p) {
+  return typeof p === 'string' && /\.(mp4|webm|mov|m4v|ogv)(\?|$)/i.test(p);
+}
+
+// Mostra foto o video nell'overlay sessione a seconda del media dell'esercizio
+function renderSessionMedia(it) {
+  const img = document.getElementById('ss-img');
+  const video = document.getElementById('ss-video');
+  const src = itemImgPath(it);
+  if (isVideoMedia(src)) {
+    img.classList.add('hidden');
+    img.removeAttribute('src');
+    if (video.getAttribute('src') !== src) video.src = src;
+    video.classList.remove('hidden');
+    try { video.play().catch(() => {}); } catch (_) {}
+  } else {
+    video.classList.add('hidden');
+    video.pause();
+    video.removeAttribute('src');
+    video.load();
+    img.src = src;
+    img.classList.remove('hidden');
+  }
+}
+
 function formatSec(s) {
   if (s < 60) return `${Math.round(s)}s`;
   const m = Math.floor(s / 60);
@@ -331,7 +356,7 @@ function enterPhase(idx) {
     cd.classList.remove('rest');
     phaseLbl.textContent = 'Esercizio';
     phaseLbl.classList.remove('rest');
-    img.src = itemImgPath(it);
+    renderSessionMedia(it);
     if (descText) descText.textContent = it.description || 'Nessuna descrizione disponibile per questo esercizio.';
     const sideTxt = SIDE_TXT[it.side] ? ` (${SIDE_TXT[it.side]})` : '';
     name.textContent = (it.name || '') + sideTxt;
@@ -357,7 +382,7 @@ function enterPhase(idx) {
     phaseLbl.textContent = ph.isInitial ? 'Preparati' : 'Riposo';
     phaseLbl.classList.add('rest');
     name.textContent = ph.isInitial ? 'Iniziamo' : 'Respira';
-    img.src = itemImgPath(ph.nextItem);
+    renderSessionMedia(ph.nextItem);
     if (descText) descText.textContent = (ph.nextItem && ph.nextItem.description) || '';
     next.innerHTML = `Prossimo: <strong>${escapeHtmlS(ph.nextItem.name)}${SIDE_TXT[ph.nextItem.side] ? ' (' + SIDE_TXT[ph.nextItem.side] + ')' : ''}</strong>`;
     // Voce: annuncia il prossimo esercizio durante il riposo (o "preparati" se è la pausa iniziale)
