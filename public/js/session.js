@@ -311,10 +311,14 @@ function enterPhase(idx) {
     next.innerHTML = following
       ? `Prossimo: <strong>${escapeHtmlS(following.item.name)}${SIDE_TXT[following.item.side] ? ' (' + SIDE_TXT[following.item.side] + ')' : ''}</strong>`
       : 'Ultimo esercizio';
-    // Voce: annuncia il nome dell'esercizio (+ eventuale lato)
+    // Voce: annuncia il nome dell'esercizio (+ eventuale lato + durata)
     if (Session.voiceEnabled) {
       const lateral = it.side === 'dx' ? ' lato destro' : it.side === 'sx' ? ' lato sinistro' : '';
-      speak(`${it.name || 'Esercizio'}${lateral}`);
+      const isBilateral = it.side === 'bilaterale';
+      const timePhrase = isBilateral
+        ? ` ${Math.round(ph.duration / 2)} secondi per lato`
+        : ` per ${ph.duration} secondi`;
+      speak(`${it.name || 'Esercizio'}${lateral}${timePhrase}`);
     }
   } else {
     cd.classList.add('rest');
