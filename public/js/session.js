@@ -493,13 +493,16 @@ function tick() {
   }
   // Commento esercizio: letto una volta dopo ~3s dall'avvio della fase
   // (così non si sovrappone all'annuncio del nome). Solo se notes valorizzato.
-  // Commento esercizio: parte 5s dopo la fine dell'annuncio del nome.
-  // Se la voce non è disponibile/cancellata (announceEndedAtMs resta null)
-  // non parte: corretto, non avrebbe senso senza l'annuncio.
-  if (Session.voiceEnabled && ph.type === 'exercise' && !Session.voiceCommentSpoken
+  // Commento esercizio: parte N s dopo la fine dell'annuncio del nome
+  // (N configurabile in Profilo, default 3s). Se la voce non è disponibile
+  // o l'opzione è disattivata, non parte.
+  const _opts = sessionOpts();
+  const _commentOn = _opts.commentEnabled !== false;
+  const _commentDelayMs = Math.max(0, (_opts.commentDelaySec ?? 3) * 1000);
+  if (Session.voiceEnabled && _commentOn && ph.type === 'exercise' && !Session.voiceCommentSpoken
       && ph.item && ph.item.notes
       && Session.announceEndedAtMs
-      && (performance.now() - Session.announceEndedAtMs) >= 5000) {
+      && (performance.now() - Session.announceEndedAtMs) >= _commentDelayMs) {
     Session.voiceCommentSpoken = true;
     speak(ph.item.notes);
   }

@@ -54,7 +54,7 @@
   /* Session toggles ──────────────────────── */
   function getSessionOpts() {
     const raw = localStorage.getItem('st-session-opts');
-    const def = { beep: true, voice: true, wakelock: true, voiceVolume: 1.0, voiceURI: '' };
+    const def = { beep: true, voice: true, wakelock: true, voiceVolume: 1.0, voiceURI: '', commentEnabled: true, commentDelaySec: 3 };
     if (!raw) return def;
     try { return Object.assign(def, JSON.parse(raw)); } catch { return def; }
   }
@@ -112,7 +112,7 @@
 
   function bindSessionToggles() {
     const opts = getSessionOpts();
-    const map = { beep: 'opt-beep', voice: 'opt-voice', wakelock: 'opt-wakelock' };
+    const map = { beep: 'opt-beep', voice: 'opt-voice', wakelock: 'opt-wakelock', commentEnabled: 'opt-comment' };
     Object.entries(map).forEach(([key, id]) => {
       const cb = document.getElementById(id);
       if (!cb) return;
@@ -139,6 +139,23 @@
       };
       slider.addEventListener('input', onChange);
       slider.addEventListener('change', onChange);
+    }
+
+    const delay = document.getElementById('opt-comment-delay');
+    const delayVal = document.getElementById('opt-comment-delay-val');
+    if (delay) {
+      const init = Math.max(0, Math.min(30, parseInt(opts.commentDelaySec ?? 3, 10) || 3));
+      delay.value = String(init);
+      if (delayVal) delayVal.textContent = `${init}s`;
+      const onDelayChange = () => {
+        const s = Math.max(0, Math.min(30, parseInt(delay.value, 10) || 0));
+        if (delayVal) delayVal.textContent = `${s}s`;
+        const next = getSessionOpts();
+        next.commentDelaySec = s;
+        setSessionOpts(next);
+      };
+      delay.addEventListener('input', onDelayChange);
+      delay.addEventListener('change', onDelayChange);
     }
   }
 
