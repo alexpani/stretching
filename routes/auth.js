@@ -5,7 +5,9 @@ const router = express.Router();
 //   const { isAuth } = require('./auth');
 //   router.get('/x', isAuth, handler);
 function isAuth(req, res, next) {
-  if (process.env.AUTH_ENABLED === 'false') return next();
+  // Auth disabilitata per default ("per ora"): bypass salvo opt-in esplicito.
+  // Per riattivare: AUTH_ENABLED=true in .env.
+  if (process.env.AUTH_ENABLED !== 'true') return next();
   if (req.session && req.session.authenticated) return next();
   if (req.xhr || req.originalUrl.startsWith('/api/')) {
     return res.status(401).json({ error: 'Non autenticato' });
