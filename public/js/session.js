@@ -189,7 +189,7 @@ function initVoice() {
   }
 }
 
-function speak(text) {
+function speak(text, onend) {
   if (!Session.voiceEnabled || !('speechSynthesis' in window)) return;
   const opts = sessionOpts();
   const vol = Math.max(0, Math.min(1, opts.voiceVolume ?? 1.0));
@@ -198,6 +198,7 @@ function speak(text) {
     const u = new SpeechSynthesisUtterance(text);
     u.lang = 'it-IT';
     if (Session.voice) u.voice = Session.voice;
+    if (typeof onend === 'function') u.onend = onend;
     u.rate = 1.0;
     u.pitch = 1.0;
     u.volume = vol;
@@ -309,6 +310,7 @@ function enterPhase(idx) {
   Session.voiceLastSpokenSec = null;
   Session.voiceMidSpoken = false;
   Session.voiceCommentSpoken = false;
+  Session.announceEndedAtMs = null;
   setPauseBtnIcon(false);
 
   const ph = Session.phases[idx];
@@ -345,7 +347,10 @@ function enterPhase(idx) {
       const timePhrase = isBilateral
         ? `, ${Math.round(ph.duration / 2)} secondi per lato`
         : `, per ${ph.duration} secondi`;
-      speak(`${it.name || 'Esercizio'}${lateral}${timePhrase}`);
+      speak(
+        `${it.name || 'Esercizio'}${lateral}${timePhrase}`,
+        () => { Session.announceEndedAtMs = performance.now(); }
+      );
     }
   } else {
     cd.classList.add('rest');
@@ -462,8 +467,13 @@ function tick() {
   }
   // Commento esercizio: letto una volta dopo ~3s dall'avvio della fase
   // (così non si sovrappone all'annuncio del nome). Solo se notes valorizzato.
+  // Commento esercizio: parte 5s dopo la fine dell'annuncio del nome.
+  // Se la voce non è disponibile/cancellata (announceEndedAtMs resta null)
+  // non parte: corretto, non avrebbe senso senza l'annuncio.
   if (Session.voiceEnabled && ph.type === 'exercise' && !Session.voiceCommentSpoken
-      && elapsedMs >= 3000 && ph.item && ph.item.notes) {
+      && ph.item && ph.item.notes
+      && Session.announceEndedAtMs
+      && (performance.now() - Session.announceEndedAtMs) >= 5000) {
     Session.voiceCommentSpoken = true;
     speak(ph.item.notes);
   }
