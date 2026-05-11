@@ -660,6 +660,7 @@ body {
 #routine-detail-view:not(.edit-mode) .item-row .item-del { display: none; }
 #routine-detail-view:not(.edit-mode) .item-row { cursor: default; }
 #routine-detail-view.edit-mode #rd-edit-toggle { color: var(--color-primary); }
+#rd-edit-toggle { font-size: 22px; line-height: 1; }
 
 /* ── Picker esercizi (full screen sheet) ──── */
 #modal-exercise-picker .modal-dialog {
