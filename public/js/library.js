@@ -24,7 +24,10 @@ function slugMuscle(s) {
 }
 
 function imgFor(ex) {
-  if (ex && ex.image_path) return ex.image_path;
+  if (ex && ex.image_path) {
+    const v = ex.updated_at || ex.created_at || '';
+    return ex.image_path + (v ? `?v=${encodeURIComponent(v)}` : '');
+  }
   if (ex && ex.muscle_group) return `/img/exercises/${slugMuscle(ex.muscle_group)}.svg`;
   return '/img/exercises/default.svg';
 }

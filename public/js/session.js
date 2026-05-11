@@ -53,7 +53,10 @@ const MUSCLE_TXT = {
 function muscleSlug(s) { return (s || '').replace(/\s+/g, '-'); }
 
 function itemImgPath(it) {
-  if (it && it.image_path) return it.image_path;
+  if (it && it.image_path) {
+    const v = it.updated_at || it.created_at || '';
+    return it.image_path + (v ? `?v=${encodeURIComponent(v)}` : '');
+  }
   if (it && it.muscle_group) return `/img/exercises/${muscleSlug(it.muscle_group)}.svg`;
   return '/img/exercises/default.svg';
 }

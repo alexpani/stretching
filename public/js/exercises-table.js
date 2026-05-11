@@ -57,7 +57,12 @@ const MUSCLE_LABELS_T = {
 function slugMuscleT(s) { return (s || '').replace(/\s+/g, '-'); }
 
 function imgForT(ex) {
-  if (ex && ex.image_path) return ex.image_path;
+  if (ex && ex.image_path) {
+    // Il file è sempre stretch-<id>.jpg: bust cache browser/SW al cambio.
+    const v = ex.updated_at || ex.created_at || '';
+    const q = v ? `?v=${encodeURIComponent(v)}` : '';
+    return ex.image_path + q;
+  }
   if (ex && ex.muscle_group) return `/img/exercises/${slugMuscleT(ex.muscle_group)}.svg`;
   return '/img/exercises/default.svg';
 }
