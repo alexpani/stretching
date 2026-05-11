@@ -144,7 +144,7 @@
 .col-muscle { width: 180px; }
 .col-side   { width: 120px; }
 .col-dur    { width: 90px; }
-.col-actions{ width: 110px; text-align: right; }
+.col-actions{ width: 140px; text-align: right; }
 
 .sheet input[type=text],
 .sheet input[type=number],
@@ -204,6 +204,7 @@
   cursor: pointer;
 }
 .row-actions button.save-btn { color: var(--color-primary); font-weight: 700; }
+.row-actions button.dup-btn  { color: var(--color-text-secondary); }
 .row-actions button.del-btn  { color: var(--color-danger); }
 .row-actions button:disabled { opacity: 0.35; cursor: default; }
 

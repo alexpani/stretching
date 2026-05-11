@@ -145,10 +145,12 @@ function buildRow(ex) {
   tdAct.innerHTML = `
     <div class="row-actions">
       <button type="button" class="save-btn" title="Salva modifiche" disabled>✓</button>
+      <button type="button" class="dup-btn" title="Duplica">⎘</button>
       <button type="button" class="del-btn" title="Elimina">×</button>
     </div>
   `;
   tdAct.querySelector('.save-btn').addEventListener('click', () => saveRow(tr));
+  tdAct.querySelector('.dup-btn').addEventListener('click', () => duplicateRow(ex));
   tdAct.querySelector('.del-btn').addEventListener('click', () => deleteRow(tr, ex));
   tr.appendChild(tdAct);
 
@@ -230,6 +232,19 @@ async function saveRow(tr) {
   tr.classList.remove('dirty');
   tr.querySelector('.save-btn').disabled = true;
   tr.querySelector('.save-btn').textContent = '✓';
+}
+
+async function duplicateRow(ex) {
+  const res = await fetch(`/api/exercises/${ex.id}/duplicate`, {
+    method: 'POST', credentials: 'same-origin'
+  });
+  if (res.status === 401) { window.location.href = '/'; return; }
+  if (!res.ok) return;
+  const created = await res.json();
+  Table.items.push(created);
+  renderTable();
+  const newTr = document.querySelector(`tr[data-id="${created.id}"]`);
+  if (newTr) newTr.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
 }
 
 async function deleteRow(tr, ex) {

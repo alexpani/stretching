@@ -171,6 +171,32 @@ router.put('/:id', isAuth, upload.single('file'), async (req, res) => {
   }
 });
 
+// POST /api/exercises/:id/duplicate
+router.post('/:id/duplicate', isAuth, async (req, res) => {
+  try {
+    const db = await getDb();
+    const src = await db.get(
+      'SELECT * FROM exercises WHERE id = ? AND deleted_at IS NULL',
+      req.params.id
+    );
+    if (!src) return res.status(404).json({ error: 'Non trovato' });
+    const newId = crypto.randomUUID();
+    const newImagePath = src.image_path ? copyImage(src.image_path, newId) : null;
+    await db.run(
+      `INSERT INTO exercises
+        (id, name, description, muscle_group, side, level, duration_sec, image_path, notes)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      newId, `${src.name} (copia)`, src.description, src.muscle_group, src.side,
+      LEVEL_DUMMY, src.duration_sec, newImagePath, src.notes
+    );
+    const row = await db.get('SELECT * FROM exercises WHERE id = ?', newId);
+    res.status(201).json(row);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Errore del server' });
+  }
+});
+
 // DELETE /api/exercises/:id  — soft-delete
 router.delete('/:id', isAuth, async (req, res) => {
   try {

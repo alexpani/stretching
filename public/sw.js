@@ -11,7 +11,7 @@
 // su conferma utente, invia postMessage({type:'SKIP_WAITING'}) che innesca
 // self.skipWaiting() qui + reload lato client.
 
-const VERSION = 'v33';
+const VERSION = 'v34';
 const SHELL_CACHE   = `st-shell-${VERSION}`;
 const RUNTIME_CACHE = `st-runtime-${VERSION}`;
 const API_CACHE     = `st-api-${VERSION}`;
