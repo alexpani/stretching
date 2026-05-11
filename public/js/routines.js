@@ -393,6 +393,12 @@ async function openPicker() {
   }
   renderPicker('');
   document.getElementById('modal-exercise-picker').classList.remove('hidden');
+  // Focus sulla casella di ricerca dopo che il modale è visibile.
+  // requestAnimationFrame evita race con il transition/display change.
+  requestAnimationFrame(() => {
+    const s = document.getElementById('picker-search');
+    if (s) s.focus();
+  });
 }
 function closePicker() {
   document.getElementById('modal-exercise-picker').classList.add('hidden');
