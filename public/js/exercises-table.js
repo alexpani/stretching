@@ -136,6 +136,8 @@ function buildRow(ex) {
   tr.appendChild(buildInputCell('text', 'name', ex.name || '', 'col-name'));
   // Descrizione
   tr.appendChild(buildTextareaCell('description', ex.description || '', 'col-desc'));
+  // Commento durante l'esercizio (notes)
+  tr.appendChild(buildTextareaCell('notes', ex.notes || '', 'col-notes'));
   // Gruppo
   tr.appendChild(buildSelectCell('muscle_group', ex.muscle_group, MUSCLE_LABELS_T, 'col-muscle'));
   // Lato
@@ -215,6 +217,7 @@ async function saveRow(tr) {
   const fd = new FormData();
   fd.set('name',         data.name || '');
   fd.set('description',  data.description || '');
+  fd.set('notes',        data.notes || '');
   fd.set('muscle_group', data.muscle_group);
   fd.set('side',         data.side || 'both');
   fd.set('duration_sec', data.duration_sec || 30);
@@ -276,6 +279,7 @@ document.getElementById('tbl-file-input').addEventListener('change', async (e) =
   const fd = new FormData();
   fd.set('name', ex.name || '');
   fd.set('description', ex.description || '');
+  fd.set('notes', ex.notes || '');
   fd.set('muscle_group', ex.muscle_group);
   fd.set('side', ex.side || 'both');
   fd.set('duration_sec', ex.duration_sec);

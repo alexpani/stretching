@@ -140,7 +140,8 @@
 
 .col-thumb  { width: 112px; }
 .col-name   { min-width: 180px; }
-.col-desc   { min-width: 280px; }
+.col-desc   { min-width: 240px; }
+.col-notes  { min-width: 240px; }
 .col-muscle { width: 180px; }
 .col-side   { width: 120px; }
 .col-dur    { width: 90px; }
@@ -164,6 +165,7 @@
 .sheet input[type=number] { min-height: 32px; }
 .sheet textarea { min-height: 34px; }
 .sheet td.col-desc textarea { min-height: 96px; height: 96px; }
+.sheet td.col-notes textarea { min-height: 96px; height: 96px; }
 .sheet input:focus,
 .sheet select:focus,
 .sheet textarea:focus {
@@ -221,5 +223,5 @@
     border: none;
     padding: 2px 0;
   }
-  .col-thumb { grid-row: span 6; align-self: start; }
+  .col-thumb { grid-row: span 7; align-self: start; }
 }
