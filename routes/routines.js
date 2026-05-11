@@ -13,7 +13,7 @@ async function loadItems(db, routineId) {
            ri.duration_override_sec, ri.rest_after_sec,
            e.name, e.description, e.muscle_group, e.side, e.level,
            e.duration_sec AS exercise_duration_sec,
-           e.image_path, e.notes
+           e.image_path, e.notes, e.video_loop, e.updated_at
     FROM routine_items ri
     JOIN exercises e ON e.id = ri.exercise_id
     WHERE ri.routine_id = ?
