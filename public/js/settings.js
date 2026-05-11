@@ -54,7 +54,7 @@
   /* Session toggles ──────────────────────── */
   function getSessionOpts() {
     const raw = localStorage.getItem('st-session-opts');
-    const def = { beep: true, voice: true, wakelock: true, voiceVolume: 1.0 };
+    const def = { beep: true, voice: true, wakelock: true, voiceVolume: 1.0, voiceURI: '' };
     if (!raw) return def;
     try { return Object.assign(def, JSON.parse(raw)); } catch { return def; }
   }
@@ -142,6 +142,57 @@
     }
   }
 
+  function bindVoicePicker() {
+    const sel = document.getElementById('opt-voice-pick');
+    const sub = document.getElementById('opt-voice-pick-sub');
+    const test = document.getElementById('opt-voice-test');
+    if (!sel) return;
+    if (!('speechSynthesis' in window)) {
+      sel.disabled = true;
+      if (sub) sub.textContent = 'Sintesi vocale non disponibile su questo browser';
+      if (test) test.disabled = true;
+      return;
+    }
+    const populate = () => {
+      const its = speechSynthesis.getVoices()
+        .filter(v => v.lang && v.lang.toLowerCase().startsWith('it'));
+      const opts = getSessionOpts();
+      const cur = opts.voiceURI || '';
+      const optionsHtml = [
+        '<option value="">Automatica (migliore disponibile)</option>',
+        ...its.map(v => {
+          const lbl = `${v.name}${v.lang ? ' — ' + v.lang : ''}${v.localService ? '' : ' ☁'}`;
+          const sel = v.voiceURI === cur ? ' selected' : '';
+          return `<option value="${v.voiceURI}"${sel}>${lbl.replace(/</g,'&lt;')}</option>`;
+        })
+      ].join('');
+      sel.innerHTML = optionsHtml;
+      if (sub) {
+        if (!its.length) sub.textContent = 'Nessuna voce italiana trovata sul dispositivo';
+        else sub.textContent = 'Scegli quale voce italiana usare. Su iOS scarica una voce "Migliorata" da Impostazioni → Accessibilità → Contenuto letto → Voci.';
+      }
+    };
+    populate();
+    speechSynthesis.addEventListener('voiceschanged', populate);
+    sel.addEventListener('change', () => {
+      const next = getSessionOpts();
+      next.voiceURI = sel.value || '';
+      setSessionOpts(next);
+    });
+    if (test) {
+      test.addEventListener('click', () => {
+        const opts = getSessionOpts();
+        try { speechSynthesis.cancel(); } catch (_) {}
+        const u = new SpeechSynthesisUtterance('Piegamenti in avanti, per 30 secondi');
+        u.lang = 'it-IT';
+        u.volume = Math.max(0, Math.min(1, opts.voiceVolume ?? 1.0));
+        const chosen = speechSynthesis.getVoices().find(v => v.voiceURI === (opts.voiceURI || sel.value));
+        if (chosen) u.voice = chosen;
+        speechSynthesis.speak(u);
+      });
+    }
+  }
+
   /* Reazione a cambi sistema (auto theme) ─ */
   function bindSystemThemeListener() {
     const mq = window.matchMedia('(prefers-color-scheme: dark)');
@@ -166,6 +217,7 @@
     refreshThemeRows();
     bindThemePicker();
     bindSessionToggles();
+    bindVoicePicker();
   }
 
   window.Settings = {

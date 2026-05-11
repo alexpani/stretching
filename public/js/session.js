@@ -171,8 +171,13 @@ function scoreVoice(v) {
 function initVoice() {
   if (!('speechSynthesis' in window)) return;
   const pickItalian = () => {
-    const its = speechSynthesis.getVoices()
-      .filter(v => v.lang && v.lang.toLowerCase().startsWith('it'));
+    const opts = sessionOpts();
+    const all = speechSynthesis.getVoices();
+    if (opts.voiceURI) {
+      const chosen = all.find(v => v.voiceURI === opts.voiceURI);
+      if (chosen) { Session.voice = chosen; return; }
+    }
+    const its = all.filter(v => v.lang && v.lang.toLowerCase().startsWith('it'));
     if (!its.length) return;
     its.sort((a, b) => scoreVoice(b) - scoreVoice(a));
     Session.voice = its[0];
@@ -336,9 +341,10 @@ function enterPhase(idx) {
     if (Session.voiceEnabled) {
       const lateral = it.side === 'dx' ? ' lato destro' : it.side === 'sx' ? ' lato sinistro' : '';
       const isBilateral = it.side === 'bilaterale';
+      // virgola → piccola pausa naturale prima della durata
       const timePhrase = isBilateral
-        ? ` ${Math.round(ph.duration / 2)} secondi per lato`
-        : ` per ${ph.duration} secondi`;
+        ? `, ${Math.round(ph.duration / 2)} secondi per lato`
+        : `, per ${ph.duration} secondi`;
       speak(`${it.name || 'Esercizio'}${lateral}${timePhrase}`);
     }
   } else {
