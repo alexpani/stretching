@@ -274,10 +274,13 @@
         </div>
 
         <div class="form-field">
-          <label>Immagine (opzionale)</label>
+          <label>Immagine o video (opzionale)</label>
           <input type="file" id="ex-file" accept="image/*,video/*" />
           <label style="display:flex; align-items:center; gap:8px; font-size:var(--text-sm);">
-            <input type="checkbox" id="ex-remove-image" /> Rimuovi immagine
+            <input type="checkbox" id="ex-remove-image" /> Rimuovi media
+          </label>
+          <label style="display:flex; align-items:center; gap:8px; font-size:var(--text-sm); margin-top:6px;">
+            <input type="checkbox" id="ex-video-loop" checked /> Riproduci video in loop (altrimenti si ferma all'ultimo fotogramma)
           </label>
         </div>
 

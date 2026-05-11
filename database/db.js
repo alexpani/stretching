@@ -80,6 +80,12 @@ async function getDb() {
   `);
   await _db.exec(`CREATE INDEX IF NOT EXISTS idx_sessions_started ON sessions(started_at)`);
 
+  // Video loop per esercizio (default 1 = loop, 0 = stop sull'ultimo frame)
+  const excols = (await _db.all("PRAGMA table_info(exercises)")).map(c => c.name);
+  if (!excols.includes('video_loop')) {
+    await _db.run(`ALTER TABLE exercises ADD COLUMN video_loop INTEGER NOT NULL DEFAULT 1`);
+  }
+
   // Round 2 — M16/M17: campi aggiuntivi su routine (idempotente).
   const rcols = (await _db.all("PRAGMA table_info(routines)")).map(c => c.name);
   if (!rcols.includes('rest_standard_sec')) {

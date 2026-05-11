@@ -38,10 +38,9 @@ function isVideoMedia(p) {
 
 function mediaTagFor(ex) {
   const src = imgFor(ex);
-  if (isVideoMedia(src)) {
-    return `<video src="${src}" muted loop autoplay playsinline preload="metadata"></video>`;
-  }
-  return `<img src="${src}" alt="" loading="lazy" />`;
+  if (!isVideoMedia(src)) return `<img src="${src}" alt="" loading="lazy" />`;
+  const loop = (ex.video_loop == null || ex.video_loop) ? ' loop' : '';
+  return `<video src="${src}" muted${loop} autoplay playsinline preload="metadata"></video>`;
 }
 // Esposto globalmente: anche session.js lo userà.
 window.slugMuscle = slugMuscle;
@@ -115,6 +114,7 @@ function openModal(ex) {
   document.getElementById('ex-notes').value        = ex ? (ex.notes || '') : '';
   document.getElementById('ex-file').value         = '';
   document.getElementById('ex-remove-image').checked = false;
+  document.getElementById('ex-video-loop').checked = ex ? (ex.video_loop == null ? true : !!ex.video_loop) : true;
   document.getElementById('ex-img').src            = imgFor(ex);
   document.getElementById('ex-error').classList.add('hidden');
   document.getElementById('ex-delete-row').style.display = ex ? 'flex' : 'none';
@@ -157,6 +157,7 @@ document.getElementById('form-exercise').addEventListener('submit', async (e) =>
   fd.set('duration_sec', document.getElementById('ex-duration').value);
   fd.set('description',  document.getElementById('ex-description').value.trim());
   fd.set('notes',        document.getElementById('ex-notes').value.trim());
+  fd.set('video_loop',   document.getElementById('ex-video-loop').checked ? '1' : '0');
   const file = document.getElementById('ex-file').files[0];
   if (file) fd.set('file', file);
   if (document.getElementById('ex-remove-image').checked) fd.set('remove_image', '1');

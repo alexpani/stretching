@@ -73,6 +73,7 @@ function renderSessionMedia(it) {
   if (isVideoMedia(src)) {
     img.classList.add('hidden');
     img.removeAttribute('src');
+    video.loop = (it && it.video_loop == null) ? true : !!it.video_loop;
     if (video.getAttribute('src') !== src) video.src = src;
     video.classList.remove('hidden');
     try { video.play().catch(() => {}); } catch (_) {}

@@ -19,7 +19,7 @@ const LEVEL_DUMMY = 'easy';
 
 function parseForm(body) {
   const {
-    name, description, muscle_group, side, duration_sec, notes
+    name, description, muscle_group, side, duration_sec, notes, video_loop
   } = body || {};
   const errors = [];
   if (!name || !String(name).trim()) errors.push('nome richiesto');
@@ -27,6 +27,10 @@ function parseForm(body) {
   const dur = parseInt(duration_sec, 10);
   if (!dur || dur < 5 || dur > 600) errors.push('durata 5-600 secondi');
   const safeSide = SIDES.includes(side) ? side : 'both';
+  // Accetta '1'/'0', 'true'/'false', undefined → default 1 (loop)
+  const loopVal = (video_loop === undefined || video_loop === null || video_loop === '')
+    ? 1
+    : (video_loop === '0' || video_loop === 'false' || video_loop === false ? 0 : 1);
   return {
     errors,
     data: {
@@ -35,7 +39,8 @@ function parseForm(body) {
       muscle_group,
       side: safeSide,
       duration_sec: dur,
-      notes: notes ? String(notes).trim() : null
+      notes: notes ? String(notes).trim() : null,
+      video_loop: loopVal
     }
   };
 }
@@ -100,10 +105,10 @@ router.post('/', isAuth, upload.single('file'), async (req, res) => {
 
     await db.run(
       `INSERT INTO exercises
-        (id, name, description, muscle_group, side, level, duration_sec, image_path, notes)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        (id, name, description, muscle_group, side, level, duration_sec, image_path, notes, video_loop)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       id, data.name, data.description, data.muscle_group, data.side,
-      LEVEL_DUMMY, data.duration_sec, imagePath, data.notes
+      LEVEL_DUMMY, data.duration_sec, imagePath, data.notes, data.video_loop
     );
 
     // M15 — clone bilaterale: se l'originale è dx/sx, crea automaticamente
@@ -114,10 +119,10 @@ router.post('/', isAuth, upload.single('file'), async (req, res) => {
       const twinImagePath = imagePath ? copyImage(imagePath, twinId) : null;
       await db.run(
         `INSERT INTO exercises
-          (id, name, description, muscle_group, side, level, duration_sec, image_path, notes)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          (id, name, description, muscle_group, side, level, duration_sec, image_path, notes, video_loop)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         twinId, data.name, data.description, data.muscle_group, twinSide,
-        LEVEL_DUMMY, data.duration_sec, twinImagePath, data.notes
+        LEVEL_DUMMY, data.duration_sec, twinImagePath, data.notes, data.video_loop
       );
     }
 
@@ -162,11 +167,11 @@ router.put('/:id', isAuth, upload.single('file'), async (req, res) => {
     await db.run(
       `UPDATE exercises
          SET name = ?, description = ?, muscle_group = ?, side = ?,
-             duration_sec = ?, image_path = ?, notes = ?,
+             duration_sec = ?, image_path = ?, notes = ?, video_loop = ?,
              updated_at = datetime('now')
        WHERE id = ?`,
       data.name, data.description, data.muscle_group, data.side,
-      data.duration_sec, imagePath, data.notes, current.id
+      data.duration_sec, imagePath, data.notes, data.video_loop, current.id
     );
     const row = await db.get('SELECT * FROM exercises WHERE id = ?', current.id);
     res.json(row);
@@ -190,10 +195,10 @@ router.post('/:id/duplicate', isAuth, async (req, res) => {
     const newImagePath = src.image_path ? copyImage(src.image_path, newId) : null;
     await db.run(
       `INSERT INTO exercises
-        (id, name, description, muscle_group, side, level, duration_sec, image_path, notes)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        (id, name, description, muscle_group, side, level, duration_sec, image_path, notes, video_loop)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       newId, `${src.name} (copia)`, src.description, src.muscle_group, src.side,
-      LEVEL_DUMMY, src.duration_sec, newImagePath, src.notes
+      LEVEL_DUMMY, src.duration_sec, newImagePath, src.notes, src.video_loop != null ? src.video_loop : 1
     );
     const row = await db.get('SELECT * FROM exercises WHERE id = ?', newId);
     res.status(201).json(row);

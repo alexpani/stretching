@@ -73,9 +73,9 @@ function isVideoMediaT(p) {
 
 function mediaTagT(ex) {
   const src = imgForT(ex);
-  return isVideoMediaT(src)
-    ? `<video src="${src}" muted loop autoplay playsinline preload="metadata"></video>`
-    : `<img src="${src}" alt="" />`;
+  if (!isVideoMediaT(src)) return `<img src="${src}" alt="" />`;
+  const loop = (ex.video_loop == null || ex.video_loop) ? ' loop' : '';
+  return `<video src="${src}" muted${loop} autoplay playsinline preload="metadata"></video>`;
 }
 
 function escT(s) {
@@ -156,6 +156,8 @@ function buildRow(ex) {
     { 'both': 'Entrambi', 'dx': 'Destro', 'sx': 'Sinistro', 'bilaterale': 'Bilaterale' }, 'col-side'));
   // Durata
   tr.appendChild(buildInputCell('number', 'duration_sec', ex.duration_sec || 30, 'col-dur'));
+  // Loop video
+  tr.appendChild(buildCheckboxCell('video_loop', ex.video_loop == null ? true : !!ex.video_loop, 'col-loop'));
 
   // Azioni
   const tdAct = document.createElement('td');
@@ -198,6 +200,23 @@ function buildTextareaCell(field, value, colClass) {
   return td;
 }
 
+function buildCheckboxCell(field, checked, colClass) {
+  const td = document.createElement('td');
+  td.className = colClass;
+  td.innerHTML = `<label style="display:inline-flex;align-items:center;justify-content:center;width:100%;cursor:pointer">
+    <input type="checkbox" data-field="${field}"${checked ? ' checked' : ''} />
+  </label>`;
+  // Per coerenza con gli altri campi, segnala dirty al change.
+  td.querySelector('input').addEventListener('change', (e) => {
+    const tr = e.target.closest('tr');
+    if (tr) {
+      markDirty(tr);
+      saveRow(tr);
+    }
+  });
+  return td;
+}
+
 function buildSelectCell(field, selected, options, colClass) {
   const td = document.createElement('td');
   td.className = colClass;
@@ -217,7 +236,7 @@ function getRowData(tr) {
   const data = {};
   tr.querySelectorAll('[data-field]').forEach(el => {
     const f = el.dataset.field;
-    data[f] = el.value;
+    data[f] = (el.type === 'checkbox') ? (el.checked ? '1' : '0') : el.value;
   });
   return data;
 }
@@ -232,6 +251,7 @@ async function saveRow(tr) {
   fd.set('muscle_group', data.muscle_group);
   fd.set('side',         data.side || 'both');
   fd.set('duration_sec', data.duration_sec || 30);
+  fd.set('video_loop',   data.video_loop || '0');
 
   const res = await fetch(`/api/exercises/${id}`, {
     method: 'PUT', body: fd, credentials: 'same-origin'
@@ -294,6 +314,7 @@ document.getElementById('tbl-file-input').addEventListener('change', async (e) =
   fd.set('muscle_group', ex.muscle_group);
   fd.set('side', ex.side || 'both');
   fd.set('duration_sec', ex.duration_sec);
+  fd.set('video_loop', (ex.video_loop == null || ex.video_loop) ? '1' : '0');
   fd.set('file', file);
   const res = await fetch(`/api/exercises/${id}`, {
     method: 'PUT', body: fd, credentials: 'same-origin'

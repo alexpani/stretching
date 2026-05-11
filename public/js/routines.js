@@ -47,9 +47,9 @@ function isVideoMediaR(p) {
 
 function itemMediaTag(it) {
   const src = itemImg(it);
-  return isVideoMediaR(src)
-    ? `<video src="${src}" muted loop autoplay playsinline preload="metadata"></video>`
-    : `<img src="${src}" alt="" />`;
+  if (!isVideoMediaR(src)) return `<img src="${src}" alt="" />`;
+  const loop = (it.video_loop == null || it.video_loop) ? ' loop' : '';
+  return `<video src="${src}" muted${loop} autoplay playsinline preload="metadata"></video>`;
 }
 
 function escHtml(s) {
