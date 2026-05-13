@@ -179,8 +179,8 @@
         '<option value="">Automatica (migliore disponibile)</option>',
         ...its.map(v => {
           const lbl = `${v.name}${v.lang ? ' — ' + v.lang : ''}${v.localService ? '' : ' ☁'}`;
-          const sel = v.voiceURI === cur ? ' selected' : '';
-          return `<option value="${v.voiceURI}"${sel}>${lbl.replace(/</g,'&lt;')}</option>`;
+          const isSel = v.voiceURI === cur ? ' selected' : '';
+          return `<option value="${v.voiceURI}"${isSel}>${lbl.replace(/</g,'&lt;')}</option>`;
         })
       ].join('');
       sel.innerHTML = optionsHtml;
@@ -189,8 +189,12 @@
         else sub.textContent = 'Scegli quale voce italiana usare. Su iOS scarica una voce "Migliorata" da Impostazioni → Accessibilità → Contenuto letto → Voci.';
       }
     };
-    populate();
     speechSynthesis.addEventListener('voiceschanged', populate);
+    populate();
+    document.addEventListener('tabchange', (e) => {
+      if (e && e.detail && e.detail.tab === 'profile') populate();
+    });
+    sel.addEventListener('focus', populate);
     sel.addEventListener('change', () => {
       const next = getSessionOpts();
       next.voiceURI = sel.value || '';
@@ -206,6 +210,7 @@
         const chosen = speechSynthesis.getVoices().find(v => v.voiceURI === (opts.voiceURI || sel.value));
         if (chosen) u.voice = chosen;
         speechSynthesis.speak(u);
+        setTimeout(populate, 250);
       });
     }
   }
