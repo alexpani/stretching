@@ -170,31 +170,51 @@
       if (test) test.disabled = true;
       return;
     }
+    let lastCount = -1;
     const populate = () => {
-      const its = speechSynthesis.getVoices()
-        .filter(v => v.lang && v.lang.toLowerCase().startsWith('it'));
+      const all = speechSynthesis.getVoices();
+      if (all.length === lastCount) return;
+      lastCount = all.length;
+      const its = all.filter(v => v.lang && v.lang.toLowerCase().startsWith('it'));
+      const others = all.filter(v => !v.lang || !v.lang.toLowerCase().startsWith('it'));
+      others.sort((a, b) => (a.lang || '').localeCompare(b.lang || ''));
       const opts = getSessionOpts();
       const cur = opts.voiceURI || '';
-      const optionsHtml = [
-        '<option value="">Automatica (migliore disponibile)</option>',
-        ...its.map(v => {
-          const lbl = `${v.name}${v.lang ? ' — ' + v.lang : ''}${v.localService ? '' : ' ☁'}`;
-          const isSel = v.voiceURI === cur ? ' selected' : '';
-          return `<option value="${v.voiceURI}"${isSel}>${lbl.replace(/</g,'&lt;')}</option>`;
-        })
-      ].join('');
-      sel.innerHTML = optionsHtml;
+      const renderOpt = (v) => {
+        const lbl = `${v.name}${v.lang ? ' — ' + v.lang : ''}${v.localService ? '' : ' ☁'}`;
+        const isSel = v.voiceURI === cur ? ' selected' : '';
+        return `<option value="${v.voiceURI}"${isSel}>${lbl.replace(/</g,'&lt;')}</option>`;
+      };
+      const parts = ['<option value="">Automatica (migliore disponibile)</option>'];
+      if (its.length) {
+        parts.push('<optgroup label="Italiano">');
+        parts.push(...its.map(renderOpt));
+        parts.push('</optgroup>');
+      }
+      if (others.length) {
+        parts.push('<optgroup label="Altre lingue">');
+        parts.push(...others.map(renderOpt));
+        parts.push('</optgroup>');
+      }
+      sel.innerHTML = parts.join('');
       if (sub) {
-        if (!its.length) sub.textContent = 'Nessuna voce italiana trovata sul dispositivo';
-        else sub.textContent = 'Scegli quale voce italiana usare. Su iOS scarica una voce "Migliorata" da Impostazioni → Accessibilità → Contenuto letto → Voci.';
+        if (!all.length) sub.textContent = 'Caricamento voci…';
+        else if (!its.length) sub.textContent = 'Nessuna voce italiana trovata. Su iOS scarica una voce italiana da Impostazioni → Accessibilità → Contenuto letto → Voci.';
+        else sub.textContent = `Trovate ${its.length} voci italiane${others.length ? ` (+${others.length} altre lingue)` : ''}. Su iOS le voci "Migliorate/Premium" possono non essere esposte al browser.`;
       }
     };
     speechSynthesis.addEventListener('voiceschanged', populate);
     populate();
+    // iOS: getVoices() popola lazy. Polla per qualche secondo per cogliere il riempimento.
+    let polls = 0;
+    const pollId = setInterval(() => {
+      populate();
+      if (++polls >= 20) clearInterval(pollId);
+    }, 300);
     document.addEventListener('tabchange', (e) => {
-      if (e && e.detail && e.detail.tab === 'profile') populate();
+      if (e && e.detail && e.detail.tab === 'profile') { lastCount = -1; populate(); }
     });
-    sel.addEventListener('focus', populate);
+    sel.addEventListener('focus', () => { lastCount = -1; populate(); });
     sel.addEventListener('change', () => {
       const next = getSessionOpts();
       next.voiceURI = sel.value || '';
@@ -210,7 +230,8 @@
         const chosen = speechSynthesis.getVoices().find(v => v.voiceURI === (opts.voiceURI || sel.value));
         if (chosen) u.voice = chosen;
         speechSynthesis.speak(u);
-        setTimeout(populate, 250);
+        setTimeout(() => { lastCount = -1; populate(); }, 250);
+        setTimeout(() => { lastCount = -1; populate(); }, 1500);
       });
     }
   }
