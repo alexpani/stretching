@@ -754,17 +754,6 @@ body {
   font-size: var(--text-sm);
   color: var(--color-text-secondary);
 }
-.session-topbar .sp { flex: 1; }
-.session-stop {
-  width: 40px; height: 40px;
-  border-radius: var(--radius-full);
-  background: var(--color-card);
-  color: var(--color-danger);
-  box-shadow: var(--shadow-sm);
-  display: flex; align-items: center; justify-content: center;
-}
-.session-stop svg { width: 18px; height: 18px; }
-
 .progress-bar {
   height: 4px;
   background: var(--color-border-soft);
@@ -781,7 +770,7 @@ body {
 
 .session-image {
   width: 100%;
-  max-height: 42vh;
+  max-height: 36vh;
   border-radius: var(--radius-lg);
   margin-bottom: var(--space-3);
   position: relative;

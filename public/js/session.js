@@ -629,7 +629,6 @@ if (_ssImageEl) {
 document.getElementById('ss-pause-btn').addEventListener('click', togglePause);
 document.getElementById('ss-skip-btn').addEventListener('click', skipPhase);
 document.getElementById('ss-stop-btn').addEventListener('click', stopEarly);
-document.getElementById('ss-close-btn').addEventListener('click', stopEarly);
 document.getElementById('sm-save-btn').addEventListener('click', saveSession);
 document.getElementById('sm-close-btn').addEventListener('click', closeOverlay);
 const smCloseX = document.getElementById('sm-close-x');
