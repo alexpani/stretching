@@ -892,14 +892,25 @@ body {
   color: var(--color-text);
 }
 
-.session-next {
+.session-next-top {
   text-align: center;
-  font-size: var(--text-sm);
+  font-size: var(--text-lg, 1.125rem);
+  font-weight: 500;
   color: var(--color-text-secondary);
-  margin-top: var(--space-3);
-  min-height: 20px;
+  margin-bottom: var(--space-3);
+  min-height: 28px;
+  line-height: 1.3;
+  transition: color 0.2s ease;
 }
-.session-next strong { color: var(--color-text); }
+.session-next-top strong {
+  color: var(--color-text);
+  font-weight: 700;
+}
+.session-next-top.rest {
+  color: var(--color-text);
+  font-size: var(--text-xl, 1.25rem);
+}
+.session-next-top.rest strong { color: var(--accent, var(--color-primary)); }
 
 .session-controls {
   display: flex;
