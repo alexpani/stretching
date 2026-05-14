@@ -513,7 +513,9 @@ document.getElementById('form-item').addEventListener('submit', async (e) => {
 // ── Trigger ingresso tab ────────────────
 document.addEventListener('tabchange', (e) => {
   if (e.detail.tab === 'routines') {
-    // se non siamo in dettaglio, ricarica la lista
-    if (!Routines.current) loadRoutines();
+    // Tornando sul tab Piani si torna sempre all'elenco: se eravamo nel
+    // dettaglio di un piano, backToList() lo chiude e ricarica la lista.
+    if (Routines.current) backToList();
+    else loadRoutines();
   }
 });
