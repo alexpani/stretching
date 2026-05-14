@@ -11,27 +11,11 @@ const Table = {
   items: [],
   filter: { q: '', zones: [], side: '', posizione: '' },
   sort: { key: null, dir: 'asc' },   // key: 'name' | 'muscle_group' | null
-  uploadRowId: null   // id riga per cui sta arrivando la foto
+  uploadRowId: null,  // id riga per cui sta arrivando la foto
+  zones: []           // elenco zone caricato da /api/zones
 };
 
 const MUSCLE_ORDER = ['collo e spalle', 'schiena', 'addominali', 'glutei e gambe', 'braccia e torace'];
-// Zone muscolari (tag multipli). Allineato a ZONES in routes/exercises.js.
-const ZONES_T = [
-  'Collo e cervicale',
-  'Spalle e cingolo scapolare',
-  'Braccia e polsi',
-  'Petto',
-  'Dorsale (schiena alta)',
-  'Lombare (schiena bassa)',
-  'Core e addome',
-  'Anche e flessori dell\'anca',
-  'Glutei e piriforme',
-  'Quadricipiti',
-  'Ischiocrurali (femorali posteriori)',
-  'Adduttori e inguine',
-  'Polpacci e caviglie',
-  'Catena posteriore completa'
-];
 
 function compareSort(a, b) {
   const k = Table.sort.key;
@@ -113,7 +97,16 @@ document.addEventListener('keydown', (e) => {
 });
 
 // ── Carica ──────────────────────────────
+async function loadZonesT() {
+  const res = await fetch('/api/zones', { credentials: 'same-origin' });
+  if (!res.ok) return;
+  const list = await res.json();
+  Table.zones = Array.isArray(list) ? list.map(z => z.name) : [];
+  buildZoneFilterT();
+}
+
 async function loadTable() {
+  await loadZonesT();
   const res = await fetch('/api/exercises', { credentials: 'same-origin' });
   if (res.status === 401) { window.location.href = '/'; return; }
   if (!res.ok) return;
@@ -295,7 +288,7 @@ function buildSelectCell(field, selected, options, colClass) {
 function buildZonesCell(selected) {
   const td = document.createElement('td');
   td.className = 'col-zones';
-  const chips = ZONES_T
+  const chips = Table.zones
     .map(z => `<button type="button" class="zone-tag${selected.includes(z) ? ' active' : ''}" data-zone="${escT(z)}">${escT(z)}</button>`)
     .join('');
   td.innerHTML = `<div class="zone-tags" data-field="zones">${chips}</div>`;
@@ -451,32 +444,43 @@ document.getElementById('tbl-search').addEventListener('input', (e) => {
   renderTable();
 });
 // Filtro zone: chip "Tutte" + una per zona, multi-selezione.
-(function buildZoneFilterT() {
+// Ricostruito quando l'elenco zone cambia; preserva la selezione corrente.
+function buildZoneFilterT() {
   const row = document.getElementById('tbl-filter-zone');
-  let html = '<button type="button" class="chip active" data-zone="">Tutte</button>';
-  for (const z of ZONES_T) html += `<button type="button" class="chip" data-zone="${escT(z)}">${escT(z)}</button>`;
+  let html = '<button type="button" class="chip" data-zone="">Tutte</button>';
+  for (const z of Table.zones) html += `<button type="button" class="chip" data-zone="${escT(z)}">${escT(z)}</button>`;
   row.innerHTML = html;
-  row.addEventListener('click', (e) => {
-    const btn = e.target.closest('.chip');
-    if (!btn) return;
-    const zone = btn.dataset.zone || '';
-    if (!zone) {
-      Table.filter.zones = [];
-    } else {
-      btn.classList.toggle('active');
-      Table.filter.zones = [...row.querySelectorAll('.chip.active')]
-        .map(c => c.dataset.zone).filter(Boolean);
-    }
-    const allBtn = row.querySelector('.chip[data-zone=""]');
-    if (Table.filter.zones.length === 0) {
-      row.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
-      allBtn.classList.add('active');
-    } else {
-      allBtn.classList.remove('active');
-    }
-    renderTable();
-  });
-})();
+  Table.filter.zones = Table.filter.zones.filter(z => Table.zones.includes(z));
+  if (Table.filter.zones.length) {
+    Table.filter.zones.forEach(z => {
+      const c = row.querySelector(`.chip[data-zone="${CSS.escape(z)}"]`);
+      if (c) c.classList.add('active');
+    });
+  } else {
+    row.querySelector('.chip[data-zone=""]').classList.add('active');
+  }
+}
+document.getElementById('tbl-filter-zone').addEventListener('click', (e) => {
+  const btn = e.target.closest('.chip');
+  if (!btn) return;
+  const row = document.getElementById('tbl-filter-zone');
+  const zone = btn.dataset.zone || '';
+  if (!zone) {
+    Table.filter.zones = [];
+  } else {
+    btn.classList.toggle('active');
+    Table.filter.zones = [...row.querySelectorAll('.chip.active')]
+      .map(c => c.dataset.zone).filter(Boolean);
+  }
+  const allBtn = row.querySelector('.chip[data-zone=""]');
+  if (Table.filter.zones.length === 0) {
+    row.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+    allBtn.classList.add('active');
+  } else {
+    allBtn.classList.remove('active');
+  }
+  renderTable();
+});
 document.getElementById('tbl-filter-side').addEventListener('change', (e) => {
   Table.filter.side = e.target.value;
   renderTable();

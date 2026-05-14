@@ -5,6 +5,7 @@
 const Library = {
   filter: { zones: [], posizione: '' },
   items: [],
+  zones: [],          // elenco zone caricato da /api/zones
   modalOpen: false
 };
 
@@ -15,24 +16,15 @@ const MUSCLE_LABELS = {
   'glutei e gambe':   'Glutei e gambe',
   'braccia e torace': 'Braccia e torace'
 };
-// Zone muscolari (tag multipli). Allineato a ZONES in routes/exercises.js.
-const ZONES = [
-  'Collo e cervicale',
-  'Spalle e cingolo scapolare',
-  'Braccia e polsi',
-  'Petto',
-  'Dorsale (schiena alta)',
-  'Lombare (schiena bassa)',
-  'Core e addome',
-  'Anche e flessori dell\'anca',
-  'Glutei e piriforme',
-  'Quadricipiti',
-  'Ischiocrurali (femorali posteriori)',
-  'Adduttori e inguine',
-  'Polpacci e caviglie',
-  'Catena posteriore completa'
-];
 const SIDE_LABELS = { dx: 'DX', sx: 'SX', bilaterale: 'BL' };
+
+// Carica l'elenco zone (gestito dal Profilo) e ricostruisce filtro + chip modal.
+async function loadZones() {
+  const list = await apiGet('/api/zones');
+  Library.zones = Array.isArray(list) ? list.map(z => z.name) : [];
+  buildZoneFilter();
+  buildZoneTags();
+}
 
 // Converte un muscle_group ("glutei e gambe") in slug file-safe ("glutei-e-gambe")
 // per il path SVG placeholder.
@@ -118,12 +110,22 @@ function escapeHtml(s) {
 
 // ── Filtri ───────────────────────────────
 // Costruisce le chip del filtro zone: "Tutte" + una per zona (multi-selezione).
-(function buildZoneFilter() {
+// Preserva la selezione corrente quando l'elenco zone cambia.
+function buildZoneFilter() {
   const row = document.getElementById('filter-zone');
-  let html = '<button class="chip active" data-zone="">Tutte</button>';
-  for (const z of ZONES) html += `<button class="chip" data-zone="${escapeHtml(z)}">${escapeHtml(z)}</button>`;
+  let html = '<button class="chip" data-zone="">Tutte</button>';
+  for (const z of Library.zones) html += `<button class="chip" data-zone="${escapeHtml(z)}">${escapeHtml(z)}</button>`;
   row.innerHTML = html;
-})();
+  Library.filter.zones = Library.filter.zones.filter(z => Library.zones.includes(z));
+  if (Library.filter.zones.length) {
+    Library.filter.zones.forEach(z => {
+      const c = row.querySelector(`.chip[data-zone="${CSS.escape(z)}"]`);
+      if (c) c.classList.add('active');
+    });
+  } else {
+    row.querySelector('.chip[data-zone=""]').classList.add('active');
+  }
+}
 
 document.getElementById('filter-zone').addEventListener('click', (e) => {
   const btn = e.target.closest('.chip');
@@ -162,11 +164,11 @@ document.getElementById('filter-reset').addEventListener('click', () => {
 });
 
 // Costruisce le zone come tag toggle nel modal esercizio.
-(function buildZoneTags() {
-  document.getElementById('ex-zones').innerHTML = ZONES.map(z =>
+function buildZoneTags() {
+  document.getElementById('ex-zones').innerHTML = Library.zones.map(z =>
     `<button type="button" class="chip" data-zone="${escapeHtml(z)}">${escapeHtml(z)}</button>`
   ).join('');
-})();
+}
 document.getElementById('ex-zones').addEventListener('click', (e) => {
   const chip = e.target.closest('.chip');
   if (chip) chip.classList.toggle('active');
@@ -301,5 +303,9 @@ document.getElementById('ex-delete-btn').addEventListener('click', async () => {
 document.addEventListener('tabchange', (e) => {
   if (e.detail.tab === 'library') loadExercises();
 });
+// Le zone possono cambiare dal Profilo: ricarica filtro + chip modal.
+document.addEventListener('zoneschanged', loadZones);
+// Carica l'elenco zone all'avvio (costruisce filtro + chip modal).
+loadZones();
 // Nota: il primo load avviene via tabchange dispatchato da showApp() in app.js.
 // Il listener 'tabchange' sopra si attiva solo quando l'utente apre il tab Esercizi.

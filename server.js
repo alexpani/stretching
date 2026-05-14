@@ -40,6 +40,7 @@ app.use('/', authRoutes);
 app.use('/api/exercises', require('./routes/exercises'));
 app.use('/api/routines',  require('./routes/routines'));
 app.use('/api/sessions',  require('./routes/sessions'));
+app.use('/api/zones',     require('./routes/zones'));
 
 // API read-only per consumo da app terze in LAN (niente auth)
 app.use('/api/external',  require('./routes/external'));

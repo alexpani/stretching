@@ -134,6 +134,38 @@ async function getDb() {
     await _db.run(`INSERT OR IGNORE INTO exercise_zones (exercise_id, zone) VALUES (?, ?)`, e.id, zone);
   }
 
+  // Elenco canonico delle zone, gestibile dal Profilo (rinomina/aggiungi/togli).
+  await _db.exec(`
+    CREATE TABLE IF NOT EXISTS zones (
+      name       TEXT PRIMARY KEY,
+      position   INTEGER NOT NULL DEFAULT 0,
+      created_at TEXT DEFAULT (datetime('now'))
+    )
+  `);
+  // Seed idempotente: solo se la tabella è vuota.
+  const zonesCount = (await _db.get('SELECT COUNT(*) AS n FROM zones')).n;
+  if (zonesCount === 0) {
+    const DEFAULT_ZONES = [
+      'Collo e cervicale',
+      'Spalle e cingolo scapolare',
+      'Braccia e polsi',
+      'Petto',
+      'Dorsale (schiena alta)',
+      'Lombare (schiena bassa)',
+      'Core e addome',
+      'Anche e flessori dell\'anca',
+      'Glutei e piriforme',
+      'Quadricipiti',
+      'Ischiocrurali (femorali posteriori)',
+      'Adduttori e inguine',
+      'Polpacci e caviglie',
+      'Catena posteriore completa'
+    ];
+    for (let i = 0; i < DEFAULT_ZONES.length; i++) {
+      await _db.run('INSERT INTO zones (name, position) VALUES (?, ?)', DEFAULT_ZONES[i], i);
+    }
+  }
+
   // Round 2 — M16/M17: campi aggiuntivi su routine (idempotente).
   const rcols = (await _db.all("PRAGMA table_info(routines)")).map(c => c.name);
   if (!rcols.includes('rest_standard_sec')) {

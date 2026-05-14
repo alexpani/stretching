@@ -12,25 +12,9 @@ const MUSCLE_GROUPS = [
   'glutei e gambe',
   'braccia e torace'
 ];
-// Zone muscolari (tag multipli per esercizio). Sostituiscono muscle_group
-// lato UI; muscle_group resta come valore derivato per le immagini placeholder.
-const ZONES = [
-  'Collo e cervicale',
-  'Spalle e cingolo scapolare',
-  'Braccia e polsi',
-  'Petto',
-  'Dorsale (schiena alta)',
-  'Lombare (schiena bassa)',
-  'Core e addome',
-  'Anche e flessori dell\'anca',
-  'Glutei e piriforme',
-  'Quadricipiti',
-  'Ischiocrurali (femorali posteriori)',
-  'Adduttori e inguine',
-  'Polpacci e caviglie',
-  'Catena posteriore completa'
-];
-// Da zona → vecchio muscle_group (per derivare il valore NOT NULL e l'immagine).
+// Le zone valide sono gestite dal DB (tabella zones, modificabile dal Profilo).
+// Da zona → vecchio muscle_group (per derivare il valore NOT NULL e l'immagine):
+// mappa statica best-effort; le zone aggiunte dall'utente ricadono sul fallback.
 const ZONE_TO_GROUP = {
   'Collo e cervicale':                   'collo e spalle',
   'Spalle e cingolo scapolare':          'collo e spalle',
@@ -54,10 +38,16 @@ const MODALITA = ['tempo', 'ripetizioni'];
 // la UI non lo espone più. Scriviamo sempre 'easy' come valore dummy.
 const LEVEL_DUMMY = 'easy';
 
+// Insieme dei nomi zona validi dal DB.
+async function loadValidZones(db) {
+  const rows = await db.all('SELECT name FROM zones');
+  return new Set(rows.map(r => r.name));
+}
+
 // zones può arrivare come array (campi ripetuti) o stringa separata da virgola.
-function normalizeZones(raw) {
+function normalizeZones(raw, validSet) {
   let arr = raw == null ? [] : (Array.isArray(raw) ? raw : String(raw).split(','));
-  return [...new Set(arr.map(z => String(z).trim()).filter(z => ZONES.includes(z)))];
+  return [...new Set(arr.map(z => String(z).trim()).filter(z => validSet.has(z)))];
 }
 
 // Sostituisce l'insieme di zone di un esercizio.
@@ -78,7 +68,7 @@ async function attachZones(db, rows) {
   return rows;
 }
 
-function parseForm(body) {
+function parseForm(body, validZones) {
   const {
     name, description, side, duration_sec, notes, video_loop, posizione,
     modalita, reps_count
@@ -86,7 +76,7 @@ function parseForm(body) {
   const errors = [];
   if (!name || !String(name).trim()) errors.push('nome richiesto');
   // Zone multiple: almeno una richiesta. muscle_group è derivato dalla prima.
-  const zones = normalizeZones(body && body.zones);
+  const zones = normalizeZones(body && body.zones, validZones);
   if (!zones.length) errors.push('seleziona almeno una zona');
   const muscle_group = zones.length ? (ZONE_TO_GROUP[zones[0]] || 'addominali') : 'addominali';
   const safeModalita = MODALITA.includes(modalita) ? modalita : 'tempo';
@@ -136,7 +126,7 @@ router.get('/', isAuth, async (req, res) => {
     const params = [];
     // Filtro zone multi-selezione: esercizi che hanno ALMENO UNA delle zone.
     if (req.query.zones) {
-      const wanted = normalizeZones(req.query.zones);
+      const wanted = normalizeZones(req.query.zones, await loadValidZones(db));
       if (wanted.length) {
         where.push(`id IN (SELECT exercise_id FROM exercise_zones WHERE zone IN (${wanted.map(() => '?').join(',')}))`);
         params.push(...wanted);
@@ -182,12 +172,12 @@ router.get('/:id', isAuth, async (req, res) => {
 // POST /api/exercises  (multipart: campi + opzionale "file")
 router.post('/', isAuth, upload.single('file'), async (req, res) => {
   try {
-    const { errors, data } = parseForm(req.body);
+    const db = await getDb();
+    const { errors, data } = parseForm(req.body, await loadValidZones(db));
     if (errors.length) {
       if (req.file) removeImage(`/uploads/${req.file.filename}`);
       return res.status(400).json({ error: errors.join(', ') });
     }
-    const db = await getDb();
     const id = crypto.randomUUID();
     let imagePath = null;
     if (req.file) {
@@ -245,7 +235,7 @@ router.put('/:id', isAuth, upload.single('file'), async (req, res) => {
       if (req.file) removeImage(`/uploads/${req.file.filename}`);
       return res.status(404).json({ error: 'Non trovato' });
     }
-    const { errors, data } = parseForm(req.body);
+    const { errors, data } = parseForm(req.body, await loadValidZones(db));
     if (errors.length) {
       if (req.file) removeImage(`/uploads/${req.file.filename}`);
       return res.status(400).json({ error: errors.join(', ') });

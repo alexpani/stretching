@@ -246,6 +246,97 @@
     else if (mq.addListener) mq.addListener(onChange);
   }
 
+  /* Gestione zone (tag): rinomina / aggiungi / togli ─ */
+  function renderZonesList() {
+    const root = document.getElementById('zones-list');
+    if (!root) return;
+    apiGet('/api/zones').then((list) => {
+      root.innerHTML = '';
+      (Array.isArray(list) ? list : []).forEach((z) => {
+        const row = document.createElement('div');
+        row.className = 'profile-row zone-row';
+        const name = document.createElement('div');
+        name.className = 'profile-row-name';
+        name.textContent = z.name;
+        const actions = document.createElement('div');
+        actions.className = 'zone-row-actions';
+        const renameBtn = document.createElement('button');
+        renameBtn.type = 'button';
+        renameBtn.className = 'icon-btn';
+        renameBtn.title = 'Rinomina';
+        renameBtn.textContent = '✎';
+        renameBtn.addEventListener('click', () => renameZone(z.name));
+        const delBtn = document.createElement('button');
+        delBtn.type = 'button';
+        delBtn.className = 'icon-btn';
+        delBtn.title = 'Elimina';
+        delBtn.textContent = '×';
+        delBtn.addEventListener('click', () => deleteZone(z.name));
+        actions.appendChild(renameBtn);
+        actions.appendChild(delBtn);
+        row.appendChild(name);
+        row.appendChild(actions);
+        root.appendChild(row);
+      });
+    });
+  }
+
+  async function renameZone(oldName) {
+    const next = prompt('Rinomina zona:', oldName);
+    if (next == null) return;
+    const name = next.trim();
+    if (!name || name === oldName) return;
+    const res = await apiPut('/api/zones/' + encodeURIComponent(oldName), { name });
+    if (Array.isArray(res)) {
+      renderZonesList();
+      document.dispatchEvent(new CustomEvent('zoneschanged'));
+    } else if (res && res.error) {
+      alert(res.error);
+    }
+  }
+
+  async function deleteZone(name) {
+    const usage = await apiGet('/api/zones/' + encodeURIComponent(name) + '/usage');
+    const count = (usage && usage.count) ? usage.count : 0;
+    const msg = count > 0
+      ? `"${name}" è usata da ${count} eserciz${count === 1 ? 'io' : 'i'}.\nEliminarla comunque? Verrà tolta da quegli esercizi.`
+      : `Eliminare la zona "${name}"?`;
+    if (!confirm(msg)) return;
+    const res = await apiDelete('/api/zones/' + encodeURIComponent(name));
+    if (Array.isArray(res)) {
+      renderZonesList();
+      document.dispatchEvent(new CustomEvent('zoneschanged'));
+    } else if (res && res.error) {
+      alert(res.error);
+    }
+  }
+
+  function bindZoneManager() {
+    const addBtn = document.getElementById('zone-add-btn');
+    const addInput = document.getElementById('zone-add-input');
+    if (!addBtn || !addInput) return;
+    const addZone = async () => {
+      const name = addInput.value.trim();
+      if (!name) return;
+      const res = await apiPost('/api/zones', { name });
+      if (Array.isArray(res)) {
+        addInput.value = '';
+        renderZonesList();
+        document.dispatchEvent(new CustomEvent('zoneschanged'));
+      } else if (res && res.error) {
+        alert(res.error);
+      }
+    };
+    addBtn.addEventListener('click', addZone);
+    addInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') { e.preventDefault(); addZone(); }
+    });
+    renderZonesList();
+    document.addEventListener('tabchange', (e) => {
+      if (e && e.detail && e.detail.tab === 'profile') renderZonesList();
+    });
+  }
+
   /* Boot — applica palette+tema PRIMA del rendering */
   function bootApply() {
     applyPalette(getPalette());
@@ -261,6 +352,7 @@
     bindThemePicker();
     bindSessionToggles();
     bindVoicePicker();
+    bindZoneManager();
   }
 
   window.Settings = {

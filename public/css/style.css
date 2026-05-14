@@ -1151,6 +1151,12 @@ body {
 }
 .profile-row:last-child { border-bottom: 0; }
 .profile-row-body { flex: 1; min-width: 0; }
+/* Gestione zone */
+.zone-row { justify-content: space-between; }
+.zone-row .profile-row-name { flex: 1; min-width: 0; }
+.zone-row-actions { display: flex; gap: var(--s-1); flex-shrink: 0; }
+.zone-row-actions .icon-btn { width: 34px; height: 34px; font-size: 16px; }
+.zone-add-row { gap: var(--s-2); }
 .profile-row-name {
   font-size: var(--t-md);
   font-weight: 500;
