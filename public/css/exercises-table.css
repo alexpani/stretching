@@ -148,6 +148,8 @@
 .col-modalita { width: 140px; }
 .col-dur    { width: 90px; }
 .col-reps   { width: 100px; }
+.cell-muted { opacity: 0.4; }
+.cell-muted input:disabled { background: transparent; cursor: not-allowed; }
 .col-actions{ width: 140px; text-align: right; }
 
 .sheet input[type=text],

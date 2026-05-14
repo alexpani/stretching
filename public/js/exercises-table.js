@@ -215,7 +215,23 @@ function buildRow(ex) {
     });
   });
 
+  // La modalità decide quale tra Durata e Ripetizioni è attiva.
+  const modalitaSel = tr.querySelector('select[data-field="modalita"]');
+  modalitaSel.addEventListener('change', () => applyModalitaRow(tr));
+  applyModalitaRow(tr);
+
   return tr;
+}
+
+// Disabilita il campo non pertinente alla modalità (Durata vs Ripetizioni).
+function applyModalitaRow(tr) {
+  const isReps = tr.querySelector('select[data-field="modalita"]').value === 'ripetizioni';
+  const durInput  = tr.querySelector('input[data-field="duration_sec"]');
+  const repsInput = tr.querySelector('input[data-field="reps_count"]');
+  durInput.disabled  = isReps;
+  repsInput.disabled = !isReps;
+  durInput.closest('td').classList.toggle('cell-muted', isReps);
+  repsInput.closest('td').classList.toggle('cell-muted', !isReps);
 }
 
 function buildInputCell(type, field, value, colClass) {
