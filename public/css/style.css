@@ -473,7 +473,8 @@ body {
 .ex-delete-row {
   display: flex;
   justify-content: center;
-  margin-top: var(--space-4);
+  margin-top: var(--space-5);
+  padding-bottom: var(--space-4);
 }
 .btn-delete-link {
   background: transparent;
