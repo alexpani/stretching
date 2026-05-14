@@ -242,7 +242,8 @@ function openRoutineModal(r) {
   document.getElementById('rt-name').value        = r ? r.name : '';
   document.getElementById('rt-description').value = r ? (r.description || '') : '';
   document.getElementById('rt-rest-std').value    = (r && r.rest_standard_sec != null) ? r.rest_standard_sec : '';
-  document.getElementById('rt-voice-guide').checked = !!(r && r.voice_guide);
+  // Nei nuovi piani la guida vocale è attiva di default.
+  document.getElementById('rt-voice-guide').checked = r ? !!r.voice_guide : true;
 
   // Cover preview
   const coverImg = document.getElementById('rt-cover-img');
