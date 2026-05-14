@@ -468,6 +468,25 @@ body {
   border: 1px solid var(--color-danger);
 }
 
+/* Elimina esercizio: link discreto e centrato, non a tutta larghezza,
+   per ridurre il rischio di pressioni accidentali. */
+.ex-delete-row {
+  display: flex;
+  justify-content: center;
+  margin-top: var(--space-4);
+}
+.btn-delete-link {
+  background: transparent;
+  border: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+  padding: var(--space-2) var(--space-3);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.btn-delete-link:hover { color: var(--color-danger); }
+
 /* ── Update banner (SW) ────────────────── */
 .update-banner {
   position: fixed;
