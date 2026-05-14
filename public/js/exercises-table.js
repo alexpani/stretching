@@ -467,6 +467,14 @@ document.getElementById('tbl-filter-posizione').addEventListener('change', (e) =
   Table.filter.posizione = e.target.value;
   renderTable();
 });
+document.getElementById('tbl-filter-reset').addEventListener('click', () => {
+  Table.filter = { q: '', zones: [], side: '', posizione: '' };
+  document.getElementById('tbl-search').value = '';
+  document.getElementById('tbl-filter-side').value = '';
+  document.getElementById('tbl-filter-posizione').value = '';
+  [...document.getElementById('tbl-filter-zone').options].forEach(o => { o.selected = false; });
+  renderTable();
+});
 
 // ── Tema ────────────────────────────────
 document.getElementById('tbl-theme').addEventListener('click', () => {

@@ -147,6 +147,20 @@ document.getElementById('filter-zone').addEventListener('click', (e) => {
   loadExercises();
 });
 
+// Reset di tutti i filtri (zone + posizione).
+document.getElementById('filter-reset').addEventListener('click', () => {
+  Library.filter = { zones: [], posizione: '' };
+  const zoneRow = document.getElementById('filter-zone');
+  zoneRow.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+  const allZone = zoneRow.querySelector('.chip[data-zone=""]');
+  if (allZone) allZone.classList.add('active');
+  const posRow = document.getElementById('filter-posizione');
+  posRow.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+  const allPos = posRow.querySelector('.chip[data-posizione=""]');
+  if (allPos) allPos.classList.add('active');
+  loadExercises();
+});
+
 // Costruisce le zone come tag toggle nel modal esercizio.
 (function buildZoneTags() {
   document.getElementById('ex-zones').innerHTML = ZONES.map(z =>
