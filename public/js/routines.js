@@ -430,16 +430,30 @@ function renderPicker(q) {
     const row = document.createElement('div');
     row.className = 'picker-row';
     const sideBadge = SIDE_LBL[ex.side] ? `<span class="badge side-${ex.side}">${SIDE_LBL[ex.side]}</span>` : '';
+    const isReps = (ex.modalita || 'tempo') === 'ripetizioni';
+    const defAmount = isReps ? (ex.reps_count || 10) : (ex.duration_sec || 30);
+    const amountLbl = isReps ? 'rip.' : 's';
     row.innerHTML = `
       <div class="picker-thumb"><img src="${itemImg(ex)}" alt="" /></div>
       <div class="picker-body">
         <div class="picker-name">${escHtml(ex.name)}</div>
-        <div class="picker-meta-row">${sideBadge}<span class="picker-meta">${MUSCLE_LBL[ex.muscle_group]} · ${ex.duration_sec}s</span></div>
+        <div class="picker-meta-row">${sideBadge}<span class="picker-meta">${MUSCLE_LBL[ex.muscle_group]}</span></div>
       </div>
+      <label class="picker-amount">
+        <input type="number" min="1" max="600" value="${defAmount}" aria-label="${isReps ? 'Ripetizioni' : 'Durata in secondi'}" />
+        <span>${amountLbl}</span>
+      </label>
       <button class="btn btn-primary" style="min-height:36px; padding:0 var(--space-3);">+</button>
     `;
+    const amountInput = row.querySelector('.picker-amount input');
     row.querySelector('button').addEventListener('click', async () => {
-      const items = await apiPost(`/api/routines/${Routines.current.id}/items`, { exercise_id: ex.id });
+      const val = parseInt(amountInput.value, 10);
+      const payload = { exercise_id: ex.id };
+      if (val && val !== defAmount) {
+        if (isReps) payload.reps_override = val;
+        else payload.duration_override_sec = val;
+      }
+      const items = await apiPost(`/api/routines/${Routines.current.id}/items`, payload);
       if (Array.isArray(items)) {
         Routines.current.items = items;
         renderRoutineItems(items);

@@ -707,6 +707,19 @@ body {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+.picker-row .picker-amount {
+  display: flex; align-items: center; gap: 4px;
+  flex-shrink: 0;
+  font-size: var(--text-xs);
+  color: var(--color-text-secondary);
+}
+.picker-row .picker-amount input {
+  width: 52px;
+  min-height: 36px;
+  padding: 0 var(--space-2);
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
 
 /* ── Session overlay ────────────────────── */
 .session-overlay {

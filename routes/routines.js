@@ -218,6 +218,8 @@ router.post('/:id/items', async (req, res) => {
     if (!ex) return res.status(400).json({ error: 'Esercizio non valido' });
     const duration_override_sec = req.body.duration_override_sec
       ? parseInt(req.body.duration_override_sec, 10) : null;
+    const reps_override = req.body.reps_override
+      ? parseInt(req.body.reps_override, 10) : null;
     const rest_after_sec = req.body.rest_after_sec != null
       ? parseInt(req.body.rest_after_sec, 10) : 10;
 
@@ -246,9 +248,9 @@ router.post('/:id/items', async (req, res) => {
     for (const exId of toInsert) {
       await db.run(
         `INSERT INTO routine_items
-          (id, routine_id, exercise_id, position, duration_override_sec, rest_after_sec)
-         VALUES (?, ?, ?, ?, ?, ?)`,
-        crypto.randomUUID(), routine.id, exId, position, duration_override_sec, rest_after_sec
+          (id, routine_id, exercise_id, position, duration_override_sec, rest_after_sec, reps_override)
+         VALUES (?, ?, ?, ?, ?, ?, ?)`,
+        crypto.randomUUID(), routine.id, exId, position, duration_override_sec, rest_after_sec, reps_override
       );
       position++;
     }
