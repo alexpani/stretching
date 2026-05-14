@@ -84,6 +84,25 @@ function escT(s) {
     .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
 
+// ── Anteprima grande (lightbox) ─────────
+function openLightbox(ex) {
+  const box = document.getElementById('tbl-lightbox');
+  const inner = document.getElementById('tbl-lightbox-inner');
+  const src = imgForT(ex);
+  inner.innerHTML = isVideoMediaT(src)
+    ? `<video src="${src}" controls autoplay loop playsinline></video>`
+    : `<img src="${src}" alt="" />`;
+  box.classList.remove('hidden');
+}
+function closeLightbox() {
+  document.getElementById('tbl-lightbox').classList.add('hidden');
+  document.getElementById('tbl-lightbox-inner').innerHTML = '';
+}
+document.getElementById('tbl-lightbox').addEventListener('click', closeLightbox);
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') closeLightbox();
+});
+
 // ── Carica ──────────────────────────────
 async function loadTable() {
   const res = await fetch('/api/exercises', { credentials: 'same-origin' });
@@ -134,14 +153,19 @@ function buildRow(ex) {
   const tdThumb = document.createElement('td');
   tdThumb.className = 'col-thumb';
   tdThumb.innerHTML = `
-    <button type="button" class="tbl-thumb" title="Clicca per cambiare foto o video">
+    <div class="tbl-thumb">
       ${mediaTagT(ex)}
-    </button>
+      <div class="tbl-thumb-actions">
+        <button type="button" class="tbl-thumb-btn js-thumb-edit" title="Cambia foto o video">📷</button>
+        <button type="button" class="tbl-thumb-btn js-thumb-zoom" title="Anteprima grande">🔍</button>
+      </div>
+    </div>
   `;
-  tdThumb.querySelector('.tbl-thumb').addEventListener('click', () => {
+  tdThumb.querySelector('.js-thumb-edit').addEventListener('click', () => {
     Table.uploadRowId = ex.id;
     document.getElementById('tbl-file-input').click();
   });
+  tdThumb.querySelector('.js-thumb-zoom').addEventListener('click', () => openLightbox(ex));
   tr.appendChild(tdThumb);
 
   // Nome
