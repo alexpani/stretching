@@ -142,7 +142,8 @@
 .col-name   { min-width: 180px; }
 .col-desc   { min-width: 240px; }
 .col-notes  { min-width: 240px; }
-.col-muscle { width: 180px; }
+.col-zones  { width: 200px; }
+.col-zones select[multiple] { height: 88px; min-height: 88px; }
 .col-side   { width: 120px; }
 .col-posizione { width: 140px; }
 .col-modalita { width: 140px; }

@@ -58,13 +58,8 @@
         <div style="display:flex; justify-content:flex-end; margin-bottom: var(--space-2)">
           <a href="/exercises-table.html" target="_blank" class="btn btn-secondary" style="min-height:32px; padding:0 var(--space-3); font-size:var(--text-xs)">📋 Foglio di lavoro</a>
         </div>
-        <div class="chip-row" id="filter-muscle">
-          <button class="chip active" data-muscle="">Tutti</button>
-          <button class="chip" data-muscle="collo e spalle">Collo e spalle</button>
-          <button class="chip" data-muscle="schiena">Schiena</button>
-          <button class="chip" data-muscle="addominali">Addominali</button>
-          <button class="chip" data-muscle="glutei e gambe">Glutei e gambe</button>
-          <button class="chip" data-muscle="braccia e torace">Braccia e torace</button>
+        <div class="chip-row" id="filter-zone">
+          <!-- popolato da library.js: chip "Tutte" + una per zona, multi-selezione -->
         </div>
         <div class="chip-row" id="filter-posizione">
           <button class="chip active" data-posizione="">Ovunque</button>
@@ -311,14 +306,8 @@
         </div>
 
         <div class="form-field">
-          <label for="ex-muscle">Gruppo</label>
-          <select id="ex-muscle" required>
-            <option value="collo e spalle">Collo e spalle</option>
-            <option value="schiena">Schiena</option>
-            <option value="addominali">Addominali</option>
-            <option value="glutei e gambe">Glutei e gambe</option>
-            <option value="braccia e torace">Braccia e torace</option>
-          </select>
+          <label>Zone <span style="color:var(--color-text-secondary); font-weight:400">(una o più)</span></label>
+          <div id="ex-zones" class="zone-checks"></div>
         </div>
 
         <div class="form-field">

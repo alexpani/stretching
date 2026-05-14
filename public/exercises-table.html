@@ -28,14 +28,7 @@
 
   <section class="table-filters">
     <input type="search" id="tbl-search" placeholder="Cerca per nome o descrizione…" />
-    <select id="tbl-filter-muscle">
-      <option value="">Tutti i gruppi</option>
-      <option value="collo e spalle">Collo e spalle</option>
-      <option value="schiena">Schiena</option>
-      <option value="addominali">Addominali</option>
-      <option value="glutei e gambe">Glutei e gambe</option>
-      <option value="braccia e torace">Braccia e torace</option>
-    </select>
+    <select id="tbl-filter-zone" multiple size="3" title="Filtra per zone (selezione multipla)"></select>
     <select id="tbl-filter-side">
       <option value="">Tutti i lati</option>
       <option value="both">Entrambi</option>
@@ -62,9 +55,7 @@
           </th>
           <th class="col-desc">Descrizione</th>
           <th class="col-notes">Commento durante l'esercizio</th>
-          <th class="col-muscle">
-            <button type="button" class="th-sort" data-sort="muscle_group">Gruppo <span class="th-sort-arrow"></span></button>
-          </th>
+          <th class="col-zones">Zone</th>
           <th class="col-side">Lato</th>
           <th class="col-posizione">Posizione</th>
           <th class="col-modalita">Modalità</th>

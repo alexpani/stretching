@@ -9,12 +9,29 @@
 
 const Table = {
   items: [],
-  filter: { q: '', muscle_group: '', side: '', posizione: '' },
+  filter: { q: '', zones: [], side: '', posizione: '' },
   sort: { key: null, dir: 'asc' },   // key: 'name' | 'muscle_group' | null
   uploadRowId: null   // id riga per cui sta arrivando la foto
 };
 
 const MUSCLE_ORDER = ['collo e spalle', 'schiena', 'addominali', 'glutei e gambe', 'braccia e torace'];
+// Zone muscolari (tag multipli). Allineato a ZONES in routes/exercises.js.
+const ZONES_T = [
+  'Collo e cervicale',
+  'Spalle e cingolo scapolare',
+  'Braccia e polsi',
+  'Petto',
+  'Dorsale (schiena alta)',
+  'Lombare (schiena bassa)',
+  'Core e addome',
+  'Anche e flessori dell\'anca',
+  'Glutei e piriforme',
+  'Quadricipiti',
+  'Ischiocrurali (femorali posteriori)',
+  'Adduttori e inguine',
+  'Polpacci e caviglie',
+  'Catena posteriore completa'
+];
 
 function compareSort(a, b) {
   const k = Table.sort.key;
@@ -45,14 +62,6 @@ function refreshSortHeaders() {
     if (Table.sort.key === key) btn.classList.add(Table.sort.dir);
   });
 }
-
-const MUSCLE_LABELS_T = {
-  'collo e spalle':   'Collo e spalle',
-  'schiena':          'Schiena',
-  'addominali':       'Addominali',
-  'glutei e gambe':   'Glutei e gambe',
-  'braccia e torace': 'Braccia e torace'
-};
 
 function slugMuscleT(s) { return (s || '').replace(/\s+/g, '-'); }
 
@@ -119,7 +128,10 @@ function matchesFilter(ex) {
     const hay = ((ex.name || '') + ' ' + (ex.description || '')).toLowerCase();
     if (!hay.includes(q)) return false;
   }
-  if (Table.filter.muscle_group && ex.muscle_group !== Table.filter.muscle_group) return false;
+  if (Table.filter.zones.length) {
+    const exZones = Array.isArray(ex.zones) ? ex.zones : [];
+    if (!Table.filter.zones.some(z => exZones.includes(z))) return false;
+  }
   if (Table.filter.side && ex.side !== Table.filter.side) return false;
   if (Table.filter.posizione && (ex.posizione || 'in piedi') !== Table.filter.posizione) return false;
   return true;
@@ -174,8 +186,8 @@ function buildRow(ex) {
   tr.appendChild(buildTextareaCell('description', ex.description || '', 'col-desc'));
   // Commento durante l'esercizio (notes)
   tr.appendChild(buildTextareaCell('notes', ex.notes || '', 'col-notes'));
-  // Gruppo
-  tr.appendChild(buildSelectCell('muscle_group', ex.muscle_group, MUSCLE_LABELS_T, 'col-muscle'));
+  // Zone (tag multipli)
+  tr.appendChild(buildZonesCell(Array.isArray(ex.zones) ? ex.zones : []));
   // Lato
   tr.appendChild(buildSelectCell('side', ex.side || 'both',
     { 'both': 'Entrambi', 'dx': 'Destro', 'sx': 'Sinistro', 'bilaterale': 'Bilaterale' }, 'col-side'));
@@ -279,6 +291,17 @@ function buildSelectCell(field, selected, options, colClass) {
   return td;
 }
 
+// Cella zone: select multiplo nativo con tutte le 14 zone.
+function buildZonesCell(selected) {
+  const td = document.createElement('td');
+  td.className = 'col-zones';
+  const opts = ZONES_T
+    .map(z => `<option value="${escT(z)}"${selected.includes(z) ? ' selected' : ''}>${escT(z)}</option>`)
+    .join('');
+  td.innerHTML = `<select data-field="zones" multiple size="4">${opts}</select>`;
+  return td;
+}
+
 function markDirty(tr) {
   tr.classList.add('dirty');
   tr.querySelector('.save-btn').disabled = false;
@@ -288,7 +311,9 @@ function getRowData(tr) {
   const data = {};
   tr.querySelectorAll('[data-field]').forEach(el => {
     const f = el.dataset.field;
-    data[f] = (el.type === 'checkbox') ? (el.checked ? '1' : '0') : el.value;
+    if (el.type === 'checkbox') data[f] = el.checked ? '1' : '0';
+    else if (el.multiple) data[f] = [...el.selectedOptions].map(o => o.value);
+    else data[f] = el.value;
   });
   return data;
 }
@@ -300,7 +325,7 @@ async function saveRow(tr) {
   fd.set('name',         data.name || '');
   fd.set('description',  data.description || '');
   fd.set('notes',        data.notes || '');
-  fd.set('muscle_group', data.muscle_group);
+  fd.set('zones',        (data.zones || []).join(','));
   fd.set('side',         data.side || 'both');
   fd.set('posizione',    data.posizione || 'in piedi');
   fd.set('duration_sec', data.duration_sec || 30);
@@ -377,7 +402,7 @@ document.getElementById('tbl-file-input').addEventListener('change', async (e) =
   fd.set('name', ex.name || '');
   fd.set('description', ex.description || '');
   fd.set('notes', ex.notes || '');
-  fd.set('muscle_group', ex.muscle_group);
+  fd.set('zones', (Array.isArray(ex.zones) ? ex.zones : []).join(','));
   fd.set('side', ex.side || 'both');
   fd.set('posizione', ex.posizione || 'in piedi');
   fd.set('duration_sec', ex.duration_sec);
@@ -401,7 +426,7 @@ document.getElementById('tbl-add-btn').addEventListener('click', async () => {
   if (!name || !name.trim()) return;
   const fd = new FormData();
   fd.set('name', name.trim());
-  fd.set('muscle_group', Table.filter.muscle_group || 'collo e spalle');
+  fd.set('zones', Table.filter.zones.join(',') || 'Core e addome');
   fd.set('side', Table.filter.side || 'both');
   fd.set('posizione', Table.filter.posizione || 'in piedi');
   fd.set('duration_sec', 30);
@@ -417,10 +442,15 @@ document.getElementById('tbl-search').addEventListener('input', (e) => {
   Table.filter.q = e.target.value.trim();
   renderTable();
 });
-document.getElementById('tbl-filter-muscle').addEventListener('change', (e) => {
-  Table.filter.muscle_group = e.target.value;
-  renderTable();
-});
+// Filtro zone: select multiplo nativo, popolato da ZONES_T.
+(function buildZoneFilterT() {
+  const sel = document.getElementById('tbl-filter-zone');
+  sel.innerHTML = ZONES_T.map(z => `<option value="${escT(z)}">${escT(z)}</option>`).join('');
+  sel.addEventListener('change', () => {
+    Table.filter.zones = [...sel.selectedOptions].map(o => o.value);
+    renderTable();
+  });
+})();
 document.getElementById('tbl-filter-side').addEventListener('change', (e) => {
   Table.filter.side = e.target.value;
   renderTable();

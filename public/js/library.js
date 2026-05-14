@@ -3,7 +3,7 @@
    ========================================== */
 
 const Library = {
-  filter: { muscle_group: '', posizione: '' },
+  filter: { zones: [], posizione: '' },
   items: [],
   modalOpen: false
 };
@@ -15,6 +15,23 @@ const MUSCLE_LABELS = {
   'glutei e gambe':   'Glutei e gambe',
   'braccia e torace': 'Braccia e torace'
 };
+// Zone muscolari (tag multipli). Allineato a ZONES in routes/exercises.js.
+const ZONES = [
+  'Collo e cervicale',
+  'Spalle e cingolo scapolare',
+  'Braccia e polsi',
+  'Petto',
+  'Dorsale (schiena alta)',
+  'Lombare (schiena bassa)',
+  'Core e addome',
+  'Anche e flessori dell\'anca',
+  'Glutei e piriforme',
+  'Quadricipiti',
+  'Ischiocrurali (femorali posteriori)',
+  'Adduttori e inguine',
+  'Polpacci e caviglie',
+  'Catena posteriore completa'
+];
 const SIDE_LABELS = { dx: 'DX', sx: 'SX', bilaterale: 'BL' };
 
 // Converte un muscle_group ("glutei e gambe") in slug file-safe ("glutei-e-gambe")
@@ -47,7 +64,7 @@ window.slugMuscle = slugMuscle;
 
 async function loadExercises() {
   const params = new URLSearchParams();
-  if (Library.filter.muscle_group) params.set('muscle_group', Library.filter.muscle_group);
+  if (Library.filter.zones.length) params.set('zones', Library.filter.zones.join(','));
   if (Library.filter.posizione) params.set('posizione', Library.filter.posizione);
   const qs = params.toString() ? `?${params}` : '';
   const list = await apiGet(`/api/exercises${qs}`);
@@ -72,11 +89,18 @@ function renderExercises() {
     const sideBadge = SIDE_LABELS[ex.side]
       ? `<span class="badge side-${ex.side}">${SIDE_LABELS[ex.side]}</span>`
       : '';
+    const zones = Array.isArray(ex.zones) ? ex.zones : [];
+    const zoneTxt = zones.length
+      ? (zones.length > 1 ? `${zones[0]} +${zones.length - 1}` : zones[0])
+      : (MUSCLE_LABELS[ex.muscle_group] || ex.muscle_group);
+    const amount = (ex.modalita === 'ripetizioni')
+      ? `${ex.reps_count || '?'} rip.`
+      : `${ex.duration_sec}s`;
     card.innerHTML = `
       <div class="thumb">${mediaTagFor(ex)}</div>
       <div class="body">
         <div class="name">${escapeHtml(ex.name)}</div>
-        <div class="meta-row">${sideBadge}<span class="meta">${MUSCLE_LABELS[ex.muscle_group] || ex.muscle_group} · ${ex.duration_sec}s</span></div>
+        <div class="meta-row">${sideBadge}<span class="meta">${escapeHtml(zoneTxt)} · ${amount}</span></div>
       </div>
     `;
     card.addEventListener('click', () => openModal(ex));
@@ -93,14 +117,42 @@ function escapeHtml(s) {
 }
 
 // ── Filtri ───────────────────────────────
-document.getElementById('filter-muscle').addEventListener('click', (e) => {
+// Costruisce le chip del filtro zone: "Tutte" + una per zona (multi-selezione).
+(function buildZoneFilter() {
+  const row = document.getElementById('filter-zone');
+  let html = '<button class="chip active" data-zone="">Tutte</button>';
+  for (const z of ZONES) html += `<button class="chip" data-zone="${escapeHtml(z)}">${escapeHtml(z)}</button>`;
+  row.innerHTML = html;
+})();
+
+document.getElementById('filter-zone').addEventListener('click', (e) => {
   const btn = e.target.closest('.chip');
   if (!btn) return;
-  document.querySelectorAll('#filter-muscle .chip').forEach(c => c.classList.remove('active'));
-  btn.classList.add('active');
-  Library.filter.muscle_group = btn.dataset.muscle || '';
+  const row = document.getElementById('filter-zone');
+  const zone = btn.dataset.zone || '';
+  if (!zone) {
+    Library.filter.zones = [];               // "Tutte" → azzera la selezione
+  } else {
+    btn.classList.toggle('active');
+    Library.filter.zones = [...row.querySelectorAll('.chip.active')]
+      .map(c => c.dataset.zone).filter(Boolean);
+  }
+  const allBtn = row.querySelector('.chip[data-zone=""]');
+  if (Library.filter.zones.length === 0) {
+    row.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+    allBtn.classList.add('active');
+  } else {
+    allBtn.classList.remove('active');
+  }
   loadExercises();
 });
+
+// Costruisce le checkbox delle zone nel modal esercizio.
+(function buildZoneChecks() {
+  document.getElementById('ex-zones').innerHTML = ZONES.map(z =>
+    `<label class="zone-check"><input type="checkbox" value="${escapeHtml(z)}" /><span>${escapeHtml(z)}</span></label>`
+  ).join('');
+})();
 
 document.getElementById('filter-posizione').addEventListener('click', (e) => {
   const btn = e.target.closest('.chip');
@@ -124,7 +176,10 @@ function openModal(ex) {
   document.getElementById('modal-ex-title').textContent = ex ? 'Modifica esercizio' : 'Nuovo esercizio';
   document.getElementById('ex-id').value           = ex ? ex.id : '';
   document.getElementById('ex-name').value         = ex ? ex.name : '';
-  document.getElementById('ex-muscle').value       = ex ? ex.muscle_group : 'collo e spalle';
+  const exZones = (ex && Array.isArray(ex.zones)) ? ex.zones : [];
+  document.querySelectorAll('#ex-zones input[type=checkbox]').forEach(cb => {
+    cb.checked = exZones.includes(cb.value);
+  });
   document.getElementById('ex-side').value         = ex ? (ex.side || 'both') : 'both';
   document.getElementById('ex-posizione').value    = ex ? (ex.posizione || 'in piedi') : 'in piedi';
   document.getElementById('ex-duration').value     = ex ? ex.duration_sec : 30;
@@ -175,7 +230,8 @@ document.getElementById('form-exercise').addEventListener('submit', async (e) =>
   const id = document.getElementById('ex-id').value;
   const fd = new FormData();
   fd.set('name',         document.getElementById('ex-name').value.trim());
-  fd.set('muscle_group', document.getElementById('ex-muscle').value);
+  const selZones = [...document.querySelectorAll('#ex-zones input:checked')].map(cb => cb.value);
+  fd.set('zones',        selZones.join(','));
   fd.set('side',         document.getElementById('ex-side').value);
   fd.set('posizione',    document.getElementById('ex-posizione').value);
   fd.set('duration_sec', document.getElementById('ex-duration').value);

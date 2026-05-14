@@ -12,6 +12,41 @@ const MUSCLE_GROUPS = [
   'glutei e gambe',
   'braccia e torace'
 ];
+// Zone muscolari (tag multipli per esercizio). Sostituiscono muscle_group
+// lato UI; muscle_group resta come valore derivato per le immagini placeholder.
+const ZONES = [
+  'Collo e cervicale',
+  'Spalle e cingolo scapolare',
+  'Braccia e polsi',
+  'Petto',
+  'Dorsale (schiena alta)',
+  'Lombare (schiena bassa)',
+  'Core e addome',
+  'Anche e flessori dell\'anca',
+  'Glutei e piriforme',
+  'Quadricipiti',
+  'Ischiocrurali (femorali posteriori)',
+  'Adduttori e inguine',
+  'Polpacci e caviglie',
+  'Catena posteriore completa'
+];
+// Da zona → vecchio muscle_group (per derivare il valore NOT NULL e l'immagine).
+const ZONE_TO_GROUP = {
+  'Collo e cervicale':                   'collo e spalle',
+  'Spalle e cingolo scapolare':          'collo e spalle',
+  'Braccia e polsi':                     'braccia e torace',
+  'Petto':                               'braccia e torace',
+  'Dorsale (schiena alta)':              'schiena',
+  'Lombare (schiena bassa)':             'schiena',
+  'Core e addome':                       'addominali',
+  'Anche e flessori dell\'anca':         'glutei e gambe',
+  'Glutei e piriforme':                  'glutei e gambe',
+  'Quadricipiti':                        'glutei e gambe',
+  'Ischiocrurali (femorali posteriori)': 'glutei e gambe',
+  'Adduttori e inguine':                 'glutei e gambe',
+  'Polpacci e caviglie':                 'glutei e gambe',
+  'Catena posteriore completa':          'schiena'
+};
 const SIDES = ['both', 'dx', 'sx', 'bilaterale'];
 const POSIZIONI = ['in piedi', 'da seduto', 'a terra'];
 const MODALITA = ['tempo', 'ripetizioni'];
@@ -19,14 +54,41 @@ const MODALITA = ['tempo', 'ripetizioni'];
 // la UI non lo espone più. Scriviamo sempre 'easy' come valore dummy.
 const LEVEL_DUMMY = 'easy';
 
+// zones può arrivare come array (campi ripetuti) o stringa separata da virgola.
+function normalizeZones(raw) {
+  let arr = raw == null ? [] : (Array.isArray(raw) ? raw : String(raw).split(','));
+  return [...new Set(arr.map(z => String(z).trim()).filter(z => ZONES.includes(z)))];
+}
+
+// Sostituisce l'insieme di zone di un esercizio.
+async function writeZones(db, exerciseId, zones) {
+  await db.run('DELETE FROM exercise_zones WHERE exercise_id = ?', exerciseId);
+  for (const z of zones) {
+    await db.run('INSERT OR IGNORE INTO exercise_zones (exercise_id, zone) VALUES (?, ?)', exerciseId, z);
+  }
+}
+
+// Attacca l'array zones a ciascuna riga esercizio.
+async function attachZones(db, rows) {
+  if (!rows.length) return rows;
+  const all = await db.all('SELECT exercise_id, zone FROM exercise_zones');
+  const byEx = {};
+  for (const r of all) (byEx[r.exercise_id] = byEx[r.exercise_id] || []).push(r.zone);
+  rows.forEach(r => { r.zones = byEx[r.id] || []; });
+  return rows;
+}
+
 function parseForm(body) {
   const {
-    name, description, muscle_group, side, duration_sec, notes, video_loop, posizione,
+    name, description, side, duration_sec, notes, video_loop, posizione,
     modalita, reps_count
   } = body || {};
   const errors = [];
   if (!name || !String(name).trim()) errors.push('nome richiesto');
-  if (!MUSCLE_GROUPS.includes(muscle_group)) errors.push('gruppo muscolare non valido');
+  // Zone multiple: almeno una richiesta. muscle_group è derivato dalla prima.
+  const zones = normalizeZones(body && body.zones);
+  if (!zones.length) errors.push('seleziona almeno una zona');
+  const muscle_group = zones.length ? (ZONE_TO_GROUP[zones[0]] || 'addominali') : 'addominali';
   const safeModalita = MODALITA.includes(modalita) ? modalita : 'tempo';
   // In modalità ripetizioni la durata non è obbligatoria: si tiene comunque
   // un valore valido (default 30) per soddisfare il NOT NULL su duration_sec.
@@ -60,19 +122,25 @@ function parseForm(body) {
       video_loop: loopVal,
       posizione: safePosizione,
       modalita: safeModalita,
-      reps_count: reps
+      reps_count: reps,
+      zones
     }
   };
 }
 
-// GET /api/exercises?muscle_group=...&q=...
+// GET /api/exercises?zones=A,B&posizione=...&q=...
 router.get('/', isAuth, async (req, res) => {
   try {
     const db = await getDb();
     const where = ['deleted_at IS NULL'];
     const params = [];
-    if (req.query.muscle_group && MUSCLE_GROUPS.includes(req.query.muscle_group)) {
-      where.push('muscle_group = ?'); params.push(req.query.muscle_group);
+    // Filtro zone multi-selezione: esercizi che hanno ALMENO UNA delle zone.
+    if (req.query.zones) {
+      const wanted = normalizeZones(req.query.zones);
+      if (wanted.length) {
+        where.push(`id IN (SELECT exercise_id FROM exercise_zones WHERE zone IN (${wanted.map(() => '?').join(',')}))`);
+        params.push(...wanted);
+      }
     }
     if (req.query.posizione && POSIZIONI.includes(req.query.posizione)) {
       where.push('posizione = ?'); params.push(req.query.posizione);
@@ -86,6 +154,7 @@ router.get('/', isAuth, async (req, res) => {
       `SELECT * FROM exercises WHERE ${where.join(' AND ')} ORDER BY muscle_group, name`,
       ...params
     );
+    await attachZones(db, rows);
     res.json(rows);
   } catch (err) {
     console.error(err);
@@ -102,6 +171,7 @@ router.get('/:id', isAuth, async (req, res) => {
       req.params.id
     );
     if (!row) return res.status(404).json({ error: 'Non trovato' });
+    row.zones = (await db.all('SELECT zone FROM exercise_zones WHERE exercise_id = ?', row.id)).map(r => r.zone);
     res.json(row);
   } catch (err) {
     console.error(err);
@@ -134,6 +204,7 @@ router.post('/', isAuth, upload.single('file'), async (req, res) => {
       LEVEL_DUMMY, data.duration_sec, imagePath, data.notes, data.video_loop, data.posizione,
       data.modalita, data.reps_count
     );
+    await writeZones(db, id, data.zones);
 
     // M15 — clone bilaterale: se l'originale è dx/sx, crea automaticamente
     // il gemello con lato opposto e foto copiata (file distinto).
@@ -149,9 +220,11 @@ router.post('/', isAuth, upload.single('file'), async (req, res) => {
         LEVEL_DUMMY, data.duration_sec, twinImagePath, data.notes, data.video_loop, data.posizione,
         data.modalita, data.reps_count
       );
+      await writeZones(db, twinId, data.zones);
     }
 
     const row = await db.get('SELECT * FROM exercises WHERE id = ?', id);
+    row.zones = data.zones;
     res.status(201).json(row);
   } catch (err) {
     console.error(err);
@@ -199,7 +272,9 @@ router.put('/:id', isAuth, upload.single('file'), async (req, res) => {
       data.duration_sec, imagePath, data.notes, data.video_loop, data.posizione,
       data.modalita, data.reps_count, current.id
     );
+    await writeZones(db, current.id, data.zones);
     const row = await db.get('SELECT * FROM exercises WHERE id = ?', current.id);
+    row.zones = data.zones;
     res.json(row);
   } catch (err) {
     console.error(err);
@@ -217,6 +292,7 @@ router.post('/:id/duplicate', isAuth, async (req, res) => {
       req.params.id
     );
     if (!src) return res.status(404).json({ error: 'Non trovato' });
+    const srcZones = (await db.all('SELECT zone FROM exercise_zones WHERE exercise_id = ?', src.id)).map(r => r.zone);
     const newId = crypto.randomUUID();
     const newImagePath = src.image_path ? copyImage(src.image_path, newId) : null;
     await db.run(
@@ -227,7 +303,9 @@ router.post('/:id/duplicate', isAuth, async (req, res) => {
       LEVEL_DUMMY, src.duration_sec, newImagePath, src.notes, src.video_loop != null ? src.video_loop : 1,
       src.posizione || 'in piedi', src.modalita || 'tempo', src.reps_count != null ? src.reps_count : null
     );
+    await writeZones(db, newId, srcZones);
     const row = await db.get('SELECT * FROM exercises WHERE id = ?', newId);
+    row.zones = srcZones;
     res.status(201).json(row);
   } catch (err) {
     console.error(err);

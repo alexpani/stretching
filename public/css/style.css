@@ -721,6 +721,20 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
+/* ── Zone (tag multipli) ────────────────── */
+.zone-checks {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px 10px;
+}
+.zone-check {
+  display: flex; align-items: center; gap: 6px;
+  font-size: var(--text-xs);
+  line-height: 1.2;
+  cursor: pointer;
+}
+.zone-check input { flex-shrink: 0; }
+
 /* ── Session overlay ────────────────────── */
 .session-overlay {
   position: fixed;
