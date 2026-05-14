@@ -197,7 +197,7 @@ router.post('/:id/items', async (req, res) => {
     if (!routine) return res.status(404).json({ error: 'Routine non trovata' });
     const exercise_id = String(req.body.exercise_id || '');
     const ex = await db.get(
-      `SELECT id FROM exercises WHERE id = ? AND deleted_at IS NULL`, exercise_id
+      `SELECT id, name, side FROM exercises WHERE id = ? AND deleted_at IS NULL`, exercise_id
     );
     if (!ex) return res.status(400).json({ error: 'Esercizio non valido' });
     const duration_override_sec = req.body.duration_override_sec
@@ -205,17 +205,31 @@ router.post('/:id/items', async (req, res) => {
     const rest_after_sec = req.body.rest_after_sec != null
       ? parseInt(req.body.rest_after_sec, 10) : 10;
 
+    // Lista degli esercizi da inserire: l'esercizio scelto e, se è dx/sx,
+    // anche il gemello del lato opposto subito a seguire.
+    const toInsert = [ex.id];
+    if (ex.side === 'dx' || ex.side === 'sx') {
+      const twinSide = ex.side === 'dx' ? 'sx' : 'dx';
+      const twin = await db.get(
+        `SELECT id FROM exercises WHERE name = ? AND side = ? AND deleted_at IS NULL LIMIT 1`,
+        ex.name, twinSide
+      );
+      if (twin) toInsert.push(twin.id);
+    }
+
     const lastPos = (await db.get(
       `SELECT MAX(position) AS p FROM routine_items WHERE routine_id = ?`, routine.id
     )).p;
-    const position = (lastPos == null ? 0 : lastPos + 1);
-    const id = crypto.randomUUID();
-    await db.run(
-      `INSERT INTO routine_items
-        (id, routine_id, exercise_id, position, duration_override_sec, rest_after_sec)
-       VALUES (?, ?, ?, ?, ?, ?)`,
-      id, routine.id, exercise_id, position, duration_override_sec, rest_after_sec
-    );
+    let position = (lastPos == null ? 0 : lastPos + 1);
+    for (const exId of toInsert) {
+      await db.run(
+        `INSERT INTO routine_items
+          (id, routine_id, exercise_id, position, duration_override_sec, rest_after_sec)
+         VALUES (?, ?, ?, ?, ?, ?)`,
+        crypto.randomUUID(), routine.id, exId, position, duration_override_sec, rest_after_sec
+      );
+      position++;
+    }
     await db.run(`UPDATE routines SET updated_at = datetime('now') WHERE id = ?`, routine.id);
     const items = await loadItems(db, routine.id);
     res.status(201).json(items);
