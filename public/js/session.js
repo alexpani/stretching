@@ -458,6 +458,19 @@ function skipPhase() {
   enterPhase(target);
 }
 
+// Riporta i bottoni del riepilogo allo stato iniziale (sessione non salvata).
+function resetSummaryButtons(saveLabel) {
+  const saveBtn = document.getElementById('sm-save-btn');
+  saveBtn.textContent = saveLabel;
+  saveBtn.disabled = false;
+  saveBtn.classList.remove('hidden');
+  const closeBtn = document.getElementById('sm-close-btn');
+  closeBtn.textContent = 'Chiudi senza salvare';
+  closeBtn.classList.add('btn-ghost');
+  closeBtn.classList.remove('btn-primary');
+  document.getElementById('sm-saved-msg').classList.add('hidden');
+}
+
 function finishSession() {
   Session.running = false;
   if (Session.rafId) { cancelAnimationFrame(Session.rafId); Session.rafId = null; }
@@ -477,9 +490,7 @@ function finishSession() {
     : `${Session.itemsDone} esercizi`;
   const metaEl = document.getElementById('sm-routine-meta');
   if (metaEl) metaEl.textContent = meta;
-  document.getElementById('sm-save-btn').textContent = 'Fatto';
-  document.getElementById('sm-save-btn').disabled = false;
-  document.getElementById('sm-saved-msg').classList.add('hidden');
+  resetSummaryButtons('Fatto');
   document.getElementById('session-running').classList.add('hidden');
   document.getElementById('session-summary').classList.remove('hidden');
 }
@@ -608,9 +619,7 @@ function stopEarly() {
   if (metaEl) metaEl.textContent = Session.routine
     ? `${Session.routine.name} · sessione parziale`
     : 'Sessione parziale';
-  document.getElementById('sm-save-btn').textContent = 'Salva (parziale)';
-  document.getElementById('sm-save-btn').disabled = false;
-  document.getElementById('sm-saved-msg').classList.add('hidden');
+  resetSummaryButtons('Salva (parziale)');
   document.getElementById('session-running').classList.add('hidden');
   document.getElementById('session-summary').classList.remove('hidden');
 }
@@ -636,8 +645,13 @@ async function saveSession() {
   const res = await apiPost('/api/sessions', payload);
   if (res && res.id) {
     Session.saved = true;
-    btn.textContent = 'Salvata';
     document.getElementById('sm-saved-msg').classList.remove('hidden');
+    // Sessione salvata: niente più scelta "salva / non salvare", resta solo "Chiudi".
+    btn.classList.add('hidden');
+    const closeBtn = document.getElementById('sm-close-btn');
+    closeBtn.textContent = 'Chiudi';
+    closeBtn.classList.remove('btn-ghost');
+    closeBtn.classList.add('btn-primary');
   } else {
     btn.disabled = false;
     btn.textContent = 'Riprova salvataggio';
