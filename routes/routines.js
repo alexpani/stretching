@@ -68,9 +68,16 @@ function computeStats(items, restStandard) {
 router.get('/', async (req, res) => {
   try {
     const db = await getDb();
-    const routines = await db.all(
-      `SELECT * FROM routines WHERE deleted_at IS NULL ORDER BY updated_at DESC`
-    );
+    // Ordinati per frequenza di utilizzo (n. sessioni completate), poi per
+    // ultimo aggiornamento come tie-break.
+    const routines = await db.all(`
+      SELECT r.*, COUNT(s.id) AS session_count
+      FROM routines r
+      LEFT JOIN sessions s ON s.routine_id = r.id
+      WHERE r.deleted_at IS NULL
+      GROUP BY r.id
+      ORDER BY session_count DESC, r.updated_at DESC
+    `);
     const result = [];
     for (const r of routines) {
       const items = await loadItems(db, r.id);
