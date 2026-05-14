@@ -1347,7 +1347,8 @@ body {
   width: 44px; height: 44px;
   border-radius: var(--r-full);
   background: rgba(255,255,255,0.95);
-  color: var(--ink);
+  /* Sfondo sempre bianco: l'icona resta scura anche in dark mode */
+  color: #15161A;
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0;
   box-shadow: 0 4px 12px rgba(0,0,0,0.18);
