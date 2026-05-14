@@ -357,6 +357,7 @@ function enterPhase(idx) {
     cd.classList.remove('rest');
     phaseLbl.textContent = 'Esercizio';
     phaseLbl.classList.remove('rest');
+    next.classList.remove('rest');
     renderSessionMedia(it);
     if (descText) descText.textContent = it.description || 'Nessuna descrizione disponibile per questo esercizio.';
     const sideTxt = SIDE_TXT[it.side] ? ` (${SIDE_TXT[it.side]})` : '';
@@ -382,6 +383,7 @@ function enterPhase(idx) {
     cd.classList.add('rest');
     phaseLbl.textContent = ph.isInitial ? 'Preparati' : 'Riposo';
     phaseLbl.classList.add('rest');
+    next.classList.add('rest');
     name.textContent = ph.isInitial ? 'Iniziamo' : 'Respira';
     renderSessionMedia(ph.nextItem);
     if (descText) descText.textContent = (ph.nextItem && ph.nextItem.description) || '';
@@ -479,7 +481,7 @@ function tick() {
   document.getElementById('ss-num').textContent = secDisplay;
 
   // Beep 3-2-1 solo per la fase esercizio (non disturbare in riposo)
-  if (Session.beepEnabled && ph.type === 'exercise' && Session.lastCountdownSec !== secDisplay) {
+  if (Session.beepEnabled && Session.lastCountdownSec !== secDisplay) {
     if (secDisplay === 3 || secDisplay === 2 || secDisplay === 1) beepCountdown();
     Session.lastCountdownSec = secDisplay;
   }
@@ -627,7 +629,6 @@ if (_ssImageEl) {
 document.getElementById('ss-pause-btn').addEventListener('click', togglePause);
 document.getElementById('ss-skip-btn').addEventListener('click', skipPhase);
 document.getElementById('ss-stop-btn').addEventListener('click', stopEarly);
-document.getElementById('ss-close-btn').addEventListener('click', stopEarly);
 document.getElementById('sm-save-btn').addEventListener('click', saveSession);
 document.getElementById('sm-close-btn').addEventListener('click', closeOverlay);
 const smCloseX = document.getElementById('sm-close-x');
