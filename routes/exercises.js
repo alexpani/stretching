@@ -13,13 +13,14 @@ const MUSCLE_GROUPS = [
   'braccia e torace'
 ];
 const SIDES = ['both', 'dx', 'sx', 'bilaterale'];
+const POSIZIONI = ['in piedi', 'da seduto', 'a terra'];
 // Il campo 'level' nel DB resta (NOT NULL su DB esistenti) ma è deprecato:
 // la UI non lo espone più. Scriviamo sempre 'easy' come valore dummy.
 const LEVEL_DUMMY = 'easy';
 
 function parseForm(body) {
   const {
-    name, description, muscle_group, side, duration_sec, notes, video_loop
+    name, description, muscle_group, side, duration_sec, notes, video_loop, posizione
   } = body || {};
   const errors = [];
   if (!name || !String(name).trim()) errors.push('nome richiesto');
@@ -27,6 +28,7 @@ function parseForm(body) {
   const dur = parseInt(duration_sec, 10);
   if (!dur || dur < 5 || dur > 600) errors.push('durata 5-600 secondi');
   const safeSide = SIDES.includes(side) ? side : 'both';
+  const safePosizione = POSIZIONI.includes(posizione) ? posizione : 'in piedi';
   // Accetta '1'/'0', 'true'/'false', undefined → default 1 (loop)
   const loopVal = (video_loop === undefined || video_loop === null || video_loop === '')
     ? 1
@@ -40,7 +42,8 @@ function parseForm(body) {
       side: safeSide,
       duration_sec: dur,
       notes: notes ? String(notes).trim() : null,
-      video_loop: loopVal
+      video_loop: loopVal,
+      posizione: safePosizione
     }
   };
 }
@@ -53,6 +56,9 @@ router.get('/', isAuth, async (req, res) => {
     const params = [];
     if (req.query.muscle_group && MUSCLE_GROUPS.includes(req.query.muscle_group)) {
       where.push('muscle_group = ?'); params.push(req.query.muscle_group);
+    }
+    if (req.query.posizione && POSIZIONI.includes(req.query.posizione)) {
+      where.push('posizione = ?'); params.push(req.query.posizione);
     }
     if (req.query.q) {
       where.push('(name LIKE ? OR description LIKE ?)');
@@ -105,10 +111,10 @@ router.post('/', isAuth, upload.single('file'), async (req, res) => {
 
     await db.run(
       `INSERT INTO exercises
-        (id, name, description, muscle_group, side, level, duration_sec, image_path, notes, video_loop)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        (id, name, description, muscle_group, side, level, duration_sec, image_path, notes, video_loop, posizione)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       id, data.name, data.description, data.muscle_group, data.side,
-      LEVEL_DUMMY, data.duration_sec, imagePath, data.notes, data.video_loop
+      LEVEL_DUMMY, data.duration_sec, imagePath, data.notes, data.video_loop, data.posizione
     );
 
     // M15 — clone bilaterale: se l'originale è dx/sx, crea automaticamente
@@ -119,10 +125,10 @@ router.post('/', isAuth, upload.single('file'), async (req, res) => {
       const twinImagePath = imagePath ? copyImage(imagePath, twinId) : null;
       await db.run(
         `INSERT INTO exercises
-          (id, name, description, muscle_group, side, level, duration_sec, image_path, notes, video_loop)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          (id, name, description, muscle_group, side, level, duration_sec, image_path, notes, video_loop, posizione)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         twinId, data.name, data.description, data.muscle_group, twinSide,
-        LEVEL_DUMMY, data.duration_sec, twinImagePath, data.notes, data.video_loop
+        LEVEL_DUMMY, data.duration_sec, twinImagePath, data.notes, data.video_loop, data.posizione
       );
     }
 
@@ -168,10 +174,10 @@ router.put('/:id', isAuth, upload.single('file'), async (req, res) => {
       `UPDATE exercises
          SET name = ?, description = ?, muscle_group = ?, side = ?,
              duration_sec = ?, image_path = ?, notes = ?, video_loop = ?,
-             updated_at = datetime('now')
+             posizione = ?, updated_at = datetime('now')
        WHERE id = ?`,
       data.name, data.description, data.muscle_group, data.side,
-      data.duration_sec, imagePath, data.notes, data.video_loop, current.id
+      data.duration_sec, imagePath, data.notes, data.video_loop, data.posizione, current.id
     );
     const row = await db.get('SELECT * FROM exercises WHERE id = ?', current.id);
     res.json(row);
@@ -195,13 +201,33 @@ router.post('/:id/duplicate', isAuth, async (req, res) => {
     const newImagePath = src.image_path ? copyImage(src.image_path, newId) : null;
     await db.run(
       `INSERT INTO exercises
-        (id, name, description, muscle_group, side, level, duration_sec, image_path, notes, video_loop)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        (id, name, description, muscle_group, side, level, duration_sec, image_path, notes, video_loop, posizione)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       newId, `${src.name} (copia)`, src.description, src.muscle_group, src.side,
-      LEVEL_DUMMY, src.duration_sec, newImagePath, src.notes, src.video_loop != null ? src.video_loop : 1
+      LEVEL_DUMMY, src.duration_sec, newImagePath, src.notes, src.video_loop != null ? src.video_loop : 1,
+      src.posizione || 'in piedi'
     );
     const row = await db.get('SELECT * FROM exercises WHERE id = ?', newId);
     res.status(201).json(row);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Errore del server' });
+  }
+});
+
+// GET /api/exercises/:id/routines — routine (non eliminate) che usano l'esercizio
+router.get('/:id/routines', isAuth, async (req, res) => {
+  try {
+    const db = await getDb();
+    const rows = await db.all(
+      `SELECT DISTINCT r.id, r.name
+         FROM routine_items ri
+         JOIN routines r ON r.id = ri.routine_id
+        WHERE ri.exercise_id = ? AND r.deleted_at IS NULL
+        ORDER BY r.name`,
+      req.params.id
+    );
+    res.json(rows);
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Errore del server' });

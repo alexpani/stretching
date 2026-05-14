@@ -9,7 +9,7 @@
 
 const Table = {
   items: [],
-  filter: { q: '', muscle_group: '', side: '' },
+  filter: { q: '', muscle_group: '', side: '', posizione: '' },
   sort: { key: null, dir: 'asc' },   // key: 'name' | 'muscle_group' | null
   uploadRowId: null   // id riga per cui sta arrivando la foto
 };
@@ -102,6 +102,7 @@ function matchesFilter(ex) {
   }
   if (Table.filter.muscle_group && ex.muscle_group !== Table.filter.muscle_group) return false;
   if (Table.filter.side && ex.side !== Table.filter.side) return false;
+  if (Table.filter.posizione && (ex.posizione || 'in piedi') !== Table.filter.posizione) return false;
   return true;
 }
 
@@ -154,6 +155,9 @@ function buildRow(ex) {
   // Lato
   tr.appendChild(buildSelectCell('side', ex.side || 'both',
     { 'both': 'Entrambi', 'dx': 'Destro', 'sx': 'Sinistro', 'bilaterale': 'Bilaterale' }, 'col-side'));
+  // Posizione
+  tr.appendChild(buildSelectCell('posizione', ex.posizione || 'in piedi',
+    { 'in piedi': 'In piedi', 'da seduto': 'Da seduto', 'a terra': 'A terra' }, 'col-posizione'));
   // Durata
   tr.appendChild(buildInputCell('number', 'duration_sec', ex.duration_sec || 30, 'col-dur'));
   // Loop video
@@ -250,6 +254,7 @@ async function saveRow(tr) {
   fd.set('notes',        data.notes || '');
   fd.set('muscle_group', data.muscle_group);
   fd.set('side',         data.side || 'both');
+  fd.set('posizione',    data.posizione || 'in piedi');
   fd.set('duration_sec', data.duration_sec || 30);
   fd.set('video_loop',   data.video_loop || '0');
 
@@ -287,7 +292,18 @@ async function duplicateRow(ex) {
 }
 
 async function deleteRow(tr, ex) {
-  if (!confirm(`Eliminare "${ex.name}"?`)) return;
+  let msg = `Eliminare "${ex.name}"?`;
+  try {
+    const r = await fetch(`/api/exercises/${ex.id}/routines`, { credentials: 'same-origin' });
+    if (r.ok) {
+      const used = await r.json();
+      if (Array.isArray(used) && used.length) {
+        const names = used.map(x => `• ${x.name}`).join('\n');
+        msg = `"${ex.name}" è usato in ${used.length} ${used.length === 1 ? 'piano' : 'piani'}:\n${names}\n\nEliminarlo comunque?`;
+      }
+    }
+  } catch (_) { /* in caso di errore mostra il confirm semplice */ }
+  if (!confirm(msg)) return;
   const res = await fetch(`/api/exercises/${ex.id}`, {
     method: 'DELETE', credentials: 'same-origin'
   });
@@ -313,6 +329,7 @@ document.getElementById('tbl-file-input').addEventListener('change', async (e) =
   fd.set('notes', ex.notes || '');
   fd.set('muscle_group', ex.muscle_group);
   fd.set('side', ex.side || 'both');
+  fd.set('posizione', ex.posizione || 'in piedi');
   fd.set('duration_sec', ex.duration_sec);
   fd.set('video_loop', (ex.video_loop == null || ex.video_loop) ? '1' : '0');
   fd.set('file', file);
@@ -334,6 +351,7 @@ document.getElementById('tbl-add-btn').addEventListener('click', async () => {
   fd.set('name', name.trim());
   fd.set('muscle_group', Table.filter.muscle_group || 'collo e spalle');
   fd.set('side', Table.filter.side || 'both');
+  fd.set('posizione', Table.filter.posizione || 'in piedi');
   fd.set('duration_sec', 30);
   const res = await fetch('/api/exercises', {
     method: 'POST', body: fd, credentials: 'same-origin'
@@ -353,6 +371,10 @@ document.getElementById('tbl-filter-muscle').addEventListener('change', (e) => {
 });
 document.getElementById('tbl-filter-side').addEventListener('change', (e) => {
   Table.filter.side = e.target.value;
+  renderTable();
+});
+document.getElementById('tbl-filter-posizione').addEventListener('change', (e) => {
+  Table.filter.posizione = e.target.value;
   renderTable();
 });
 

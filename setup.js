@@ -14,40 +14,40 @@ async function seedIfEmpty(db) {
 
   const seed = [
     // collo e spalle
-    ['Rotazione lenta del collo',  'Ruota la testa descrivendo un cerchio largo.',                       'collo e spalle', 'both', 30],
-    ['Flessione laterale collo',   'Porta l\'orecchio verso la spalla, senza alzare la spalla.',         'collo e spalle', 'dx',   30],
-    ['Flessione laterale collo',   'Porta l\'orecchio verso la spalla, senza alzare la spalla.',         'collo e spalle', 'sx',   30],
-    ['Circonduzione spalle',       'Grandi cerchi con le spalle, in avanti e indietro.',                 'collo e spalle', 'both', 40],
-    ['Cross-body stretch',         'Porta un braccio disteso davanti al petto, accompagnalo con l\'altro.', 'collo e spalle', 'dx', 30],
-    ['Cross-body stretch',         'Porta un braccio disteso davanti al petto, accompagnalo con l\'altro.', 'collo e spalle', 'sx', 30],
+    ['Rotazione lenta del collo',  'Ruota la testa descrivendo un cerchio largo.',                       'collo e spalle', 'both', 30, 'in piedi'],
+    ['Flessione laterale collo',   'Porta l\'orecchio verso la spalla, senza alzare la spalla.',         'collo e spalle', 'dx',   30, 'in piedi'],
+    ['Flessione laterale collo',   'Porta l\'orecchio verso la spalla, senza alzare la spalla.',         'collo e spalle', 'sx',   30, 'in piedi'],
+    ['Circonduzione spalle',       'Grandi cerchi con le spalle, in avanti e indietro.',                 'collo e spalle', 'both', 40, 'in piedi'],
+    ['Cross-body stretch',         'Porta un braccio disteso davanti al petto, accompagnalo con l\'altro.', 'collo e spalle', 'dx', 30, 'in piedi'],
+    ['Cross-body stretch',         'Porta un braccio disteso davanti al petto, accompagnalo con l\'altro.', 'collo e spalle', 'sx', 30, 'in piedi'],
     // schiena
-    ['Cat-cow',                    'In quadrupedia alterna inarcamento e curvatura dorsale.',            'schiena', 'both', 45],
-    ['Child\'s pose',              'Seduto sui talloni, allunga le braccia in avanti e rilassa la schiena.', 'schiena', 'both', 45],
-    ['Rotazione lombare supina',   'Supino, ginocchia piegate, porta le ginocchia da un lato mantenendo le spalle a terra.', 'schiena', 'dx', 30],
-    ['Rotazione lombare supina',   'Supino, ginocchia piegate, porta le ginocchia da un lato mantenendo le spalle a terra.', 'schiena', 'sx', 30],
+    ['Cat-cow',                    'In quadrupedia alterna inarcamento e curvatura dorsale.',            'schiena', 'both', 45, 'a terra'],
+    ['Child\'s pose',              'Seduto sui talloni, allunga le braccia in avanti e rilassa la schiena.', 'schiena', 'both', 45, 'a terra'],
+    ['Rotazione lombare supina',   'Supino, ginocchia piegate, porta le ginocchia da un lato mantenendo le spalle a terra.', 'schiena', 'dx', 30, 'a terra'],
+    ['Rotazione lombare supina',   'Supino, ginocchia piegate, porta le ginocchia da un lato mantenendo le spalle a terra.', 'schiena', 'sx', 30, 'a terra'],
     // addominali
-    ['Cobra stretch',              'Prono, mani sotto le spalle, solleva il petto mantenendo il bacino a terra.', 'addominali', 'both', 30],
-    ['Hip flexor lunge',           'Affondo basso: allunga l\'anca della gamba arretrata spingendo il bacino avanti.', 'addominali', 'dx', 40],
-    ['Hip flexor lunge',           'Affondo basso: allunga l\'anca della gamba arretrata spingendo il bacino avanti.', 'addominali', 'sx', 40],
+    ['Cobra stretch',              'Prono, mani sotto le spalle, solleva il petto mantenendo il bacino a terra.', 'addominali', 'both', 30, 'a terra'],
+    ['Hip flexor lunge',           'Affondo basso: allunga l\'anca della gamba arretrata spingendo il bacino avanti.', 'addominali', 'dx', 40, 'a terra'],
+    ['Hip flexor lunge',           'Affondo basso: allunga l\'anca della gamba arretrata spingendo il bacino avanti.', 'addominali', 'sx', 40, 'a terra'],
     // glutei e gambe
-    ['Quadricipite in piedi',      'In piedi, afferra la caviglia portando il tallone al gluteo.',       'glutei e gambe', 'dx', 30],
-    ['Quadricipite in piedi',      'In piedi, afferra la caviglia portando il tallone al gluteo.',       'glutei e gambe', 'sx', 30],
-    ['Ischiocrurali seduto',       'Seduto, gamba tesa davanti, piegati in avanti dall\'anca.',          'glutei e gambe', 'both', 40],
-    ['Butterfly',                  'Seduto, piante dei piedi unite, avvicina i talloni e lascia scendere le ginocchia.', 'glutei e gambe', 'both', 45],
-    ['Pigeon pose',                'In quadrupedia porta il ginocchio avanti sotto il petto, distendi la gamba opposta indietro.', 'glutei e gambe', 'dx', 45],
-    ['Pigeon pose',                'In quadrupedia porta il ginocchio avanti sotto il petto, distendi la gamba opposta indietro.', 'glutei e gambe', 'sx', 45],
-    ['Polpaccio al muro',          'In piedi, mani al muro, gamba dietro tesa con tallone a terra.',     'glutei e gambe', 'dx', 30],
-    ['Polpaccio al muro',          'In piedi, mani al muro, gamba dietro tesa con tallone a terra.',     'glutei e gambe', 'sx', 30],
+    ['Quadricipite in piedi',      'In piedi, afferra la caviglia portando il tallone al gluteo.',       'glutei e gambe', 'dx', 30, 'in piedi'],
+    ['Quadricipite in piedi',      'In piedi, afferra la caviglia portando il tallone al gluteo.',       'glutei e gambe', 'sx', 30, 'in piedi'],
+    ['Ischiocrurali seduto',       'Seduto, gamba tesa davanti, piegati in avanti dall\'anca.',          'glutei e gambe', 'both', 40, 'da seduto'],
+    ['Butterfly',                  'Seduto, piante dei piedi unite, avvicina i talloni e lascia scendere le ginocchia.', 'glutei e gambe', 'both', 45, 'da seduto'],
+    ['Pigeon pose',                'In quadrupedia porta il ginocchio avanti sotto il petto, distendi la gamba opposta indietro.', 'glutei e gambe', 'dx', 45, 'a terra'],
+    ['Pigeon pose',                'In quadrupedia porta il ginocchio avanti sotto il petto, distendi la gamba opposta indietro.', 'glutei e gambe', 'sx', 45, 'a terra'],
+    ['Polpaccio al muro',          'In piedi, mani al muro, gamba dietro tesa con tallone a terra.',     'glutei e gambe', 'dx', 30, 'in piedi'],
+    ['Polpaccio al muro',          'In piedi, mani al muro, gamba dietro tesa con tallone a terra.',     'glutei e gambe', 'sx', 30, 'in piedi'],
     // braccia e torace
-    ['Tricipite sopra testa',      'Braccio sopra la testa, mano dietro la nuca; aiuta con l\'altra mano al gomito.', 'braccia e torace', 'dx', 25],
-    ['Tricipite sopra testa',      'Braccio sopra la testa, mano dietro la nuca; aiuta con l\'altra mano al gomito.', 'braccia e torace', 'sx', 25]
+    ['Tricipite sopra testa',      'Braccio sopra la testa, mano dietro la nuca; aiuta con l\'altra mano al gomito.', 'braccia e torace', 'dx', 25, 'in piedi'],
+    ['Tricipite sopra testa',      'Braccio sopra la testa, mano dietro la nuca; aiuta con l\'altra mano al gomito.', 'braccia e torace', 'sx', 25, 'in piedi']
   ];
 
-  for (const [name, description, muscle_group, side, duration_sec] of seed) {
+  for (const [name, description, muscle_group, side, duration_sec, posizione] of seed) {
     await db.run(
-      `INSERT INTO exercises (id, name, description, muscle_group, side, level, duration_sec)
-       VALUES (?, ?, ?, ?, ?, 'easy', ?)`,
-      crypto.randomUUID(), name, description, muscle_group, side, duration_sec
+      `INSERT INTO exercises (id, name, description, muscle_group, side, level, duration_sec, posizione)
+       VALUES (?, ?, ?, ?, ?, 'easy', ?, ?)`,
+      crypto.randomUUID(), name, description, muscle_group, side, duration_sec, posizione
     );
   }
   console.log(`✓ Inseriti ${seed.length} esercizi`);

@@ -3,7 +3,7 @@
    ========================================== */
 
 const Library = {
-  filter: { muscle_group: '' },
+  filter: { muscle_group: '', posizione: '' },
   items: [],
   modalOpen: false
 };
@@ -48,6 +48,7 @@ window.slugMuscle = slugMuscle;
 async function loadExercises() {
   const params = new URLSearchParams();
   if (Library.filter.muscle_group) params.set('muscle_group', Library.filter.muscle_group);
+  if (Library.filter.posizione) params.set('posizione', Library.filter.posizione);
   const qs = params.toString() ? `?${params}` : '';
   const list = await apiGet(`/api/exercises${qs}`);
   Library.items = Array.isArray(list) ? list : [];
@@ -101,6 +102,15 @@ document.getElementById('filter-muscle').addEventListener('click', (e) => {
   loadExercises();
 });
 
+document.getElementById('filter-posizione').addEventListener('click', (e) => {
+  const btn = e.target.closest('.chip');
+  if (!btn) return;
+  document.querySelectorAll('#filter-posizione .chip').forEach(c => c.classList.remove('active'));
+  btn.classList.add('active');
+  Library.filter.posizione = btn.dataset.posizione || '';
+  loadExercises();
+});
+
 // ── Modal ────────────────────────────────
 function openModal(ex) {
   const modal = document.getElementById('modal-exercise');
@@ -109,6 +119,7 @@ function openModal(ex) {
   document.getElementById('ex-name').value         = ex ? ex.name : '';
   document.getElementById('ex-muscle').value       = ex ? ex.muscle_group : 'collo e spalle';
   document.getElementById('ex-side').value         = ex ? (ex.side || 'both') : 'both';
+  document.getElementById('ex-posizione').value    = ex ? (ex.posizione || 'in piedi') : 'in piedi';
   document.getElementById('ex-duration').value     = ex ? ex.duration_sec : 30;
   document.getElementById('ex-description').value  = ex ? (ex.description || '') : '';
   document.getElementById('ex-notes').value        = ex ? (ex.notes || '') : '';
@@ -154,6 +165,7 @@ document.getElementById('form-exercise').addEventListener('submit', async (e) =>
   fd.set('name',         document.getElementById('ex-name').value.trim());
   fd.set('muscle_group', document.getElementById('ex-muscle').value);
   fd.set('side',         document.getElementById('ex-side').value);
+  fd.set('posizione',    document.getElementById('ex-posizione').value);
   fd.set('duration_sec', document.getElementById('ex-duration').value);
   fd.set('description',  document.getElementById('ex-description').value.trim());
   fd.set('notes',        document.getElementById('ex-notes').value.trim());
@@ -183,7 +195,13 @@ document.getElementById('form-exercise').addEventListener('submit', async (e) =>
 document.getElementById('ex-delete-btn').addEventListener('click', async () => {
   const id = document.getElementById('ex-id').value;
   if (!id) return;
-  if (!confirm('Eliminare questo esercizio?')) return;
+  let msg = 'Eliminare questo esercizio?';
+  const used = await apiGet(`/api/exercises/${id}/routines`);
+  if (Array.isArray(used) && used.length) {
+    const names = used.map(r => `• ${r.name}`).join('\n');
+    msg = `Questo esercizio è usato in ${used.length} ${used.length === 1 ? 'piano' : 'piani'}:\n${names}\n\nEliminarlo comunque?`;
+  }
+  if (!confirm(msg)) return;
   const res = await apiDelete(`/api/exercises/${id}`);
   if (res && res.ok) {
     closeModal();

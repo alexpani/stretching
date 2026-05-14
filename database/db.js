@@ -86,6 +86,11 @@ async function getDb() {
     await _db.run(`ALTER TABLE exercises ADD COLUMN video_loop INTEGER NOT NULL DEFAULT 1`);
   }
 
+  // Posizione di esecuzione: 'in piedi' | 'da seduto' | 'a terra'
+  if (!excols.includes('posizione')) {
+    await _db.run(`ALTER TABLE exercises ADD COLUMN posizione TEXT NOT NULL DEFAULT 'in piedi'`);
+  }
+
   // Round 2 — M16/M17: campi aggiuntivi su routine (idempotente).
   const rcols = (await _db.all("PRAGMA table_info(routines)")).map(c => c.name);
   if (!rcols.includes('rest_standard_sec')) {
