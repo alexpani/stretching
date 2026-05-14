@@ -291,14 +291,21 @@ function buildSelectCell(field, selected, options, colClass) {
   return td;
 }
 
-// Cella zone: select multiplo nativo con tutte le 14 zone.
+// Cella zone: tag toggle con tutte le 14 zone, salvataggio immediato al tap.
 function buildZonesCell(selected) {
   const td = document.createElement('td');
   td.className = 'col-zones';
-  const opts = ZONES_T
-    .map(z => `<option value="${escT(z)}"${selected.includes(z) ? ' selected' : ''}>${escT(z)}</option>`)
+  const chips = ZONES_T
+    .map(z => `<button type="button" class="zone-tag${selected.includes(z) ? ' active' : ''}" data-zone="${escT(z)}">${escT(z)}</button>`)
     .join('');
-  td.innerHTML = `<select data-field="zones" multiple size="4">${opts}</select>`;
+  td.innerHTML = `<div class="zone-tags" data-field="zones">${chips}</div>`;
+  td.querySelector('.zone-tags').addEventListener('click', (e) => {
+    const chip = e.target.closest('.zone-tag');
+    if (!chip) return;
+    chip.classList.toggle('active');
+    const tr = chip.closest('tr');
+    if (tr) { markDirty(tr); saveRow(tr); }
+  });
   return td;
 }
 
@@ -312,6 +319,7 @@ function getRowData(tr) {
   tr.querySelectorAll('[data-field]').forEach(el => {
     const f = el.dataset.field;
     if (el.type === 'checkbox') data[f] = el.checked ? '1' : '0';
+    else if (el.classList.contains('zone-tags')) data[f] = [...el.querySelectorAll('.zone-tag.active')].map(c => c.dataset.zone);
     else if (el.multiple) data[f] = [...el.selectedOptions].map(o => o.value);
     else data[f] = el.value;
   });

@@ -147,12 +147,16 @@ document.getElementById('filter-zone').addEventListener('click', (e) => {
   loadExercises();
 });
 
-// Costruisce le checkbox delle zone nel modal esercizio.
-(function buildZoneChecks() {
+// Costruisce le zone come tag toggle nel modal esercizio.
+(function buildZoneTags() {
   document.getElementById('ex-zones').innerHTML = ZONES.map(z =>
-    `<label class="zone-check"><input type="checkbox" value="${escapeHtml(z)}" /><span>${escapeHtml(z)}</span></label>`
+    `<button type="button" class="chip" data-zone="${escapeHtml(z)}">${escapeHtml(z)}</button>`
   ).join('');
 })();
+document.getElementById('ex-zones').addEventListener('click', (e) => {
+  const chip = e.target.closest('.chip');
+  if (chip) chip.classList.toggle('active');
+});
 
 document.getElementById('filter-posizione').addEventListener('click', (e) => {
   const btn = e.target.closest('.chip');
@@ -177,8 +181,8 @@ function openModal(ex) {
   document.getElementById('ex-id').value           = ex ? ex.id : '';
   document.getElementById('ex-name').value         = ex ? ex.name : '';
   const exZones = (ex && Array.isArray(ex.zones)) ? ex.zones : [];
-  document.querySelectorAll('#ex-zones input[type=checkbox]').forEach(cb => {
-    cb.checked = exZones.includes(cb.value);
+  document.querySelectorAll('#ex-zones .chip').forEach(chip => {
+    chip.classList.toggle('active', exZones.includes(chip.dataset.zone));
   });
   document.getElementById('ex-side').value         = ex ? (ex.side || 'both') : 'both';
   document.getElementById('ex-posizione').value    = ex ? (ex.posizione || 'in piedi') : 'in piedi';
@@ -230,7 +234,7 @@ document.getElementById('form-exercise').addEventListener('submit', async (e) =>
   const id = document.getElementById('ex-id').value;
   const fd = new FormData();
   fd.set('name',         document.getElementById('ex-name').value.trim());
-  const selZones = [...document.querySelectorAll('#ex-zones input:checked')].map(cb => cb.value);
+  const selZones = [...document.querySelectorAll('#ex-zones .chip.active')].map(c => c.dataset.zone);
   fd.set('zones',        selZones.join(','));
   fd.set('side',         document.getElementById('ex-side').value);
   fd.set('posizione',    document.getElementById('ex-posizione').value);
