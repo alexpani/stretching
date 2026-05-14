@@ -112,6 +112,13 @@ document.getElementById('filter-posizione').addEventListener('click', (e) => {
 });
 
 // ── Modal ────────────────────────────────
+// Mostra il campo durata o ripetizioni in base alla modalità selezionata.
+function applyModalitaUI() {
+  const isReps = document.getElementById('ex-modalita').value === 'ripetizioni';
+  document.getElementById('ex-duration-field').classList.toggle('hidden', isReps);
+  document.getElementById('ex-reps-field').classList.toggle('hidden', !isReps);
+}
+
 function openModal(ex) {
   const modal = document.getElementById('modal-exercise');
   document.getElementById('modal-ex-title').textContent = ex ? 'Modifica esercizio' : 'Nuovo esercizio';
@@ -121,6 +128,9 @@ function openModal(ex) {
   document.getElementById('ex-side').value         = ex ? (ex.side || 'both') : 'both';
   document.getElementById('ex-posizione').value    = ex ? (ex.posizione || 'in piedi') : 'in piedi';
   document.getElementById('ex-duration').value     = ex ? ex.duration_sec : 30;
+  document.getElementById('ex-modalita').value     = ex ? (ex.modalita || 'tempo') : 'tempo';
+  document.getElementById('ex-reps').value         = (ex && ex.reps_count) ? ex.reps_count : 10;
+  applyModalitaUI();
   document.getElementById('ex-description').value  = ex ? (ex.description || '') : '';
   document.getElementById('ex-notes').value        = ex ? (ex.notes || '') : '';
   document.getElementById('ex-file').value         = '';
@@ -145,6 +155,8 @@ document.getElementById('modal-exercise').addEventListener('click', (e) => {
 
 document.getElementById('fab-add-exercise').addEventListener('click', () => openModal(null));
 
+document.getElementById('ex-modalita').addEventListener('change', applyModalitaUI);
+
 // Anteprima immagine selezionata
 document.getElementById('ex-file').addEventListener('change', (e) => {
   const f = e.target.files && e.target.files[0];
@@ -167,6 +179,8 @@ document.getElementById('form-exercise').addEventListener('submit', async (e) =>
   fd.set('side',         document.getElementById('ex-side').value);
   fd.set('posizione',    document.getElementById('ex-posizione').value);
   fd.set('duration_sec', document.getElementById('ex-duration').value);
+  fd.set('modalita',     document.getElementById('ex-modalita').value);
+  fd.set('reps_count',   document.getElementById('ex-reps').value);
   fd.set('description',  document.getElementById('ex-description').value.trim());
   fd.set('notes',        document.getElementById('ex-notes').value.trim());
   fd.set('video_loop',   document.getElementById('ex-video-loop').checked ? '1' : '0');

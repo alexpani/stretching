@@ -14,19 +14,34 @@ const MUSCLE_GROUPS = [
 ];
 const SIDES = ['both', 'dx', 'sx', 'bilaterale'];
 const POSIZIONI = ['in piedi', 'da seduto', 'a terra'];
+const MODALITA = ['tempo', 'ripetizioni'];
 // Il campo 'level' nel DB resta (NOT NULL su DB esistenti) ma è deprecato:
 // la UI non lo espone più. Scriviamo sempre 'easy' come valore dummy.
 const LEVEL_DUMMY = 'easy';
 
 function parseForm(body) {
   const {
-    name, description, muscle_group, side, duration_sec, notes, video_loop, posizione
+    name, description, muscle_group, side, duration_sec, notes, video_loop, posizione,
+    modalita, reps_count
   } = body || {};
   const errors = [];
   if (!name || !String(name).trim()) errors.push('nome richiesto');
   if (!MUSCLE_GROUPS.includes(muscle_group)) errors.push('gruppo muscolare non valido');
-  const dur = parseInt(duration_sec, 10);
-  if (!dur || dur < 5 || dur > 600) errors.push('durata 5-600 secondi');
+  const safeModalita = MODALITA.includes(modalita) ? modalita : 'tempo';
+  // In modalità ripetizioni la durata non è obbligatoria: si tiene comunque
+  // un valore valido (default 30) per soddisfare il NOT NULL su duration_sec.
+  let dur = parseInt(duration_sec, 10);
+  if (safeModalita === 'tempo') {
+    if (!dur || dur < 5 || dur > 600) errors.push('durata 5-600 secondi');
+  } else {
+    if (!dur || dur < 5 || dur > 600) dur = 30;
+  }
+  let reps = parseInt(reps_count, 10);
+  if (safeModalita === 'ripetizioni') {
+    if (!reps || reps < 1 || reps > 200) errors.push('ripetizioni 1-200');
+  } else {
+    reps = (reps && reps >= 1 && reps <= 200) ? reps : null;
+  }
   const safeSide = SIDES.includes(side) ? side : 'both';
   const safePosizione = POSIZIONI.includes(posizione) ? posizione : 'in piedi';
   // Accetta '1'/'0', 'true'/'false', undefined → default 1 (loop)
@@ -43,7 +58,9 @@ function parseForm(body) {
       duration_sec: dur,
       notes: notes ? String(notes).trim() : null,
       video_loop: loopVal,
-      posizione: safePosizione
+      posizione: safePosizione,
+      modalita: safeModalita,
+      reps_count: reps
     }
   };
 }
@@ -111,10 +128,11 @@ router.post('/', isAuth, upload.single('file'), async (req, res) => {
 
     await db.run(
       `INSERT INTO exercises
-        (id, name, description, muscle_group, side, level, duration_sec, image_path, notes, video_loop, posizione)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        (id, name, description, muscle_group, side, level, duration_sec, image_path, notes, video_loop, posizione, modalita, reps_count)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       id, data.name, data.description, data.muscle_group, data.side,
-      LEVEL_DUMMY, data.duration_sec, imagePath, data.notes, data.video_loop, data.posizione
+      LEVEL_DUMMY, data.duration_sec, imagePath, data.notes, data.video_loop, data.posizione,
+      data.modalita, data.reps_count
     );
 
     // M15 — clone bilaterale: se l'originale è dx/sx, crea automaticamente
@@ -125,10 +143,11 @@ router.post('/', isAuth, upload.single('file'), async (req, res) => {
       const twinImagePath = imagePath ? copyImage(imagePath, twinId) : null;
       await db.run(
         `INSERT INTO exercises
-          (id, name, description, muscle_group, side, level, duration_sec, image_path, notes, video_loop, posizione)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          (id, name, description, muscle_group, side, level, duration_sec, image_path, notes, video_loop, posizione, modalita, reps_count)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         twinId, data.name, data.description, data.muscle_group, twinSide,
-        LEVEL_DUMMY, data.duration_sec, twinImagePath, data.notes, data.video_loop, data.posizione
+        LEVEL_DUMMY, data.duration_sec, twinImagePath, data.notes, data.video_loop, data.posizione,
+        data.modalita, data.reps_count
       );
     }
 
@@ -174,10 +193,11 @@ router.put('/:id', isAuth, upload.single('file'), async (req, res) => {
       `UPDATE exercises
          SET name = ?, description = ?, muscle_group = ?, side = ?,
              duration_sec = ?, image_path = ?, notes = ?, video_loop = ?,
-             posizione = ?, updated_at = datetime('now')
+             posizione = ?, modalita = ?, reps_count = ?, updated_at = datetime('now')
        WHERE id = ?`,
       data.name, data.description, data.muscle_group, data.side,
-      data.duration_sec, imagePath, data.notes, data.video_loop, data.posizione, current.id
+      data.duration_sec, imagePath, data.notes, data.video_loop, data.posizione,
+      data.modalita, data.reps_count, current.id
     );
     const row = await db.get('SELECT * FROM exercises WHERE id = ?', current.id);
     res.json(row);
@@ -201,11 +221,11 @@ router.post('/:id/duplicate', isAuth, async (req, res) => {
     const newImagePath = src.image_path ? copyImage(src.image_path, newId) : null;
     await db.run(
       `INSERT INTO exercises
-        (id, name, description, muscle_group, side, level, duration_sec, image_path, notes, video_loop, posizione)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        (id, name, description, muscle_group, side, level, duration_sec, image_path, notes, video_loop, posizione, modalita, reps_count)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       newId, `${src.name} (copia)`, src.description, src.muscle_group, src.side,
       LEVEL_DUMMY, src.duration_sec, newImagePath, src.notes, src.video_loop != null ? src.video_loop : 1,
-      src.posizione || 'in piedi'
+      src.posizione || 'in piedi', src.modalita || 'tempo', src.reps_count != null ? src.reps_count : null
     );
     const row = await db.get('SELECT * FROM exercises WHERE id = ?', newId);
     res.status(201).json(row);

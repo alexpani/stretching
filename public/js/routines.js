@@ -156,14 +156,18 @@ function renderRoutineItems(items) {
     const row = document.createElement('div');
     row.className = 'item-row';
     row.dataset.itemId = it.id;
-    const dur = it.duration_override_sec || it.exercise_duration_sec;
+    const isReps = (it.modalita || 'tempo') === 'ripetizioni';
+    const effReps = it.reps_override || it.reps_count;
+    const amount = isReps
+      ? `${effReps || '?'} rip.`
+      : `${it.duration_override_sec || it.exercise_duration_sec}s`;
     const sideBadge = SIDE_LBL[it.side] ? `<span class="badge side-${it.side}">${SIDE_LBL[it.side]}</span>` : '';
     row.innerHTML = `
       <div class="drag-handle" aria-label="Trascina">≡</div>
       <div class="item-thumb">${itemMediaTag(it)}</div>
       <div class="item-body">
         <div class="item-name">${escHtml(it.name)}</div>
-        <div class="item-meta-row">${sideBadge}<span class="item-meta">${MUSCLE_LBL[it.muscle_group]} · ${dur}s · riposo ${it.rest_after_sec || 0}s</span></div>
+        <div class="item-meta-row">${sideBadge}<span class="item-meta">${MUSCLE_LBL[it.muscle_group]} · ${amount} · riposo ${it.rest_after_sec || 0}s</span></div>
       </div>
       <button class="item-del" data-del="${it.id}" aria-label="Rimuovi">×</button>
     `;
@@ -458,6 +462,13 @@ function openItemEdit(it) {
   document.getElementById('it-duration').placeholder = `${it.exercise_duration_sec}`;
   document.getElementById('it-default-dur').textContent = it.exercise_duration_sec;
   document.getElementById('it-rest').value     = it.rest_after_sec != null ? it.rest_after_sec : 10;
+  // Esercizio a ripetizioni: mostra l'override ripetizioni al posto della durata.
+  const isReps = (it.modalita || 'tempo') === 'ripetizioni';
+  document.getElementById('it-duration-field').classList.toggle('hidden', isReps);
+  document.getElementById('it-reps-field').classList.toggle('hidden', !isReps);
+  document.getElementById('it-reps').value = it.reps_override || '';
+  document.getElementById('it-reps').placeholder = it.reps_count != null ? `${it.reps_count}` : '';
+  document.getElementById('it-default-reps').textContent = it.reps_count != null ? it.reps_count : '—';
   document.getElementById('modal-item').classList.remove('hidden');
 }
 function closeItemModal() {
@@ -470,8 +481,10 @@ document.getElementById('form-item').addEventListener('submit', async (e) => {
   e.preventDefault();
   const itemId = document.getElementById('it-id').value;
   const durVal = document.getElementById('it-duration').value.trim();
+  const repsVal = document.getElementById('it-reps').value.trim();
   const payload = {
     duration_override_sec: durVal ? parseInt(durVal, 10) : null,
+    reps_override: repsVal ? parseInt(repsVal, 10) : null,
     rest_after_sec: parseInt(document.getElementById('it-rest').value, 10) || 0
   };
   const items = await apiPut(`/api/routines/${Routines.current.id}/items/${itemId}`, payload);

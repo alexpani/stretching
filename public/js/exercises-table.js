@@ -182,8 +182,13 @@ function buildRow(ex) {
   // Posizione
   tr.appendChild(buildSelectCell('posizione', ex.posizione || 'in piedi',
     { 'in piedi': 'In piedi', 'da seduto': 'Da seduto', 'a terra': 'A terra' }, 'col-posizione'));
+  // Modalità
+  tr.appendChild(buildSelectCell('modalita', ex.modalita || 'tempo',
+    { 'tempo': 'A tempo', 'ripetizioni': 'A ripetizioni' }, 'col-modalita'));
   // Durata
   tr.appendChild(buildInputCell('number', 'duration_sec', ex.duration_sec || 30, 'col-dur'));
+  // Ripetizioni
+  tr.appendChild(buildInputCell('number', 'reps_count', ex.reps_count || '', 'col-reps'));
   // Loop video
   tr.appendChild(buildCheckboxCell('video_loop', ex.video_loop == null ? true : !!ex.video_loop, 'col-loop'));
 
@@ -216,7 +221,10 @@ function buildRow(ex) {
 function buildInputCell(type, field, value, colClass) {
   const td = document.createElement('td');
   td.className = colClass;
-  const min = type === 'number' ? ' min="5" max="600"' : '';
+  let min = '';
+  if (type === 'number') {
+    min = field === 'reps_count' ? ' min="1" max="200"' : ' min="5" max="600"';
+  }
   td.innerHTML = `<input type="${type}"${min} data-field="${field}" value="${escT(value)}" />`;
   return td;
 }
@@ -280,6 +288,8 @@ async function saveRow(tr) {
   fd.set('side',         data.side || 'both');
   fd.set('posizione',    data.posizione || 'in piedi');
   fd.set('duration_sec', data.duration_sec || 30);
+  fd.set('modalita',     data.modalita || 'tempo');
+  fd.set('reps_count',   data.reps_count || '');
   fd.set('video_loop',   data.video_loop || '0');
 
   const res = await fetch(`/api/exercises/${id}`, {
@@ -355,6 +365,8 @@ document.getElementById('tbl-file-input').addEventListener('change', async (e) =
   fd.set('side', ex.side || 'both');
   fd.set('posizione', ex.posizione || 'in piedi');
   fd.set('duration_sec', ex.duration_sec);
+  fd.set('modalita', ex.modalita || 'tempo');
+  fd.set('reps_count', ex.reps_count || '');
   fd.set('video_loop', (ex.video_loop == null || ex.video_loop) ? '1' : '0');
   fd.set('file', file);
   const res = await fetch(`/api/exercises/${id}`, {

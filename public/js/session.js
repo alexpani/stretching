@@ -283,9 +283,15 @@ function startSession(routine) {
   }
   for (let i = 0; i < routine.items.length; i++) {
     const it = routine.items[i];
+    const isReps = (it.modalita || 'tempo') === 'ripetizioni';
+    const effReps = it.reps_override || it.reps_count || 10;
     Session.phases.push({
       type: 'exercise',
-      duration: it.duration_override_sec || it.exercise_duration_sec || 30,
+      modalita: isReps ? 'ripetizioni' : 'tempo',
+      reps: isReps ? effReps : null,
+      // Per gli esercizi a tempo è il countdown reale; per quelli a ripetizioni
+      // è solo una stima usata dalla barra di avanzamento totale.
+      duration: isReps ? (effReps * 4) : (it.duration_override_sec || it.exercise_duration_sec || 30),
       item: it
     });
     const restSec = (restOverride != null) ? restOverride : (it.rest_after_sec || 0);
@@ -345,6 +351,7 @@ function enterPhase(idx) {
   const img = document.getElementById('ss-img');
   const name = document.getElementById('ss-name');
   const next = document.getElementById('ss-next');
+  const doneBtn = document.getElementById('ss-done-btn');
 
   // Reset eventuale toggle descrizione → torna sempre alla foto al cambio fase
   const ssImage = document.getElementById('ss-image');
@@ -353,34 +360,48 @@ function enterPhase(idx) {
 
   if (ph.type === 'exercise') {
     const it = ph.item;
+    const isReps = ph.modalita === 'ripetizioni';
     if (Session.beepEnabled) beepStartExercise();
     cd.classList.remove('rest');
-    phaseLbl.textContent = 'Esercizio';
+    cd.classList.toggle('reps', isReps);
+    doneBtn.classList.toggle('hidden', !isReps);
+    phaseLbl.textContent = isReps ? 'Ripetizioni' : 'Esercizio';
     phaseLbl.classList.remove('rest');
     next.classList.remove('rest');
     renderSessionMedia(it);
     if (descText) descText.textContent = it.description || 'Nessuna descrizione disponibile per questo esercizio.';
     const sideTxt = SIDE_TXT[it.side] ? ` (${SIDE_TXT[it.side]})` : '';
     name.textContent = (it.name || '') + sideTxt;
+    // Esercizio a ripetizioni: niente countdown, mostra il numero di ripetizioni.
+    if (isReps) document.getElementById('ss-num').textContent = ph.reps;
     const following = Session.phases.slice(idx + 1).find(p => p.type === 'exercise');
     next.innerHTML = following
       ? `Prossimo: <strong>${escapeHtmlS(following.item.name)}${SIDE_TXT[following.item.side] ? ' (' + SIDE_TXT[following.item.side] + ')' : ''}</strong>`
       : 'Ultimo esercizio';
-    // Voce: annuncia il nome dell'esercizio (+ eventuale lato + durata)
+    // Voce: annuncia il nome dell'esercizio (+ eventuale lato + durata o ripetizioni)
     if (Session.voiceEnabled) {
       const lateral = it.side === 'dx' ? ' lato destro' : it.side === 'sx' ? ' lato sinistro' : '';
       const isBilateral = it.side === 'bilaterale';
-      // virgola → piccola pausa naturale prima della durata
-      const timePhrase = isBilateral
-        ? `, ${Math.round(ph.duration / 2)} secondi per lato`
-        : `, per ${ph.duration} secondi`;
+      // virgola → piccola pausa naturale prima della quantità
+      let amountPhrase;
+      if (isReps) {
+        amountPhrase = isBilateral
+          ? `, ${ph.reps} ripetizioni per lato`
+          : `, ${ph.reps} ripetizioni`;
+      } else {
+        amountPhrase = isBilateral
+          ? `, ${Math.round(ph.duration / 2)} secondi per lato`
+          : `, per ${ph.duration} secondi`;
+      }
       speak(
-        `${it.name || 'Esercizio'}${lateral}${timePhrase}`,
+        `${it.name || 'Esercizio'}${lateral}${amountPhrase}`,
         () => { Session.announceEndedAtMs = performance.now(); }
       );
     }
   } else {
     cd.classList.add('rest');
+    cd.classList.remove('reps');
+    doneBtn.classList.add('hidden');
     phaseLbl.textContent = ph.isInitial ? 'Preparati' : 'Riposo';
     phaseLbl.classList.add('rest');
     next.classList.add('rest');
@@ -474,6 +495,29 @@ function tick() {
   if (!ph) return;
   const now = performance.now();
   const elapsedMs = now - Session.phaseStartMs - Session.pausedAccumMs;
+
+  // Commento esercizio: parte N s dopo la fine dell'annuncio del nome
+  // (N configurabile in Profilo, default 3s). Vale sia per gli esercizi a
+  // tempo che per quelli a ripetizioni.
+  const _opts = sessionOpts();
+  const _commentOn = _opts.commentEnabled !== false;
+  const _commentDelayMs = Math.max(0, (_opts.commentDelaySec ?? 3) * 1000);
+  if (Session.voiceEnabled && _commentOn && ph.type === 'exercise' && !Session.voiceCommentSpoken
+      && ph.item && ph.item.notes
+      && Session.announceEndedAtMs
+      && (performance.now() - Session.announceEndedAtMs) >= _commentDelayMs) {
+    Session.voiceCommentSpoken = true;
+    speak(ph.item.notes);
+  }
+
+  // Esercizio a ripetizioni: avanzamento manuale, nessun countdown né beep.
+  // Si attende il tap su "Fatto" (vedi listener ss-done-btn → nextPhase).
+  if (ph.type === 'exercise' && ph.modalita === 'ripetizioni') {
+    updateTotalProgress(elapsedMs);
+    Session.rafId = requestAnimationFrame(tick);
+    return;
+  }
+
   const totalMs = ph.duration * 1000;
   const remainingMs = Math.max(0, totalMs - elapsedMs);
 
@@ -492,21 +536,6 @@ function tick() {
     const words = { 3: 'tre', 2: 'due', 1: 'uno' };
     speak(words[secDisplay]);
     Session.voiceLastSpokenSec = secDisplay;
-  }
-  // Commento esercizio: letto una volta dopo ~3s dall'avvio della fase
-  // (così non si sovrappone all'annuncio del nome). Solo se notes valorizzato.
-  // Commento esercizio: parte N s dopo la fine dell'annuncio del nome
-  // (N configurabile in Profilo, default 3s). Se la voce non è disponibile
-  // o l'opzione è disattivata, non parte.
-  const _opts = sessionOpts();
-  const _commentOn = _opts.commentEnabled !== false;
-  const _commentDelayMs = Math.max(0, (_opts.commentDelaySec ?? 3) * 1000);
-  if (Session.voiceEnabled && _commentOn && ph.type === 'exercise' && !Session.voiceCommentSpoken
-      && ph.item && ph.item.notes
-      && Session.announceEndedAtMs
-      && (performance.now() - Session.announceEndedAtMs) >= _commentDelayMs) {
-    Session.voiceCommentSpoken = true;
-    speak(ph.item.notes);
   }
   // Guida vocale a metà fase esercizio: una sola volta.
   // - Se bilaterale → "cambia lato" (annuncio sempre, è un'istruzione operativa)
@@ -628,6 +657,12 @@ if (_ssImageEl) {
 
 document.getElementById('ss-pause-btn').addEventListener('click', togglePause);
 document.getElementById('ss-skip-btn').addEventListener('click', skipPhase);
+// "Fatto, prossimo" — avanzamento manuale degli esercizi a ripetizioni
+document.getElementById('ss-done-btn').addEventListener('click', () => {
+  if (!Session.running || Session.paused) return;
+  stopSpeak();
+  nextPhase();
+});
 document.getElementById('ss-stop-btn').addEventListener('click', stopEarly);
 document.getElementById('sm-save-btn').addEventListener('click', saveSession);
 document.getElementById('sm-close-btn').addEventListener('click', closeOverlay);

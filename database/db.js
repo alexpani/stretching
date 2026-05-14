@@ -91,6 +91,20 @@ async function getDb() {
     await _db.run(`ALTER TABLE exercises ADD COLUMN posizione TEXT NOT NULL DEFAULT 'in piedi'`);
   }
 
+  // Modalità esercizio: 'tempo' (countdown) | 'ripetizioni' (avanzamento manuale)
+  if (!excols.includes('modalita')) {
+    await _db.run(`ALTER TABLE exercises ADD COLUMN modalita TEXT NOT NULL DEFAULT 'tempo'`);
+  }
+  if (!excols.includes('reps_count')) {
+    await _db.run(`ALTER TABLE exercises ADD COLUMN reps_count INTEGER`);
+  }
+
+  // Override ripetizioni per singolo item di routine (analogo a duration_override_sec)
+  const ricols = (await _db.all("PRAGMA table_info(routine_items)")).map(c => c.name);
+  if (!ricols.includes('reps_override')) {
+    await _db.run(`ALTER TABLE routine_items ADD COLUMN reps_override INTEGER`);
+  }
+
   // Round 2 — M16/M17: campi aggiuntivi su routine (idempotente).
   const rcols = (await _db.all("PRAGMA table_info(routines)")).map(c => c.name);
   if (!rcols.includes('rest_standard_sec')) {

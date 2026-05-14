@@ -24,9 +24,10 @@ function mirrorSideInName(name) {
 async function loadItems(db, routineId) {
   return db.all(`
     SELECT ri.id, ri.routine_id, ri.exercise_id, ri.position,
-           ri.duration_override_sec, ri.rest_after_sec,
+           ri.duration_override_sec, ri.rest_after_sec, ri.reps_override,
            e.name, e.description, e.muscle_group, e.side, e.level,
            e.duration_sec AS exercise_duration_sec,
+           e.modalita, e.reps_count,
            e.image_path, e.notes, e.video_loop, e.updated_at
     FROM routine_items ri
     JOIN exercises e ON e.id = ri.exercise_id
@@ -186,10 +187,10 @@ router.post('/:id/duplicate', async (req, res) => {
     for (const it of items) {
       await db.run(
         `INSERT INTO routine_items
-          (id, routine_id, exercise_id, position, duration_override_sec, rest_after_sec)
-         VALUES (?, ?, ?, ?, ?, ?)`,
+          (id, routine_id, exercise_id, position, duration_override_sec, rest_after_sec, reps_override)
+         VALUES (?, ?, ?, ?, ?, ?, ?)`,
         crypto.randomUUID(), newId, it.exercise_id, it.position,
-        it.duration_override_sec, it.rest_after_sec
+        it.duration_override_sec, it.rest_after_sec, it.reps_override
       );
     }
     const row = await db.get('SELECT * FROM routines WHERE id = ?', newId);
@@ -273,9 +274,11 @@ router.put('/:id/items/:itemId', async (req, res) => {
       ? parseInt(req.body.duration_override_sec, 10) : null;
     const rest_after_sec = req.body.rest_after_sec != null
       ? parseInt(req.body.rest_after_sec, 10) : 10;
+    const reps_override = req.body.reps_override
+      ? parseInt(req.body.reps_override, 10) : null;
     await db.run(
-      `UPDATE routine_items SET duration_override_sec = ?, rest_after_sec = ? WHERE id = ?`,
-      duration_override_sec, rest_after_sec, req.params.itemId
+      `UPDATE routine_items SET duration_override_sec = ?, rest_after_sec = ?, reps_override = ? WHERE id = ?`,
+      duration_override_sec, rest_after_sec, reps_override, req.params.itemId
     );
     await db.run(`UPDATE routines SET updated_at = datetime('now') WHERE id = ?`, req.params.id);
     const items = await loadItems(db, req.params.id);
