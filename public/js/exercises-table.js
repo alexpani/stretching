@@ -180,8 +180,8 @@ function buildRow(ex) {
   tdThumb.querySelector('.js-thumb-zoom').addEventListener('click', () => openLightbox(ex));
   tr.appendChild(tdThumb);
 
-  // Nome
-  tr.appendChild(buildInputCell('text', 'name', ex.name || '', 'col-name'));
+  // Nome — textarea così il titolo va a capo invece di troncare
+  tr.appendChild(buildTextareaCell('name', ex.name || '', 'col-name'));
   // Descrizione
   tr.appendChild(buildTextareaCell('description', ex.description || '', 'col-desc'));
   // Commento durante l'esercizio (notes)

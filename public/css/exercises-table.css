@@ -6,7 +6,7 @@
 .table-body {
   display: block !important;
   justify-content: unset !important;
-  max-width: 1680px !important;
+  max-width: 1920px !important;
   margin: 0 auto;
 }
 
@@ -139,7 +139,7 @@
 }
 
 .col-thumb  { width: 112px; }
-.col-name   { min-width: 180px; }
+.col-name   { min-width: 200px; width: 220px; }
 .col-desc   { min-width: 240px; }
 .col-notes  { min-width: 240px; }
 .col-zones  { width: 240px; }
@@ -190,6 +190,13 @@
 .sheet textarea { min-height: 34px; }
 .sheet td.col-desc textarea { min-height: 96px; height: 96px; }
 .sheet td.col-notes textarea { min-height: 96px; height: 96px; }
+/* Nome: va a capo e cresce in altezza col contenuto */
+.sheet td.col-name textarea {
+  min-height: 34px;
+  field-sizing: content;
+  font-weight: 500;
+  white-space: normal;
+}
 .sheet input:focus,
 .sheet select:focus,
 .sheet textarea:focus {
