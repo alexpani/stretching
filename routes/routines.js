@@ -7,6 +7,20 @@ const { upload, resizeAndStoreCover, removeImage } = require('../services/images
 
 router.use(isAuth);
 
+// Restituisce il nome "speculare" invertendo destro/sinistro e destra/sinistra
+// (parole intere, case-insensitive). Serve a trovare il gemello del lato opposto
+// quando i due esercizi hanno nomi descrittivi anziché identici.
+function mirrorSideInName(name) {
+  const map = {
+    destro: 'sinistro', sinistro: 'destro',
+    destra: 'sinistra', sinistra: 'destra'
+  };
+  return String(name || '').replace(/\b(destr[oa]|sinistr[oa])\b/gi, (m) => {
+    const swapped = map[m.toLowerCase()];
+    return swapped ? swapped : m;
+  });
+}
+
 async function loadItems(db, routineId) {
   return db.all(`
     SELECT ri.id, ri.routine_id, ri.exercise_id, ri.position,
@@ -210,9 +224,15 @@ router.post('/:id/items', async (req, res) => {
     const toInsert = [ex.id];
     if (ex.side === 'dx' || ex.side === 'sx') {
       const twinSide = ex.side === 'dx' ? 'sx' : 'dx';
+      // Il gemello può avere lo stesso nome (esercizi auto-clonati) oppure
+      // un nome "speculare" con destro/sinistra invertiti.
+      const mirrored = mirrorSideInName(ex.name);
       const twin = await db.get(
-        `SELECT id FROM exercises WHERE name = ? AND side = ? AND deleted_at IS NULL LIMIT 1`,
-        ex.name, twinSide
+        `SELECT id FROM exercises
+           WHERE side = ? AND deleted_at IS NULL
+             AND lower(name) IN (lower(?), lower(?))
+           LIMIT 1`,
+        twinSide, ex.name, mirrored
       );
       if (twin) toInsert.push(twin.id);
     }
