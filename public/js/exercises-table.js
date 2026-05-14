@@ -450,12 +450,30 @@ document.getElementById('tbl-search').addEventListener('input', (e) => {
   Table.filter.q = e.target.value.trim();
   renderTable();
 });
-// Filtro zone: select multiplo nativo, popolato da ZONES_T.
+// Filtro zone: chip "Tutte" + una per zona, multi-selezione.
 (function buildZoneFilterT() {
-  const sel = document.getElementById('tbl-filter-zone');
-  sel.innerHTML = ZONES_T.map(z => `<option value="${escT(z)}">${escT(z)}</option>`).join('');
-  sel.addEventListener('change', () => {
-    Table.filter.zones = [...sel.selectedOptions].map(o => o.value);
+  const row = document.getElementById('tbl-filter-zone');
+  let html = '<button type="button" class="chip active" data-zone="">Tutte</button>';
+  for (const z of ZONES_T) html += `<button type="button" class="chip" data-zone="${escT(z)}">${escT(z)}</button>`;
+  row.innerHTML = html;
+  row.addEventListener('click', (e) => {
+    const btn = e.target.closest('.chip');
+    if (!btn) return;
+    const zone = btn.dataset.zone || '';
+    if (!zone) {
+      Table.filter.zones = [];
+    } else {
+      btn.classList.toggle('active');
+      Table.filter.zones = [...row.querySelectorAll('.chip.active')]
+        .map(c => c.dataset.zone).filter(Boolean);
+    }
+    const allBtn = row.querySelector('.chip[data-zone=""]');
+    if (Table.filter.zones.length === 0) {
+      row.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+      allBtn.classList.add('active');
+    } else {
+      allBtn.classList.remove('active');
+    }
     renderTable();
   });
 })();
@@ -472,7 +490,10 @@ document.getElementById('tbl-filter-reset').addEventListener('click', () => {
   document.getElementById('tbl-search').value = '';
   document.getElementById('tbl-filter-side').value = '';
   document.getElementById('tbl-filter-posizione').value = '';
-  [...document.getElementById('tbl-filter-zone').options].forEach(o => { o.selected = false; });
+  const zoneRow = document.getElementById('tbl-filter-zone');
+  zoneRow.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+  const allZ = zoneRow.querySelector('.chip[data-zone=""]');
+  if (allZ) allZ.classList.add('active');
   renderTable();
 });
 

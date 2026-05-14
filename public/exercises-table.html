@@ -27,23 +27,25 @@
   </header>
 
   <section class="table-filters">
-    <input type="search" id="tbl-search" placeholder="Cerca per nome o descrizione…" />
-    <select id="tbl-filter-zone" multiple size="3" title="Filtra per zone (selezione multipla)"></select>
-    <select id="tbl-filter-side">
-      <option value="">Tutti i lati</option>
-      <option value="both">Entrambi</option>
-      <option value="dx">Destro</option>
-      <option value="sx">Sinistro</option>
-      <option value="bilaterale">Bilaterale</option>
-    </select>
-    <select id="tbl-filter-posizione">
-      <option value="">Tutte le posizioni</option>
-      <option value="in piedi">In piedi</option>
-      <option value="da seduto">Da seduto</option>
-      <option value="a terra">A terra</option>
-    </select>
-    <button type="button" id="tbl-filter-reset" class="btn btn-secondary">↺ Reset filtri</button>
-    <span id="tbl-count" class="tbl-count">—</span>
+    <div class="table-filters-row">
+      <input type="search" id="tbl-search" placeholder="Cerca per nome o descrizione…" />
+      <select id="tbl-filter-side">
+        <option value="">Tutti i lati</option>
+        <option value="both">Entrambi</option>
+        <option value="dx">Destro</option>
+        <option value="sx">Sinistro</option>
+        <option value="bilaterale">Bilaterale</option>
+      </select>
+      <select id="tbl-filter-posizione">
+        <option value="">Tutte le posizioni</option>
+        <option value="in piedi">In piedi</option>
+        <option value="da seduto">Da seduto</option>
+        <option value="a terra">A terra</option>
+      </select>
+      <button type="button" id="tbl-filter-reset" class="btn btn-secondary">↺ Reset filtri</button>
+      <span id="tbl-count" class="tbl-count">—</span>
+    </div>
+    <div class="chip-row" id="tbl-filter-zone"></div>
   </section>
 
   <main class="table-wrap">
