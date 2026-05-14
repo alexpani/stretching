@@ -3,7 +3,7 @@ const crypto = require('crypto');
 const router = express.Router();
 const { getDb } = require('../database/db');
 const { isAuth } = require('./auth');
-const { upload, resizeAndStoreCover, removeImage } = require('../services/images');
+const { upload, resizeAndStoreCover, removeImage, copyCoverImage } = require('../services/images');
 
 router.use(isAuth);
 
@@ -177,10 +177,11 @@ router.post('/:id/duplicate', async (req, res) => {
     if (!src) return res.status(404).json({ error: 'Non trovata' });
     const items = await loadItems(db, src.id);
     const newId = crypto.randomUUID();
+    const newCover = src.cover_image_path ? copyCoverImage(src.cover_image_path, newId) : null;
     await db.run(
-      `INSERT INTO routines (id, name, description, rest_standard_sec, voice_guide)
-       VALUES (?, ?, ?, ?, ?)`,
-      newId, `${src.name} (copia)`, src.description, src.rest_standard_sec, src.voice_guide || 0
+      `INSERT INTO routines (id, name, description, rest_standard_sec, voice_guide, cover_image_path)
+       VALUES (?, ?, ?, ?, ?, ?)`,
+      newId, `${src.name} (copia)`, src.description, src.rest_standard_sec, src.voice_guide || 0, newCover
     );
     for (const it of items) {
       await db.run(

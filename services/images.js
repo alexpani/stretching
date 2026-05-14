@@ -83,6 +83,18 @@ function copyImage(srcImagePath, newId) {
   return `/uploads/${outName}`;
 }
 
+// Copia la cover di un piano in cover-<newRoutineId>.<ext>. Usato dal duplica piano.
+function copyCoverImage(srcImagePath, newRoutineId) {
+  if (!srcImagePath) return null;
+  const srcFull = path.join(uploadsDir, path.basename(srcImagePath));
+  if (!fs.existsSync(srcFull)) return null;
+  const ext = (path.extname(srcImagePath) || '.jpg').toLowerCase();
+  const outName = `cover-${newRoutineId}${ext}`;
+  const outFull = path.join(uploadsDir, outName);
+  fs.copyFileSync(srcFull, outFull);
+  return `/uploads/${outName}`;
+}
+
 // Variante per le cover dei piani: 16:9, fit 'cover' centrato. File chiamato
 // cover-<routineId>.jpg. Stesso pattern naming → soft-delete piani non rimuove
 // l'immagine (coerente con esercizi).
@@ -98,4 +110,4 @@ async function resizeAndStoreCover(tmpPath, routineId) {
   return `/uploads/${outName}`;
 }
 
-module.exports = { upload, resizeAndStore, removeImage, copyImage, resizeAndStoreCover, storeVideo, isVideoFile };
+module.exports = { upload, resizeAndStore, removeImage, copyImage, copyCoverImage, resizeAndStoreCover, storeVideo, isVideoFile };
