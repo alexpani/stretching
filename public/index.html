@@ -69,6 +69,16 @@
           <button class="chip" data-posizione="a terra">A terra</button>
         </div>
       </div>
+      <div class="list-toolbar">
+        <div class="view-toggle" id="library-view-toggle" role="group" aria-label="Vista">
+          <button type="button" class="vt-btn" data-view="extended" aria-pressed="true" title="Vista estesa">
+            <span data-icon="Grid" data-icon-size="18" aria-hidden="true"></span>
+          </button>
+          <button type="button" class="vt-btn" data-view="compact" aria-pressed="false" title="Vista elenco">
+            <span data-icon="List" data-icon-size="18" aria-hidden="true"></span>
+          </button>
+        </div>
+      </div>
       <div id="exercises-grid" class="exercises-grid"></div>
       <div id="exercises-empty" class="empty-state hidden">Nessun esercizio trovato.</div>
       <button class="fab" id="fab-add-exercise" aria-label="Aggiungi esercizio"><span data-icon="Plus" data-icon-size="22" aria-hidden="true"></span></button>
@@ -78,6 +88,16 @@
     <main id="tab-routines" class="content tab-panel">
       <!-- Lista routine -->
       <div id="routines-list-view">
+        <div class="list-toolbar">
+          <div class="view-toggle" id="routines-view-toggle" role="group" aria-label="Vista">
+            <button type="button" class="vt-btn" data-view="extended" aria-pressed="true" title="Vista estesa">
+              <span data-icon="Grid" data-icon-size="18" aria-hidden="true"></span>
+            </button>
+            <button type="button" class="vt-btn" data-view="compact" aria-pressed="false" title="Vista elenco">
+              <span data-icon="List" data-icon-size="18" aria-hidden="true"></span>
+            </button>
+          </div>
+        </div>
         <div id="routines-list" class="routine-list"></div>
         <div id="routines-empty" class="empty-state hidden">Nessun piano. Crea il primo col pulsante "+".</div>
         <button class="fab" id="fab-add-routine" aria-label="Nuovo piano"><span data-icon="Plus" data-icon-size="22" aria-hidden="true"></span></button>

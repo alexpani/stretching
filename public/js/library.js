@@ -54,6 +54,33 @@ function mediaTagFor(ex) {
 // Esposto globalmente: anche session.js lo userà.
 window.slugMuscle = slugMuscle;
 
+// ── View toggle (esteso / compatto) ─────
+function applyLibraryView(mode) {
+  const grid = document.getElementById('exercises-grid');
+  if (grid) grid.setAttribute('data-view', mode);
+  const tg = document.getElementById('library-view-toggle');
+  if (tg) {
+    tg.querySelectorAll('.vt-btn').forEach(b => {
+      b.setAttribute('aria-pressed', b.dataset.view === mode ? 'true' : 'false');
+    });
+  }
+}
+(function initLibraryView() {
+  const saved = localStorage.getItem('st-library-view');
+  const mode = saved === 'compact' ? 'compact' : 'extended';
+  applyLibraryView(mode);
+  const tg = document.getElementById('library-view-toggle');
+  if (tg) {
+    tg.addEventListener('click', (e) => {
+      const btn = e.target.closest('.vt-btn');
+      if (!btn) return;
+      const m = btn.dataset.view === 'compact' ? 'compact' : 'extended';
+      localStorage.setItem('st-library-view', m);
+      applyLibraryView(m);
+    });
+  }
+})();
+
 async function loadExercises() {
   const params = new URLSearchParams();
   if (Library.filter.zones.length) params.set('zones', Library.filter.zones.join(','));

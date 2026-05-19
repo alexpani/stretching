@@ -74,6 +74,15 @@
       `<polygon points="4 9 8 9 13 5 13 19 8 15 4 15"/><path d="M16 8c1.5 1 2.5 2.5 2.5 4s-1 3-2.5 4"/>`),
     Trash: ({ size = 18 } = {}) => wrap(size,
       `<polyline points="4 7 20 7"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/><path d="M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12"/>`),
+    Grid: ({ size = 18 } = {}) => wrap(size, `
+      <rect x="4" y="4" width="7" height="7" rx="1.5"/>
+      <rect x="13" y="4" width="7" height="7" rx="1.5"/>
+      <rect x="4" y="13" width="7" height="7" rx="1.5"/>
+      <rect x="13" y="13" width="7" height="7" rx="1.5"/>`),
+    List: ({ size = 18 } = {}) => wrap(size, `
+      <line x1="4" y1="7" x2="20" y2="7"/>
+      <line x1="4" y1="12" x2="20" y2="12"/>
+      <line x1="4" y1="17" x2="20" y2="17"/>`),
     /* Logo "L10b — Pinch con ancore" (4 ancore + 2 archi che si incrociano). 32x32. */
     LogoD: ({ size = 28 } = {}) =>
       `<svg width="${size}" height="${size}" viewBox="0 0 32 32" fill="none" aria-hidden="true">

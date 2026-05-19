@@ -1387,6 +1387,116 @@ body {
 .plan-card.no-cover .plan-cover-sub { color: var(--ink-2); opacity: 1; }
 
 /* ============================================
+   View toggle (esteso / compatto)
+   ============================================ */
+.list-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  padding: 0 0 var(--s-3);
+}
+.view-toggle {
+  display: inline-flex;
+  border: 1px solid var(--border);
+  border-radius: var(--r-full);
+  overflow: hidden;
+  background: var(--surface);
+}
+.vt-btn {
+  appearance: none;
+  -webkit-appearance: none;
+  background: transparent;
+  border: 0;
+  padding: 8px 14px;
+  min-height: 36px;
+  color: var(--ink-2);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background .15s, color .15s;
+}
+.vt-btn + .vt-btn { border-left: 1px solid var(--border); }
+.vt-btn[aria-pressed="true"] {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+/* ── Vista compatta: Piani ── */
+#routines-list[data-view="compact"] { gap: var(--s-2); }
+#routines-list[data-view="compact"] .plan-card .plan-cover {
+  aspect-ratio: auto;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  padding: var(--s-2);
+  background: var(--surface);
+}
+#routines-list[data-view="compact"] .plan-card.no-cover .plan-cover {
+  background: linear-gradient(140deg, var(--accent-soft), var(--accent-tint));
+}
+#routines-list[data-view="compact"] .plan-cover-img {
+  position: static;
+  width: 56px;
+  height: 56px;
+  flex: 0 0 56px;
+  border-radius: var(--r-2);
+}
+#routines-list[data-view="compact"] .plan-cover-overlay { display: none; }
+#routines-list[data-view="compact"] .plan-cover-meta {
+  position: static;
+  flex: 1;
+  min-width: 0;
+  color: var(--ink);
+  align-items: center;
+}
+#routines-list[data-view="compact"] .plan-cover-name {
+  font-size: var(--t-base);
+  text-shadow: none;
+  color: var(--ink);
+}
+#routines-list[data-view="compact"] .plan-cover-sub {
+  font-size: var(--t-xs);
+  text-shadow: none;
+  color: var(--ink-2);
+  opacity: 1;
+}
+#routines-list[data-view="compact"] .plan-card.no-cover .plan-cover-name,
+#routines-list[data-view="compact"] .plan-card.no-cover .plan-cover-sub {
+  color: var(--ink);
+}
+#routines-list[data-view="compact"] .plan-cover-play {
+  width: 36px;
+  height: 36px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.14);
+}
+
+/* ── Vista compatta: Esercizi ── */
+#exercises-grid[data-view="compact"] {
+  grid-template-columns: 1fr;
+  gap: var(--space-2);
+}
+#exercises-grid[data-view="compact"] .exercise-card {
+  flex-direction: row;
+  align-items: center;
+}
+#exercises-grid[data-view="compact"] .exercise-card .thumb {
+  width: 56px;
+  height: 56px;
+  flex: 0 0 56px;
+  aspect-ratio: 1 / 1;
+}
+#exercises-grid[data-view="compact"] .exercise-card .body {
+  padding: var(--space-2) var(--space-3);
+  flex: 1;
+  min-width: 0;
+}
+#exercises-grid[data-view="compact"] .exercise-card .name {
+  -webkit-line-clamp: 1;
+  font-size: var(--text-sm);
+}
+
+/* ============================================
    Slider (volume voce)
    ============================================ */
 .slider-row { flex-wrap: wrap; }

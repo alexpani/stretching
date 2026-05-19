@@ -58,6 +58,33 @@ function escHtml(s) {
     .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
 
+// ── View toggle (esteso / compatto) ─────
+function applyRoutinesView(mode) {
+  const list = document.getElementById('routines-list');
+  if (list) list.setAttribute('data-view', mode);
+  const tg = document.getElementById('routines-view-toggle');
+  if (tg) {
+    tg.querySelectorAll('.vt-btn').forEach(b => {
+      b.setAttribute('aria-pressed', b.dataset.view === mode ? 'true' : 'false');
+    });
+  }
+}
+(function initRoutinesView() {
+  const saved = localStorage.getItem('st-routines-view');
+  const mode = saved === 'compact' ? 'compact' : 'extended';
+  applyRoutinesView(mode);
+  const tg = document.getElementById('routines-view-toggle');
+  if (tg) {
+    tg.addEventListener('click', (e) => {
+      const btn = e.target.closest('.vt-btn');
+      if (!btn) return;
+      const m = btn.dataset.view === 'compact' ? 'compact' : 'extended';
+      localStorage.setItem('st-routines-view', m);
+      applyRoutinesView(m);
+    });
+  }
+})();
+
 // ── Liste ────────────────────────────────
 async function loadRoutines() {
   const list = await apiGet('/api/routines');
