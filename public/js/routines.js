@@ -367,6 +367,13 @@ document.getElementById('form-routine').addEventListener('submit', async (e) => 
   Routines._coverRemove = false;
 
   closeRoutineModal();
+  if (!id) {
+    // Nuovo piano: apri direttamente il dettaglio in modalità modifica e il picker
+    await openRoutineDetail(targetId);
+    setEditMode(true);
+    openPicker();
+    return;
+  }
   if (id && Routines.current && Routines.current.id === id) {
     Routines.current.name = res.name;
     Routines.current.description = res.description;
