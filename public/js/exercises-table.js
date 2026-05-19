@@ -203,11 +203,13 @@ function buildRow(ex) {
   tdAct.innerHTML = `
     <div class="row-actions">
       <button type="button" class="save-btn" title="Salva modifiche" disabled>✓</button>
+      <button type="button" class="voice-btn" title="Anteprima voce">🔊</button>
       <button type="button" class="dup-btn" title="Duplica">⎘</button>
       <button type="button" class="del-btn" title="Elimina">×</button>
     </div>
   `;
   tdAct.querySelector('.save-btn').addEventListener('click', () => saveRow(tr));
+  tdAct.querySelector('.voice-btn').addEventListener('click', () => previewVoiceRow(tr));
   tdAct.querySelector('.dup-btn').addEventListener('click', () => duplicateRow(ex));
   tdAct.querySelector('.del-btn').addEventListener('click', () => deleteRow(tr, ex));
   tr.appendChild(tdAct);
@@ -352,6 +354,108 @@ async function saveRow(tr) {
   tr.classList.remove('dirty');
   tr.querySelector('.save-btn').disabled = true;
   tr.querySelector('.save-btn').textContent = '✓';
+}
+
+// ── Anteprima voce (rispecchia session.js) ─
+function getSessionOptsT() {
+  try {
+    const raw = localStorage.getItem('st-session-opts');
+    return raw ? JSON.parse(raw) : {};
+  } catch (_) { return {}; }
+}
+
+let _voicePreviewCache = null;
+function pickItalianVoiceT(preferredURI) {
+  if (!('speechSynthesis' in window)) return null;
+  const all = speechSynthesis.getVoices();
+  if (preferredURI) {
+    const chosen = all.find(v => v.voiceURI === preferredURI);
+    if (chosen) return chosen;
+  }
+  const its = all.filter(v => v.lang && v.lang.toLowerCase().startsWith('it'));
+  if (!its.length) return null;
+  const score = (v) => {
+    const hay = ((v.voiceURI || '') + ' ' + (v.name || '')).toLowerCase();
+    let s = 0;
+    if (/siri|neural/.test(hay)) s += 100;
+    if (/premium/.test(hay)) s += 60;
+    if (/enhanced|eloquence|eloquenza/.test(hay)) s += 40;
+    if (/\bcompact\b/.test(hay)) s -= 30;
+    if (v.localService) s += 5;
+    return s;
+  };
+  its.sort((a, b) => score(b) - score(a));
+  return its[0];
+}
+
+function speakT(text, voice, volume, onend) {
+  if (!('speechSynthesis' in window) || !text) return;
+  try {
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = 'it-IT';
+    if (voice) u.voice = voice;
+    u.rate = 1.0;
+    u.pitch = 1.0;
+    u.volume = Math.max(0, Math.min(1, volume ?? 1.0));
+    if (typeof onend === 'function') u.onend = onend;
+    speechSynthesis.speak(u);
+  } catch (_) {}
+}
+
+function previewVoiceRow(tr) {
+  if (!('speechSynthesis' in window)) {
+    alert('Sintesi vocale non disponibile su questo browser.');
+    return;
+  }
+  const data = getRowData(tr);
+  const name = (data.name || '').trim() || 'Esercizio';
+  const side = data.side || 'both';
+  const modalita = data.modalita || 'tempo';
+  const isReps = modalita === 'ripetizioni';
+  const isBilateral = side === 'bilaterale';
+  const lateral = side === 'dx' ? ' lato destro' : side === 'sx' ? ' lato sinistro' : '';
+  let amount;
+  if (isReps) {
+    const reps = parseInt(data.reps_count || '0', 10) || 10;
+    amount = isBilateral ? `, ${reps} ripetizioni per lato` : `, ${reps} ripetizioni`;
+  } else {
+    const dur = parseInt(data.duration_sec || '0', 10) || 30;
+    amount = isBilateral
+      ? `, ${Math.round(dur / 2)} secondi per lato`
+      : `, per ${dur} secondi`;
+  }
+  const phrase = `${name}${lateral}${amount}`;
+  const notes = (data.notes || '').trim();
+
+  const opts = getSessionOptsT();
+  const volume = opts.voiceVolume ?? 1.0;
+  const commentOn = opts.commentEnabled !== false;
+  const commentDelayMs = Math.max(0, (opts.commentDelaySec ?? 3) * 1000);
+
+  try { speechSynthesis.cancel(); } catch (_) {}
+
+  const start = () => {
+    const voice = pickItalianVoiceT(opts.voiceURI);
+    const playComment = commentOn && notes;
+    speakT(phrase, voice, volume, playComment ? () => {
+      setTimeout(() => speakT(notes, voice, volume), commentDelayMs);
+    } : null);
+  };
+
+  // Su Safari iOS getVoices() può essere asincrono: attendi voiceschanged se vuoto.
+  if (!_voicePreviewCache && !speechSynthesis.getVoices().length) {
+    _voicePreviewCache = true;
+    speechSynthesis.addEventListener('voiceschanged', start, { once: true });
+    setTimeout(start, 400);
+  } else {
+    start();
+  }
+
+  const btn = tr.querySelector('.voice-btn');
+  if (btn) {
+    btn.classList.add('playing');
+    setTimeout(() => btn.classList.remove('playing'), 1200);
+  }
 }
 
 async function duplicateRow(ex) {
