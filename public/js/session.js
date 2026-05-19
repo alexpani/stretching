@@ -323,12 +323,55 @@ function startSession(routine) {
   enterPhase(0);
 }
 
+// ── Sessione libera (cronometro che sale, senza scaletta) ──
+function startFreeSession() {
+  const opts = sessionOpts();
+  Session.freeMode = true;
+  Session.routine = null;
+  Session.phases = [];
+  Session.phaseIndex = 0;
+  Session.itemsDone = 0;
+  Session.itemsSkipped = 0;
+  Session.voiceEnabled = false;
+  Session.beepEnabled = false;
+  Session.wakelockEnabled = opts.wakelock !== false;
+  Session.startedAtIso = new Date().toISOString();
+  Session.sessionStartMs = performance.now();
+  Session.pausedAccumMs = 0;
+  Session.paused = false;
+  Session.running = true;
+  Session.saved = false;
+
+  const overlay = document.getElementById('session-overlay');
+  overlay.dataset.mode = 'free';
+  document.getElementById('session-running').classList.remove('hidden');
+  document.getElementById('session-summary').classList.add('hidden');
+  overlay.classList.remove('hidden');
+  setPauseBtnIcon(false);
+
+  if (Session.wakelockEnabled) requestWakeLock();
+  freeTick();
+}
+
+function freeTick() {
+  if (!Session.running || !Session.freeMode) return;
+  if (!Session.paused) {
+    const elapsedMs = performance.now() - Session.sessionStartMs - Session.pausedAccumMs;
+    const el = document.getElementById('ss-free-timer');
+    if (el) el.textContent = formatMmss(elapsedMs / 1000);
+  }
+  Session.rafId = requestAnimationFrame(freeTick);
+}
+
 function closeOverlay() {
   Session.running = false;
   if (Session.rafId) { cancelAnimationFrame(Session.rafId); Session.rafId = null; }
   releaseWakeLock();
   stopSpeak();
-  document.getElementById('session-overlay').classList.add('hidden');
+  const overlay = document.getElementById('session-overlay');
+  overlay.classList.add('hidden');
+  delete overlay.dataset.mode;
+  Session.freeMode = false;
 }
 
 // ── Fasi ─────────────────────────────────
@@ -603,23 +646,27 @@ function togglePause() {
 }
 
 function stopEarly() {
-  if (!confirm('Terminare ora la sessione? Potrai salvarla parziale.')) return;
-  // Chiudi le statistiche a questo punto e mostra il riepilogo (permette di salvare parziale)
+  const msg = Session.freeMode
+    ? 'Terminare la sessione?'
+    : 'Terminare ora la sessione? Potrai salvarla parziale.';
+  if (!confirm(msg)) return;
   Session.running = false;
   if (Session.rafId) { cancelAnimationFrame(Session.rafId); Session.rafId = null; }
   releaseWakeLock();
   stopSpeak();
   Session._endedAtIso = new Date().toISOString();
-  Session._durationSec = Math.round((performance.now() - Session.sessionStartMs) / 1000);
+  Session._durationSec = Math.round((performance.now() - Session.sessionStartMs - (Session.pausedAccumMs || 0)) / 1000);
 
   document.getElementById('sm-done').textContent = Session.itemsDone;
   document.getElementById('sm-skipped').textContent = Session.itemsSkipped;
   document.getElementById('sm-duration').textContent = formatMmss(Session._durationSec);
   const metaEl = document.getElementById('sm-routine-meta');
-  if (metaEl) metaEl.textContent = Session.routine
-    ? `${Session.routine.name} · sessione parziale`
-    : 'Sessione parziale';
-  resetSummaryButtons('Salva (parziale)');
+  if (metaEl) {
+    if (Session.freeMode) metaEl.textContent = 'Sessione libera';
+    else if (Session.routine) metaEl.textContent = `${Session.routine.name} · sessione parziale`;
+    else metaEl.textContent = 'Sessione parziale';
+  }
+  resetSummaryButtons(Session.freeMode ? 'Salva' : 'Salva (parziale)');
   document.getElementById('session-running').classList.add('hidden');
   document.getElementById('session-summary').classList.remove('hidden');
 }
@@ -634,7 +681,7 @@ async function saveSession() {
   const total = Session.phases.filter(p => p.type === 'exercise').length;
   const payload = {
     routine_id:    Session.routine ? Session.routine.id : null,
-    routine_name:  Session.routine ? Session.routine.name : null,
+    routine_name:  Session.freeMode ? 'Sessione libera' : (Session.routine ? Session.routine.name : null),
     started_at:    Session.startedAtIso,
     ended_at:      Session._endedAtIso || new Date().toISOString(),
     duration_sec:  Session._durationSec || Math.round((performance.now() - Session.sessionStartMs) / 1000),
@@ -683,4 +730,13 @@ document.getElementById('sm-close-btn').addEventListener('click', closeOverlay);
 const smCloseX = document.getElementById('sm-close-x');
 if (smCloseX) smCloseX.addEventListener('click', closeOverlay);
 
+const _freeCard = document.getElementById('free-session-card');
+if (_freeCard) {
+  _freeCard.addEventListener('click', () => {
+    if (Session.running) return;
+    startFreeSession();
+  });
+}
+
 window.startSession = startSession;
+window.startFreeSession = startFreeSession;

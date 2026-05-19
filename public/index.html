@@ -98,6 +98,13 @@
             </button>
           </div>
         </div>
+        <button type="button" class="free-card" id="free-session-card">
+          <div class="free-card-icon" data-icon="Play" data-icon-size="22" aria-hidden="true"></div>
+          <div class="free-card-body">
+            <div class="free-card-title">Allenamento libero</div>
+            <div class="free-card-sub">Cronometro senza scaletta</div>
+          </div>
+        </button>
         <div id="routines-list" class="routine-list"></div>
         <div id="routines-empty" class="empty-state hidden">Nessun piano. Crea il primo col pulsante "+".</div>
         <button class="fab" id="fab-add-routine" aria-label="Nuovo piano"><span data-icon="Plus" data-icon-size="22" aria-hidden="true"></span></button>
@@ -516,6 +523,12 @@
           <div class="pos" id="ss-position">—</div>
         </div>
         <div class="progress-bar"><div class="progress-bar-fill" id="ss-progress"></div></div>
+
+        <!-- Sessione libera: cronometro che sale, senza fasi -->
+        <div id="ss-free" class="ss-free">
+          <div class="ss-free-eyebrow">SESSIONE LIBERA</div>
+          <div id="ss-free-timer" class="ss-free-timer mono">0:00</div>
+        </div>
 
         <div class="session-next-top" id="ss-next">&nbsp;</div>
 

@@ -1497,6 +1497,88 @@ body {
 }
 
 /* ============================================
+   Free session card (tab Piani)
+   ============================================ */
+.free-card {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  width: 100%;
+  padding: var(--s-4);
+  margin: 0 0 var(--s-4);
+  background: linear-gradient(140deg, var(--accent-soft), var(--accent-tint));
+  border: 0;
+  border-radius: var(--r-4);
+  box-shadow: var(--sh-2);
+  cursor: pointer;
+  text-align: left;
+  color: var(--ink);
+  transition: transform .15s;
+}
+.free-card:active { transform: scale(0.99); }
+.free-card-icon {
+  width: 44px; height: 44px;
+  border-radius: var(--r-full);
+  background: rgba(255,255,255,0.95);
+  color: #15161A;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.18);
+}
+.free-card-icon svg { margin-left: 2px; }
+.free-card-body { min-width: 0; flex: 1; }
+.free-card-title {
+  font-size: var(--t-lg);
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  line-height: 1.2;
+  margin-bottom: 2px;
+}
+.free-card-sub {
+  font-size: var(--t-sm);
+  color: var(--ink-2);
+}
+
+/* ============================================
+   Sessione libera (overlay free mode)
+   ============================================ */
+.ss-free { display: none; }
+#session-overlay[data-mode="free"] .ss-free {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s-3);
+  padding: var(--s-10) var(--s-4);
+}
+.ss-free-eyebrow {
+  font-size: var(--t-xs);
+  letter-spacing: 0.18em;
+  color: var(--ink-2);
+  text-transform: uppercase;
+}
+.ss-free-timer {
+  font-size: 88px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+}
+/* In free mode nascondi tutti gli elementi phase-only */
+#session-overlay[data-mode="free"] #ss-progress,
+#session-overlay[data-mode="free"] .progress-bar,
+#session-overlay[data-mode="free"] #ss-next,
+#session-overlay[data-mode="free"] #ss-image,
+#session-overlay[data-mode="free"] .session-meta,
+#session-overlay[data-mode="free"] #ss-countdown,
+#session-overlay[data-mode="free"] #ss-skip-btn,
+#session-overlay[data-mode="free"] #ss-done-btn,
+#session-overlay[data-mode="free"] .session-topbar {
+  display: none !important;
+}
+
+/* ============================================
    Slider (volume voce)
    ============================================ */
 .slider-row { flex-wrap: wrap; }
